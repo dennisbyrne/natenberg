@@ -1,0 +1,23 @@
+<project name="natenberg" default="go" basedir=".">
+
+	<path id="cp">
+	   <fileset dir="lib">
+	      <include name="*.jar"/>
+	   </fileset>
+	</path>
+	
+	<target name="go">
+		<delete dir="bin/com"/>
+		<javac srcdir="src/java/com" destdir="bin">
+			<classpath refid="cp"/>
+		</javac>
+		<jar destfile="expiration.jar" basedir="bin"/>			
+		<java classname="com.drw.natenberg.Natenberg" fork="true">
+			<classpath refid="cp"/>
+			<classpath>
+				<pathelement location="expiration.jar"/>
+			</classpath>
+		</java>	
+	</target>
+
+</project>

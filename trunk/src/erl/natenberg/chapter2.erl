@@ -58,7 +58,7 @@ pxs(#position{long = Long, short = Short}) ->
 	LongPxs = pxs(Long),
 	ShortPxs = pxs(Short),
 	Pxs = lists:usort(LongPxs ++ ShortPxs),
-	Low = lists:nth(1, Pxs),
+	Low = hd(Pxs),
 	High = lists:last(Pxs),
 	[common:floor(Low - 2)] ++ Pxs ++ [common:ceiling(High + 2)];
 pxs(#side{underlyings = Underlyings, calls = Calls, puts = Puts}) ->
@@ -69,13 +69,13 @@ pnl(Px, #position{long = Long, short = Short}) ->
 	Pnl = [ Px - U#underlying.px || U <- Long#side.underlyings ] ++
 	      [-Px + U#underlying.px || U <- Short#side.underlyings ] ++
 	      [-C#option.px || C <- Long#side.calls,  Px =< C#option.strike ] ++
-		  [ C#option.px || C <- Short#side.calls, Px =< C#option.strike ] ++
-		  [-P#option.px || P <- Long#side.puts,   Px >= P#option.strike ] ++
-		  [ P#option.px || P <- Short#side.puts,  Px >= P#option.strike ] ++
-		  [ Px - C#option.strike - C#option.px || C <- Long#side.calls,  Px > C#option.strike ] ++
-		  [-Px + C#option.strike + C#option.px || C <- Short#side.calls, Px > C#option.strike ] ++
-		  [-P#option.strike + Px + P#option.px || P <- Short#side.puts,  Px < P#option.strike ] ++
-		  [ P#option.strike - Px - P#option.px || P <- Long#side.puts,   Px < P#option.strike ],
+	      [ C#option.px || C <- Short#side.calls, Px =< C#option.strike ] ++
+	      [-P#option.px || P <- Long#side.puts,   Px >= P#option.strike ] ++
+	      [ P#option.px || P <- Short#side.puts,  Px >= P#option.strike ] ++
+	      [ Px - C#option.strike - C#option.px || C <- Long#side.calls,  Px > C#option.strike ] ++
+	      [-Px + C#option.strike + C#option.px || C <- Short#side.calls, Px > C#option.strike ] ++
+	      [-P#option.strike + Px + P#option.px || P <- Short#side.puts,  Px < P#option.strike ] ++
+	      [ P#option.strike - Px - P#option.px || P <- Long#side.puts,   Px < P#option.strike ],
 	lists:foldl(fun common:sum/2, 0.0, Pnl).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

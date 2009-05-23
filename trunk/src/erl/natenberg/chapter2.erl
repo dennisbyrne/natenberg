@@ -3,43 +3,72 @@
 -record(option, {px, strike}).
 -record(side, { underlyings=[], calls=[], puts=[] }).
 -record(position, { long=#side{}, short=#side{} }).
--export([long_call/0, short_put/0, long_straddle/0, short_straddle/0, underlying/0]).
+-export([pages/0, page15/0, page16/0, page17/0, page18/0, page19/0, page20/0, page21/0, page22/0]).
 -include_lib("eunit/include/eunit.hrl").
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % API
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-long_call() ->
-	Call = #option{px = 1.0, strike = 100.0},
+pages() ->
+	timer:start(),
+	pages(1, 1000, [page15, page16, page17, page18, page19, page20, page21]).
+
+pages(Seq, _, []) ->
+	Seq;
+pages(Seq, Millis, [H|T]) ->
+	timer:apply_after(Seq * Millis, chapter2, H, []),
+	pages(Seq + 1, Millis, T).
+
+page15() ->
+	Underlying = #underlying{px = 99.0},
+	Long = #side{underlyings = [Underlying]},
+	Position = #position{ long = Long },
+	draw(Position).
+
+page16() ->
+	Call = #option{px = 1.15, strike = 105.0},
 	Long = #side{calls = [Call]},
 	Position = #position{long = Long},
 	draw(Position).
 
-short_put() ->
-	Put = #option{px = 1.0, strike = 100.0},
+page17() ->
+	Call = #option{px = 1.15, strike = 105.0},
+	Short = #side{calls = [Call]},
+	Position = #position{short = Short},
+	draw(Position).
+
+page18() ->
+	Put = #option{px = 1.55, strike = 95.0},
+	Long = #side{puts = [Put]},
+	Position = #position{long = Long},
+	draw(Position).	
+
+page19() ->
+	Put = #option{px = 1.55, strike = 95.0},
 	Short = #side{puts = [Put]},
 	Position = #position{short = Short},
 	draw(Position).
 
-long_straddle() ->
-	Call = #option{px = 1.0, strike = 100.0},
-	Put = #option{px = 1.0, strike = 100.0},
+page20() ->
+	Call = #option{px = 0.70, strike = 100.0},
+	Put = #option{px = 1.70, strike = 100.0},
 	Long = #side{calls = [Call], puts = [Put]},
 	Position = #position{long = Long},
-	draw(Position).
+	draw(Position).	
 
-short_straddle() ->
-	Call = #option{px = 1.0, strike = 100.0},
-	Put = #option{px = 1.0, strike = 101.0},
+page21() ->
+	Call = #option{px = 0.7, strike = 100.0},
+	Put = #option{px = 1.7, strike = 100.0},
 	Short = #side{calls = [Call], puts = [Put]},
 	Position = #position{short = Short},
 	draw(Position).
 
-underlying() ->
-	Underlying = #underlying{px = 99.5},
-	Long = #side{underlyings = [Underlying]},
-	Position = #position{ long = Long },
+page22() ->
+	Call = #option{px = 0.55, strike = 95.0},
+	Put = #option{px = 0.15, strike = 105.0},
+	Short = #side{calls = [Call], puts = [Put]},
+	Position = #position{short = Short},
 	draw(Position).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -60,6 +89,7 @@ pxs(#position{long = Long, short = Short}) ->
 	Pxs = lists:usort(LongPxs ++ ShortPxs),
 	Low = hd(Pxs),
 	High = lists:last(Pxs),
+	% bug: pxs need to stretch past 0 in at least one direction
 	[common:floor(Low - 2)] ++ Pxs ++ [common:ceiling(High + 2)];
 pxs(#side{underlyings = Underlyings, calls = Calls, puts = Puts}) ->
 	[Underlying#underlying.px || Underlying <- Underlyings] ++ 

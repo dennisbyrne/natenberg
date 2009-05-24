@@ -83,17 +83,31 @@ pxByPnl(Position) ->
 	Pnls = [ pnl(Px, Position) || Px <- Pxs ],
 	lists:zip(Pxs, Pnls).
 
-pxs(#position{long = Long, short = Short}) ->
+pxs(Position = #position{long = Long, short = Short}) ->
 	LongPxs = pxs(Long),
 	ShortPxs = pxs(Short),
 	Pxs = lists:usort(LongPxs ++ ShortPxs),
+	{DownsideRisk, UpsideRisk} = risk(Position),
 	Low = hd(Pxs),
 	High = lists:last(Pxs),
-	% bug: pxs need to stretch past 0 in at least one direction
-	[common:floor(Low - 2)] ++ Pxs ++ [common:ceiling(High + 2)];
+	LowPx = find_low(Low, pnl(Low, Position), -DownsideRisk),
+	HighPx = find_high(High, pnl(High, Position), UpsideRisk),
+	[common:floor(LowPx)] ++ Pxs ++ [common:ceiling(HighPx)];
 pxs(#side{underlyings = Underlyings, calls = Calls, puts = Puts}) ->
 	[Underlying#underlying.px || Underlying <- Underlyings] ++ 
 	[Option#option.strike || Option <- Calls ++ Puts].
+
+find_low(X, Y, Slope) when Slope == 0 orelse Y == 0 orelse (Slope > 0 andalso Y < 0) orelse (Slope < 0 andalso Y > 0) ->
+	X - 2;
+find_low(X, Y, Slope) ->
+	YOffset = Y - X * Slope,
+	(0 - YOffset) / Slope.
+
+find_high(X, Y, Slope) when Slope == 0 orelse Y == 0 orelse (Slope > 0 andalso Y > 0) orelse (Slope < 0 andalso Y < 0) ->
+	X + 2;
+find_high(X, Y, Slope) ->
+	YOffset = Y - X * Slope,
+	(0 - YOffset) / Slope.
 
 pnl(Px, #position{long = Long, short = Short}) ->
 	Pnl = [ Px - U#underlying.px || U <- Long#side.underlyings ] ++
@@ -199,10 +213,30 @@ pnls_one_long_put_test() ->
 	?assertMatch(1.0, pnl(98.0, Position)).
 
 pxs_one_short_one_put_test() ->
-	Put = #option{px = 3.24, strike = 101.4},
+	Put = #option{px = 2.00, strike = 100.0},
 	Short = #side{puts = [Put]},
 	Position = #position{ short = Short },
-	?assertMatch([99, 101.4, 104], pxs(Position)).
+	?assertMatch([98, 100.0, 102], pxs(Position)).
+
+pxs_one_short_one_put_force_stretch_test() ->
+	Put = #option{px = 2.01, strike = 100.0},
+	Short = #side{puts = [Put]},
+	Position = #position{ short = Short },
+	?assertMatch([97, 100.0, 102], pxs(Position)).
+
+pxs_long_straddle_test() ->
+	Call = #option{px = 0.70, strike = 100.0},
+	Put = #option{px = 1.70, strike = 100.0},
+	Long = #side{calls = [Call], puts = [Put]},
+	Position = #position{long = Long},	
+	?assertMatch([97, 100.0, 103], pxs(Position)).
+
+pxs_short_straddle_test() ->
+	Call = #option{px = 0.7, strike = 100.0},
+	Put = #option{px = 1.7, strike = 100.0},
+	Short = #side{calls = [Call], puts = [Put]},
+	Position = #position{short = Short},
+	?assertMatch([97, 100.0, 103], pxs(Position)).
 
 pxs_one_underlying_test() ->
 	Underlying = #underlying{px = 99.0},

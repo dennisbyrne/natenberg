@@ -108,9 +108,33 @@ pnl(Px, #position{long = Long, short = Short}) ->
 	      [ P#option.strike - Px - P#option.px || P <- Long#side.puts,   Px < P#option.strike ],
 	lists:foldl(fun common:sum/2, 0.0, Pnl).
 
+risk(#position{long = Long, short = Short}) ->
+	#side{underlyings = LongUnderlyings, calls = LongCalls, puts = LongPuts} = Long,
+	#side{underlyings = ShortUnderlyings, calls = ShortCalls, puts = ShortPuts} = Short,
+	{length(LongPuts) - length(ShortPuts) + length(ShortUnderlyings) - length(LongUnderlyings), 
+	 length(LongCalls) - length(ShortCalls) - length(ShortUnderlyings) + length(LongUnderlyings)}.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Unit Tests
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+risk_underlying_test() ->
+	Underlying = #underlying{px = 99.0},
+	?assertMatch({-1, 1}, risk(#position{ long = #side{underlyings = [Underlying]} })),
+	?assertMatch({1, -1}, risk(#position{ short = #side{underlyings = [Underlying]} })),
+	?assertMatch({2, -2}, risk(#position{ short = #side{underlyings = [Underlying, Underlying]} })).
+
+risk_calls_test() ->
+	Call = #option{px = 1.0, strike = 100.0},
+	?assertMatch({0, 1}, risk(#position{ long = #side{calls = [Call]} })),
+	?assertMatch({0, -1}, risk(#position{ short = #side{calls = [Call]} })),
+	?assertMatch({0, -2}, risk(#position{ short = #side{calls = [Call, Call]} })).
+
+risk_puts_test() ->
+	Put = #option{px = 1.0, strike = 100.0},
+	?assertMatch({1, 0}, risk(#position{ long = #side{puts = [Put]} })),
+	?assertMatch({-1, 0}, risk(#position{ short = #side{puts = [Put]} })),
+	?assertMatch({-2, 0}, risk(#position{ short = #side{puts = [Put, Put]} })).
 
 pnls_empty_position_test() ->
 	Position = #position{},

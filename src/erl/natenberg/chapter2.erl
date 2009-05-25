@@ -3,7 +3,7 @@
 -record(option, {px, strike}).
 -record(side, { underlyings=[], calls=[], puts=[] }).
 -record(position, { long=#side{}, short=#side{} }).
--export([pages/0, page15/0, page16/0, page17/0, page18/0, page19/0, page20/0, page21/0, page22/0, page23/0, page24/0]).
+-export([pages/0, page15/0, page16/0, page17/0, page18/0, page19/0, page20/0, page21/0, page22/0, page23/0, page24/0, page26/0, page29/0]).
 -include_lib("eunit/include/eunit.hrl").
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -12,7 +12,7 @@
 
 pages() ->
 	timer:start(),
-	Functions = [page15, page16, page17, page18, page19, page20, page21, page22, page23, page24],
+	Functions = [page15, page16, page17, page18, page19, page20, page21, page22, page23, page24, page26, page29],
 	pages(1, 1000, Functions).
 
 pages(Seq, _, []) ->
@@ -78,6 +78,22 @@ page24() ->
 	Short = #side{puts = [ShortPut]},
 	draw(#position{long = Long, short = Short}).
 
+page26() ->
+	LongCall = #option{px = 5.5, strike = 95.0},
+	ShortCall = #option{px = 1.15, strike = 105.0},
+	Long = #side{calls = [LongCall]},
+	Short = #side{calls = [ShortCall, ShortCall, ShortCall]},
+	draw(#position{long = Long, short = Short}).
+
+page29() ->
+	LongCall = #option{px = 2.7, strike = 100.0},
+	ShortCall = #option{px = 9.35, strike = 90.0},
+	LongPut = #option{px = 3.7, strike = 100.0},
+	ShortPut = #option{px = 1.55, strike = 95.0},
+	Long = #side{calls = [LongCall, LongCall], puts = [LongPut, LongPut]},
+	Short = #side{calls = [ShortCall], puts = [ShortPut, ShortPut, ShortPut, ShortPut]},
+	draw(#position{long = Long, short = Short}).
+	
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Implementation
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

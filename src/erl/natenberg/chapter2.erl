@@ -96,26 +96,20 @@ pxs(Position = #position{long = Long, short = Short}) ->
 	Pxs = lists:usort(LongPxs ++ ShortPxs),
 	{DownsideRisk, UpsideRisk} = risk(Position),
 	Low = hd(Pxs),
+	LowPnl = pnl(Low, Position),
+	LowPx = Low - break_even(-LowPnl, -DownsideRisk),
 	High = lists:last(Pxs),
-	LowPx = find_low(Low, pnl(Low, Position), -DownsideRisk),
-	HighPx = find_high(High, pnl(High, Position), UpsideRisk),
+	HighPnl = pnl(High, Position),
+	HighPx = High + break_even(HighPnl, UpsideRisk),
 	[common:floor(LowPx)] ++ Pxs ++ [common:ceiling(HighPx)];
 pxs(#side{underlyings = Underlyings, calls = Calls, puts = Puts}) ->
 	[Underlying#underlying.px || Underlying <- Underlyings] ++ 
 	[Option#option.strike || Option <- Calls ++ Puts].
 
-find_low(X, Y, Slope) when Slope == 0 orelse Y == 0 orelse (Slope > 0 andalso Y < 0) orelse (Slope < 0 andalso Y > 0) ->
-	X - 2;
-find_low(X, Y, Slope) ->
-	break_even(X, Y, Slope).
-
-find_high(X, Y, Slope) when Slope == 0 orelse Y == 0 orelse (Slope > 0 andalso Y > 0) orelse (Slope < 0 andalso Y < 0) ->
-	X + 2;
-find_high(X, Y, Slope) ->
-	break_even(X, Y, Slope).
-
-break_even(X, Y, Slope) ->
-	(Y - X * Slope) / -Slope.	
+break_even(Pnl, Risk) when (Risk > 0 andalso Pnl < 0) or (Risk < 0 andalso Pnl > 0) ->
+	Pnl / -Risk;
+break_even(_, _) ->
+	2. % stretch the x axis by 2 if pnl does not approach 0
 
 pnl(Px, #position{long = Long, short = Short}) ->
 	Pnl = [ Px - U#underlying.px || U <- Long#side.underlyings ] ++

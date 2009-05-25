@@ -3,7 +3,7 @@
 -record(option, {px, strike}).
 -record(side, { underlyings=[], calls=[], puts=[] }).
 -record(position, { long=#side{}, short=#side{} }).
--export([pages/0, page15/0, page16/0, page17/0, page18/0, page19/0, page20/0, page21/0, page22/0]).
+-export([pages/0, page15/0, page16/0, page17/0, page18/0, page19/0, page20/0, page21/0, page22/0, page23/0, page24/0]).
 -include_lib("eunit/include/eunit.hrl").
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -12,7 +12,8 @@
 
 pages() ->
 	timer:start(),
-	pages(1, 1000, [page15, page16, page17, page18, page19, page20, page21, page22]).
+	Functions = [page15, page16, page17, page18, page19, page20, page21, page22, page23, page24],
+	pages(1, 1000, Functions).
 
 pages(Seq, _, []) ->
 	Seq;
@@ -23,53 +24,59 @@ pages(Seq, Millis, [H|T]) ->
 page15() ->
 	Underlying = #underlying{px = 99.0},
 	Long = #side{underlyings = [Underlying]},
-	Position = #position{ long = Long },
-	draw(Position).
+	draw(#position{ long = Long }).
 
 page16() ->
-	Call = #option{px = 1.15, strike = 105.0},
+	Call = #option{px = 2.7, strike = 100.0},
 	Long = #side{calls = [Call]},
-	Position = #position{long = Long},
-	draw(Position).
+	draw(#position{long = Long}).
 
 page17() ->
 	Call = #option{px = 1.15, strike = 105.0},
 	Short = #side{calls = [Call]},
-	Position = #position{short = Short},
-	draw(Position).
+	draw(#position{short = Short}).
 
 page18() ->
 	Put = #option{px = 1.55, strike = 95.0},
 	Long = #side{puts = [Put]},
-	Position = #position{long = Long},
-	draw(Position).	
+	draw(#position{long = Long}).	
 
 page19() ->
 	Put = #option{px = 1.55, strike = 95.0},
 	Short = #side{puts = [Put]},
-	Position = #position{short = Short},
-	draw(Position).
+	draw(#position{short = Short}).
 
 page20() ->
-	Call = #option{px = 0.70, strike = 100.0},
-	Put = #option{px = 1.70, strike = 100.0},
+	Call = #option{px = 2.7, strike = 100.0},
+	Put = #option{px = 3.7, strike = 100.0},
 	Long = #side{calls = [Call], puts = [Put]},
-	Position = #position{long = Long},
-	draw(Position).	
+	draw(#position{long = Long}).	
 
 page21() ->
-	Call = #option{px = 0.7, strike = 100.0},
-	Put = #option{px = 1.7, strike = 100.0},
+	Call = #option{px = 2.7, strike = 100.0},
+	Put = #option{px = 3.7, strike = 100.0},
 	Short = #side{calls = [Call], puts = [Put]},
-	Position = #position{short = Short},
-	draw(Position).
+	draw(#position{short = Short}).
 
 page22() ->
-	Call = #option{px = 1.55, strike = 105.0},
-	Put = #option{px = 1.15, strike = 95.0},
+	Call = #option{px = 1.15, strike = 105.0},
+	Put = #option{px = 1.55, strike = 95.0},
 	Short = #side{calls = [Call], puts = [Put]},
-	Position = #position{short = Short},
-	draw(Position).
+	draw(#position{short = Short}).
+
+page23() ->
+	LongCall = #option{px = 9.35, strike = 90.0},
+	ShortCall = #option{px = 2.7, strike = 100.0},
+	Long = #side{calls = [LongCall]},
+	Short = #side{calls = [ShortCall]},
+	draw(#position{long = Long, short = Short}).
+
+page24() ->
+	LongPut = #option{px = 7.1, strike = 105.0},
+	ShortPut = #option{px = 3.7, strike = 100.0},
+	Long = #side{puts = [LongPut]},
+	Short = #side{puts = [ShortPut]},
+	draw(#position{long = Long, short = Short}).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Implementation
@@ -100,14 +107,15 @@ pxs(#side{underlyings = Underlyings, calls = Calls, puts = Puts}) ->
 find_low(X, Y, Slope) when Slope == 0 orelse Y == 0 orelse (Slope > 0 andalso Y < 0) orelse (Slope < 0 andalso Y > 0) ->
 	X - 2;
 find_low(X, Y, Slope) ->
-	YOffset = Y - X * Slope,
-	(0 - YOffset) / Slope.
+	break_even(X, Y, Slope).
 
 find_high(X, Y, Slope) when Slope == 0 orelse Y == 0 orelse (Slope > 0 andalso Y > 0) orelse (Slope < 0 andalso Y < 0) ->
 	X + 2;
 find_high(X, Y, Slope) ->
-	YOffset = Y - X * Slope,
-	(0 - YOffset) / Slope.
+	break_even(X, Y, Slope).
+
+break_even(X, Y, Slope) ->
+	(Y - X * Slope) / -Slope.	
 
 pnl(Px, #position{long = Long, short = Short}) ->
 	Pnl = [ Px - U#underlying.px || U <- Long#side.underlyings ] ++
@@ -150,6 +158,14 @@ risk_puts_test() ->
 	?assertMatch({-1, 0}, risk(#position{ short = #side{puts = [Put]} })),
 	?assertMatch({-2, 0}, risk(#position{ short = #side{puts = [Put, Put]} })).
 
+risk_flat_test() ->
+	LongCall = #option{px = 9.35, strike = 90.0},
+	ShortCall = #option{px = 2.7, strike = 100.0},
+	Long = #side{calls = [LongCall]},
+	Short = #side{calls = [ShortCall]},
+	Position = #position{long = Long, short = Short},	
+	?assertMatch({0, 0}, risk(Position)).
+	
 pnls_empty_position_test() ->
 	Position = #position{},
 	?assertMatch(0.0, pnl(89.0, Position)).
@@ -239,11 +255,11 @@ pxs_short_straddle_test() ->
 	?assertMatch([97, 100.0, 103], pxs(Position)).
 
 pxs_short_straddle_different_strike_test() ->
-	Call = #option{px = 1.0, strike = 105.0},
-	Put = #option{px = 1.0, strike = 95.0},
+	Call = #option{px = 1.15, strike = 105.0},
+	Put = #option{px = 1.55, strike = 95.0},
 	Short = #side{calls = [Call], puts = [Put]},
 	Position = #position{short = Short},
-	?assertMatch(2.0, pnl(95.0, Position)).
+	?assertMatch([92, 95.0, 105.0, 108], pxs(Position)).
 
 pxs_one_underlying_test() ->
 	Underlying = #underlying{px = 99.0},

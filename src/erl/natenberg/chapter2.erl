@@ -12,7 +12,7 @@
 
 pages() ->
 	timer:start(),
-	pages(1, 1000, [page15, page16, page17, page18, page19, page20, page21]).
+	pages(1, 1000, [page15, page16, page17, page18, page19, page20, page21, page22]).
 
 pages(Seq, _, []) ->
 	Seq;
@@ -65,8 +65,8 @@ page21() ->
 	draw(Position).
 
 page22() ->
-	Call = #option{px = 0.55, strike = 95.0},
-	Put = #option{px = 0.15, strike = 105.0},
+	Call = #option{px = 1.55, strike = 105.0},
+	Put = #option{px = 1.15, strike = 95.0},
 	Short = #side{calls = [Call], puts = [Put]},
 	Position = #position{short = Short},
 	draw(Position).
@@ -237,6 +237,13 @@ pxs_short_straddle_test() ->
 	Short = #side{calls = [Call], puts = [Put]},
 	Position = #position{short = Short},
 	?assertMatch([97, 100.0, 103], pxs(Position)).
+
+pxs_short_straddle_different_strike_test() ->
+	Call = #option{px = 1.0, strike = 105.0},
+	Put = #option{px = 1.0, strike = 95.0},
+	Short = #side{calls = [Call], puts = [Put]},
+	Position = #position{short = Short},
+	?assertMatch(2.0, pnl(95.0, Position)).
 
 pxs_one_underlying_test() ->
 	Underlying = #underlying{px = 99.0},

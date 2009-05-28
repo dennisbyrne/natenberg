@@ -125,7 +125,7 @@ pxs(Position = #position{long = Long, short = Short}) ->
 	{DownsideRisk, UpsideRisk} = risk(Position),
 	Low = hd(Pxs),
 	LowPnl = pnl(Low, Position),
-	LowPx = Low - break_even(-LowPnl, -DownsideRisk),
+	LowPx = Low - break_even(LowPnl, DownsideRisk),
 	High = lists:last(Pxs),
 	HighPnl = pnl(High, Position),
 	HighPx = High + break_even(HighPnl, UpsideRisk),

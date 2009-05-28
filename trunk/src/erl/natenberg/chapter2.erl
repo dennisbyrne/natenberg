@@ -124,20 +124,21 @@ pxs(Position = #position{long = Long, short = Short}) ->
 	Pxs = lists:usort(LongPxs ++ ShortPxs),
 	{DownsideRisk, UpsideRisk} = risk(Position),
 	Low = hd(Pxs),
-	LowPnl = pnl(Low, Position),
-	LowPx = Low - break_even(LowPnl, DownsideRisk),
+	LowPx = Low - break_even(Low, DownsideRisk, Position),
 	High = lists:last(Pxs),
-	HighPnl = pnl(High, Position),
-	HighPx = High + break_even(HighPnl, UpsideRisk),
+	HighPx = High + break_even(High, UpsideRisk, Position),
 	[common:floor(LowPx)] ++ Pxs ++ [common:ceiling(HighPx)];
 pxs(#side{underlyings = Underlyings, calls = Calls, puts = Puts}) ->
 	[Underlying#underlying.px || Underlying <- Underlyings] ++ 
 	[Option#option.strike || Option <- Calls ++ Puts].
 
-break_even(Pnl, Risk) when (Risk > 0 andalso Pnl < 0) or (Risk < 0 andalso Pnl > 0) ->
-	Pnl / -Risk;
-break_even(_, _) ->
-	2. % stretch the x axis by 2 if pnl does not approach 0
+break_even(Px, Risk, Position) ->
+	Pnl = pnl(Px, Position),
+	if Risk * Pnl < 0 ->
+		Pnl / -Risk;
+	   true ->
+		2 % stretch the x axis by 2 if pnl does not approach 0
+	end.
 
 pnl(Px, #position{long = Long, short = Short}) ->
 	Pnl = [ Px - U#underlying.px || U <- Long#side.underlyings ] ++

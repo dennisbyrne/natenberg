@@ -180,7 +180,7 @@ risk_puts_test() ->
 	?assertMatch({-1, 0}, risk(#position{ short = #side{puts = [Put]} })),
 	?assertMatch({-2, 0}, risk(#position{ short = #side{puts = [Put, Put]} })).
 
-risk_flat_test() ->
+risk_spread_test() ->
 	LongCall = #option{px = 9.35, strike = 90.0},
 	ShortCall = #option{px = 2.7, strike = 100.0},
 	Long = #side{calls = [LongCall]},

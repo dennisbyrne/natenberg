@@ -11,12 +11,9 @@
 % the License.
 
 -module(chapter2).
--record(underlying, {px}).
--record(option, {px, strike}).
--record(side, { underlyings=[], calls=[], puts=[] }).
--record(position, { long=#side{}, short=#side{} }).
 -export([pages/0, page15/0, page16/0, page17/0, page18/0, page19/0, page20/0, page21/0, page22/0, page23/0, page24/0, page26/0, page29/0]).
 -include_lib("eunit/include/eunit.hrl").
+-include_lib("position.hrl").
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % API

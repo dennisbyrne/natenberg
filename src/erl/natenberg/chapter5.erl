@@ -63,11 +63,12 @@ adjust_buy_test() ->
 	?assertMatch(Expected, adjust(-1, 5.0, #position{})).
 
 adjust_sell_test() ->
-	Call = #option{},
+	Long = #side{calls = [#option{}]},
 	Underlying = #underlying{px = 5.0},
-	Short = #side{underlyings = [Underlying], calls = [Call]},
-	Expected = #position{short = #side{underlyings = [Underlying, Underlying], calls = [Call]}},
-	?assertMatch(Expected, adjust(1, 5.0, #position{short = Short})).
+	Short = #side{underlyings = [Underlying]},
+	Position = #position{long = Long, short = Short},
+	Expected = Position#position{short = Short#side{underlyings = [Underlying, Underlying]}},
+	?assertMatch(Expected, adjust(1, 5.0, Position)).
 
 delta_page_82_test() ->
 	Long = #side{calls = lists:duplicate(100, #option{})},
@@ -124,8 +125,8 @@ adjust_page_85_test() ->
 	Position = adjust(?FUTURES_PXS, NeutralPosition),
 	ShortUnderlyings = (Position#position.short)#side.underlyings,
 	LongUnderlyings = (Position#position.long)#side.underlyings,
-	LongSideCalls = (Position#position.long)#side.calls,
-	?assertMatch(Calls, LongSideCalls),
+	LongCalls = (Position#position.long)#side.calls,
+	?assertMatch(Calls, LongCalls),
 	Net = length(Underlyings) + 36,
 	?assertMatch(Net, length(ShortUnderlyings) - length(LongUnderlyings)),
 	PreClosePosition = adjust(-36, 102.54, Position),

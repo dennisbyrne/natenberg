@@ -11,9 +11,16 @@
 % the License.
 
 -module(common).
--export([floor/1, ceiling/1, join/1, sum/2, min/2, max/2]).
+-export([floor/1, ceiling/1, join/1, sum/2, min/2, max/2, round/2]).
 
 % things that should just be in erlang
+
+round(X, Precision) when X > 0 ->
+	Factor = 10 * Precision,
+	Product = X * Factor,
+	if X > 0 -> floor(Product);
+	   true -> ceiling(Product)
+	end / Factor.
 
 floor(X) ->
     T = erlang:trunc(X),

@@ -13,6 +13,10 @@
 -module(chapter4).
 -include_lib("eunit/include/eunit.hrl").
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Implementation
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 compute_standard_deviation([]) ->
 	0.0;
 compute_standard_deviation(Sample) ->

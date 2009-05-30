@@ -13,4 +13,4 @@
 -record(underlying, {px}).
 -record(option, {px, strike}).
 -record(side, { underlyings=[], calls=[], puts=[] }).
--record(position, { long=#side{}, short=#side{} }).
+-record(position, { long=#side{}, short=#side{}, deltas=dict:new() }).

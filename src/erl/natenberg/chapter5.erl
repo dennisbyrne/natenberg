@@ -14,9 +14,13 @@
 -include_lib("eunit/include/eunit.hrl").
 -include_lib("position.hrl").
 
--define(DELTA, [62, 46, 53, 56, 74, 45, 35, 50, 93]).
--define(PXS, [102.26, 99.07, 100.39, 100.76, 103.59, 99.26, 98.28, 99.98, 103.78]).
--define(DELTA_BY_PRICE, dict:from_list(lists:zip([101.35] ++ ?PXS, [57] ++ ?DELTA))).
+-define(FUTURES_DELTA, [62, 46, 53, 56, 74, 45, 35, 50, 93]).
+-define(FUTURES_PXS, [102.26, 99.07, 100.39, 100.76, 103.59, 99.26, 98.28, 99.98, 103.78]).
+-define(FUTURES_DELTA_BY_PX, dict:from_list(lists:zip([101.35] ++ ?FUTURES_PXS, [57] ++ ?FUTURES_DELTA))).
+
+-define(EQY_DELTA, [52, 66, 64, 52, 28, 38, 73, 78, 55]).
+-define(EQY_PXS, [49.625, 52.125, 51.75, 50, 47, 48.125, 52, 52.25, 50.125]).
+-define(EQY_DELTA_BY_PX, dict:from_list(lists:zip([48.5] ++ ?EQY_PXS, [46] ++ ?EQY_DELTA))).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Implementation
@@ -30,23 +34,22 @@ adjust([], Position) ->
 adjust([Px|T], Position) ->
 	adjust(T, adjust(Px, Position)).
 
-adjust(Quantity, Px, #position{long = Long, short = Short}) when Quantity > 0 ->
-	#side{underlyings = Underlyings} = Short,
+adjust(Quantity, Px, Position = #position{short = Short}) when Quantity > 0 ->
+	Underlyings = Short#side.underlyings,
 	NewUnderlyings = Underlyings ++ lists:duplicate(Quantity, #underlying{px = Px}),
-	#position{long = Long, short = Short#side{underlyings = NewUnderlyings}};
+	Position#position{short = Short#side{underlyings = NewUnderlyings}};
 adjust(Quantity, _, Position) when Quantity == 0 ->
 	Position;
-adjust(Quantity, Px, #position{long = Long, short = Short}) when Quantity < 0 ->
-	#side{underlyings = Underlyings} = Long,
+adjust(Quantity, Px, Position = #position{long = Long}) when Quantity < 0 ->
+	Underlyings = Long#side.underlyings,
 	NewUnderlyings = Underlyings ++ lists:duplicate(-Quantity, #underlying{px = Px}),
-	#position{long = Long#side{underlyings = NewUnderlyings}, short = Short}.
+	Position#position{long = Long#side{underlyings = NewUnderlyings}}.
 
-delta(Px, #position{long = Long, short = Short}) ->
-	#side{underlyings = LongUnderlyings, calls = LongCalls, puts = _} = Long,
-	#side{underlyings = ShortUnderlyings, calls = _, puts = _} = Short,
-	Delta = dict:fetch(Px, ?DELTA_BY_PRICE),
-	OptionDeltas = lists:duplicate(length(LongCalls), Delta),
-	OptionDelta = lists:foldl(fun common:sum/2, 0, OptionDeltas),
+delta(Px, #position{long = Long, short = Short, deltas = Deltas}) ->
+	#side{underlyings = LongUnderlyings, calls = LongCalls, puts = LongPuts} = Long,
+	#side{underlyings = ShortUnderlyings, calls = ShortCalls, puts = ShortPuts} = Short,
+	Delta = dict:fetch(Px, Deltas),
+	OptionDelta = Delta * (length(LongCalls ++ ShortPuts) - length(ShortCalls ++ LongPuts)),
 	UnderlyingDelta = 100 * (length(LongUnderlyings) - length(ShortUnderlyings)),
 	OptionDelta + UnderlyingDelta.
 
@@ -68,7 +71,7 @@ adjust_sell_test() ->
 
 delta_page_82_test() ->
 	Long = #side{calls = lists:duplicate(100, #option{})},
-	Position = #position{long = Long},
+	Position = #position{long = Long, deltas = ?FUTURES_DELTA_BY_PX},
 	?assertMatch(5700, delta(101.35, Position)),
 	?assertMatch(6200, delta(102.26, Position)),
   	?assertMatch(4600, delta(99.07, Position)),
@@ -77,54 +80,63 @@ delta_page_82_test() ->
 delta_page_83_test() ->
 	Long = #side{calls = lists:duplicate(100, #option{})},
 	Short = #side{underlyings = lists:duplicate(57, #underlying{})},
-	Position = #position{long = Long, short = Short},
+	Position = #position{long = Long, short = Short, deltas = ?FUTURES_DELTA_BY_PX},
 	?assertMatch(0, delta(101.35, Position)).
 
 delta_negative_test() ->
 	Long = #side{calls = lists:duplicate(100, #option{})},
 	Short = #side{underlyings = lists:duplicate(58, #underlying{})},
-	Position = #position{long = Long, short = Short},
+	Position = #position{long = Long, short = Short, deltas = ?FUTURES_DELTA_BY_PX},
 	?assertMatch(-100, delta(101.35, Position)).
 
 delta_options_and_underlyings_test() ->
 	Calls = lists:duplicate(100, #option{}),
-	ShortUnderlyings = [ #underlying{px = 101.35} || _ <- lists:seq(1, 57) ] ++
-					   [ #underlying{px = 102.26} || _ <- lists:seq(1, 5) ],
-	LongUnderlyings = [ #underlying{px = 99.07} || _ <- lists:seq(1, 16) ],
+	ShortUnderlyings = lists:duplicate(57, #underlying{px = 101.35}) ++
+					   lists:duplicate(5, #underlying{px = 102.26}),
+	LongUnderlyings = lists:duplicate(16, #underlying{px = 99.07}),
 	Long = #side{calls = Calls, underlyings = LongUnderlyings},
 	Short = #side{underlyings = ShortUnderlyings},
-	Position = #position{long = Long, short = Short},
+	Position = #position{long = Long, short = Short, deltas = ?FUTURES_DELTA_BY_PX},
 	?assertMatch(700, delta(100.39, Position)).
 
 delta_no_options_test() ->
 	Underlying = #underlying{px = 101.35},
-	Long = #side{underlyings = [Underlying]},
-	Short = #side{underlyings = [Underlying]},
-	Position = #position{long = Long, short = Short},
+	Side = #side{underlyings = [Underlying]},
+	Position = #position{long = Side, short = Side, deltas = ?FUTURES_DELTA_BY_PX},
 	?assertMatch(0, delta(101.35, Position)).
 
 adjust_page_83_test() ->
 	Calls = lists:duplicate(100, #option{}),
 	Long = #side{calls = Calls},
-	ExpectedUnderlyings = [ #underlying{px = 101.35} || _ <- lists:seq(1, 57) ] ++
-						  [ #underlying{px = 102.26} || _ <- lists:seq(1, 5) ],
+	Position = #position{long = Long, deltas = ?FUTURES_DELTA_BY_PX},
+	ExpectedUnderlyings = lists:duplicate(57, #underlying{px = 101.35}) ++
+						  lists:duplicate(5, #underlying{px = 102.26}),
 	ExpectedShort = #side{underlyings = ExpectedUnderlyings},
-	ExpectedPosition = #position{long = Long, short = ExpectedShort},
-	?assertMatch(ExpectedPosition, adjust([101.35, 102.26], #position{long = Long})).
+	ExpectedPosition = Position#position{short = ExpectedShort},
+	?assertMatch(ExpectedPosition, adjust([101.35, 102.26], Position)).
 
 adjust_page_85_test() ->
 	Calls = lists:duplicate(100, #option{px = 3.25, strike = 100.0}),
 	Underlyings = lists:duplicate(57, #underlying{px = 101.35}),
 	NeutralPosition = #position{long = #side{calls = Calls},
-								short = #side{underlyings = Underlyings}},
-	Position = adjust(?PXS, NeutralPosition),
-	#position{long = Long, short = Short} = Position,
-	#side{underlyings = ShortUnderlyings} = Short,
-	#side{underlyings = LongUnderlyings} = Long,
-	?assertMatch(Calls, Long#side.calls),
+								short = #side{underlyings = Underlyings},
+								deltas = ?FUTURES_DELTA_BY_PX},
+	Position = adjust(?FUTURES_PXS, NeutralPosition),
+	ShortUnderlyings = (Position#position.short)#side.underlyings,
+	LongUnderlyings = (Position#position.long)#side.underlyings,
+	LongSideCalls = (Position#position.long)#side.calls,
+	?assertMatch(Calls, LongSideCalls),
 	Net = length(Underlyings) + 36,
 	?assertMatch(Net, length(ShortUnderlyings) - length(LongUnderlyings)),
 	PreClosePosition = adjust(-36, 102.54, Position),
 	OriginalHedgeAndAdjustmentsPnl = -138.83 + 205.27,
 	PreClosePnl = chapter1:pnl(102.54, PreClosePosition),
 	?assertMatch(true, PreClosePnl - OriginalHedgeAndAdjustmentsPnl < 0.001).
+
+adjust_page_91_test() ->
+	Calls = lists:duplicate(100, #option{px = 3.0, strike = 50.0}),
+	Stocks = lists:duplicate(46, #underlying{px = 48.5}),
+	NeutralPosition = #position{short = #side{calls = Calls},
+								long = #side{underlyings = Stocks},
+								deltas = ?EQY_DELTA_BY_PX},
+	?assertMatch(0, delta(48.5, NeutralPosition)).

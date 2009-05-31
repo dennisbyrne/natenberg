@@ -138,7 +138,10 @@ adjust_page_91_test() ->
 								long = #side{underlyings = Stocks},
 								deltas = ?EQY_DELTA_BY_PX},
 	Position = adjust(?EQY_PXS, NeutralPosition),
+	ShortUnderlyings = (Position#position.short)#side.underlyings,
+	LongUnderlyings = (Position#position.long)#side.underlyings,
 	PreClosePosition = adjust(-9, 52.375, Position),
 	PreClosePnl = chapter1:pnl(52.375, PreClosePosition),
 	?assertEqual(Calls, (PreClosePosition#position.short)#side.calls),
+	?assertEqual(length(Stocks) + 9, length(LongUnderlyings) - length(ShortUnderlyings)),
 	?assertEqual(0, delta(48.5, NeutralPosition)).

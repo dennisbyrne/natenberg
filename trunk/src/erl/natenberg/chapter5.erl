@@ -11,6 +11,7 @@
 % the License.
 
 -module(chapter5).
+-export([delta/2]).
 -include_lib("eunit/include/eunit.hrl").
 -include_lib("position.hrl").
 
@@ -97,14 +98,22 @@ delta_options_and_underlyings_test() ->
 	LongUnderlyings = lists:duplicate(16, #underlying{px = 99.07}),
 	Long = #side{calls = Calls, underlyings = LongUnderlyings},
 	Short = #side{underlyings = ShortUnderlyings},
-	Position = #position{long = Long, short = Short, deltas = ?FUTURES_DELTA_BY_PX},
+	Position = #position{long = Long, 
+						 short = Short, 
+						 deltas = ?FUTURES_DELTA_BY_PX},
 	?assertEqual(700, delta(100.39, Position)).
 
 delta_no_options_test() ->
 	Underlying = #underlying{px = 101.35},
 	Side = #side{underlyings = [Underlying]},
-	Position = #position{long = Side, short = Side, deltas = ?FUTURES_DELTA_BY_PX},
+	Position = #position{long = Side, short = Side, 
+						 deltas = ?FUTURES_DELTA_BY_PX},
 	?assertEqual(0, delta(101.35, Position)).
+
+delta_put_test() ->
+	Position = #position{long = #side{ puts = [#option{}]}, 
+						 deltas = ?FUTURES_DELTA_BY_PX },
+	?assertEqual(-53, delta(100.39, Position)).
 
 adjust_page_83_test() ->
 	Calls = lists:duplicate(100, #option{}),

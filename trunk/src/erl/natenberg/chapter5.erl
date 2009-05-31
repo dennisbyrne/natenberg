@@ -19,27 +19,27 @@
 -define(FUTURES_DELTA_BY_PX, dict:from_list(lists:zip([101.35] ++ ?FUTURES_PXS, [57] ++ ?FUTURES_DELTA))).
 
 -define(EQY_DELTA, [52, 66, 64, 52, 28, 38, 73, 78, 55]).
--define(EQY_PXS, [49.625, 52.125, 51.75, 50.0, 47.0, 48.125, 52.0, 52.25, 50.125]).
--define(EQY_DELTA_BY_PX, dict:from_list(lists:zip([48.5] ++ ?EQY_PXS, [46] ++ ?EQY_DELTA))).
+-define(EQY_PXS, [ 100 * X || X <- [49.625, 52.125, 51.75, 50.0, 47.0, 48.125, 52.0, 52.25, 50.125]]).
+-define(EQY_DELTA_BY_PX, dict:from_list(lists:zip(?EQY_PXS, ?EQY_DELTA))).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Implementation
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-adjust(Px, Position) when is_float(Px) ->
-	Delta = delta(Px, Position),
-	adjust(Delta div 100, Px, Position);
 adjust([], Position) ->
 	Position;
 adjust([Px|T], Position) ->
-	adjust(T, adjust(Px, Position)).
+	adjust(T, adjust(Px, Position));
+adjust(Px, Position) ->
+	Delta = delta(Px, Position),
+	adjust(Delta div 100, Px, Position).
 
+adjust(0, _, Position) ->
+	Position;
 adjust(Quantity, Px, Position = #position{short = Short}) when Quantity > 0 ->
 	Underlyings = Short#side.underlyings,
 	NewUnderlyings = Underlyings ++ lists:duplicate(Quantity, #underlying{px = Px}),
 	Position#position{short = Short#side{underlyings = NewUnderlyings}};
-adjust(Quantity, _, Position) when Quantity == 0 ->
-	Position;
 adjust(Quantity, Px, Position = #position{long = Long}) when Quantity < 0 ->
 	Underlyings = Long#side.underlyings,
 	NewUnderlyings = Underlyings ++ lists:duplicate(-Quantity, #underlying{px = Px}),
@@ -133,15 +133,13 @@ adjust_page_85_test() ->
 
 adjust_page_91_test() ->
 	Calls = lists:duplicate(100, #option{px = 3.0, strike = 50.0}),
-	Stocks = lists:duplicate(46, #underlying{px = 48.5}),
+	Stocks = lists:duplicate(46, #underlying{px = 4850.0}),
 	NeutralPosition = #position{short = #side{calls = Calls},
 								long = #side{underlyings = Stocks},
-								deltas = ?EQY_DELTA_BY_PX},
+								deltas = dict:store(4850.0, 46.0, ?EQY_DELTA_BY_PX)},
 	Position = adjust(?EQY_PXS, NeutralPosition),
 	ShortUnderlyings = (Position#position.short)#side.underlyings,
 	LongUnderlyings = (Position#position.long)#side.underlyings,
-	PreClosePosition = adjust(-9, 52.375, Position),
-	PreClosePnl = chapter1:pnl(52.375, PreClosePosition),
-	?assertEqual(Calls, (PreClosePosition#position.short)#side.calls),
+	?assertEqual(Calls, (Position#position.short)#side.calls),
 	?assertEqual(length(Stocks) + 9, length(LongUnderlyings) - length(ShortUnderlyings)),
-	?assertEqual(0, delta(48.5, NeutralPosition)).
+	?assertEqual(0.0, delta(4850.0, NeutralPosition)).

@@ -46,7 +46,8 @@ public class View {
 		JPanel panel = new GraphPanel(lines, labels);
 		Integer width = root.getInt("width");
 		Integer height = root.getInt("height");
-		show(panel, "Message # " + sequence.toString(), width, height);
+		String message = root.getString("message");
+		show(panel, message + " (Message # " + sequence.toString() + ")", width, height);
 	}
 
 	private class GraphPanel extends JPanel{

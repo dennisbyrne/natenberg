@@ -14,7 +14,7 @@
 -define(TO, {graph, 'view@127.0.0.1'}).
 -define(WIDTH, 650).
 -define(HEIGHT, 650).
--export([start/0, draw/1]).
+-export([start/0, draw/2]).
 -record(rectangle, {minX = 0, maxX = 100, minY = -100, maxY = 100}).
 -include_lib("eunit/include/eunit.hrl").
 
@@ -25,12 +25,12 @@
 start() ->
 	os:cmd("cd ../../.. && ant &").
 
-draw(Points) ->
+draw(Points, Msg) ->
 	Rectangle = min_bounding_rectangle(Points),
 	{XAxis, YAxis} = axes(Rectangle),
 	Lines = points_to_lines(Points, Rectangle),
 	{Scales, Labels} = scale(XAxis, YAxis, Rectangle),
-	Json = json:to_json(?WIDTH, ?HEIGHT, Lines ++ [XAxis, YAxis] ++ Scales, Labels),
+	Json = json:to_json(Msg, ?WIDTH, ?HEIGHT, Lines ++ [XAxis, YAxis] ++ Scales, Labels),
 	?TO ! {draw, Json}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

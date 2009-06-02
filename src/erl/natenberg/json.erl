@@ -11,15 +11,16 @@
 % the License.
 
 -module(json).
--export([to_json/4]).
+-export([to_json/5]).
 -include_lib("eunit/include/eunit.hrl").
 
-to_json(Width, Height, Lines, Labels) ->
+to_json(Msg, Width, Height, Lines, Labels) ->
+	JsonMsg = "message:'" ++ Msg ++ "'",
 	JsonWidth = "width:" ++ integer_to_list(Width),
 	JsonHeight = "height:" ++ integer_to_list(Height),
 	JsonLines = "lines:" ++ to_lines(Lines),
 	JsonLabels = "labels:" ++ to_labels(Labels), 
-	to_json([JsonWidth, JsonHeight, JsonLines, JsonLabels]).
+	to_json([JsonMsg, JsonWidth, JsonHeight, JsonLines, JsonLabels]).
 
 to_lines(Lines) ->
 	JsonLines = lists:map(fun to_line/1, Lines),
@@ -47,8 +48,8 @@ to_json(List) ->
 
 to_json_graph_test() ->
 	Line = {{1,2}, {3,4}},
-	Expected = "{width:650,height:650,lines:[{to:{x:1,y:2},from:{x:3,y:4}}],labels:[{pt:{x:1,y:3},text:'A'}]}",
-	?assertMatch(Expected, to_json(650, 650, [Line], [{{1,3}, "A"}])).
+	Expected = "{message:'Message',width:650,height:650,lines:[{to:{x:1,y:2},from:{x:3,y:4}}],labels:[{pt:{x:1,y:3},text:'A'}]}",
+	?assertMatch(Expected, to_json("Msg", 650, 650, [Line], [{{1,3}, "A"}])).
 
 to_lines_two_points_test() ->
 	First = {{1,2}, {3,4}},

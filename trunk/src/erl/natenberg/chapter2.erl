@@ -22,7 +22,7 @@
 pages() ->
 	timer:start(),
 	Functions = [page15, page16, page17, page18, page19, page20, page21, page22, page23, page24, page26, page29],
-	pages(1, 1000, Functions).
+	pages(1, 2000, Functions).
 
 pages(Seq, _, []) ->
 	Seq;
@@ -33,66 +33,66 @@ pages(Seq, Millis, [H|T]) ->
 page15() ->
 	Underlying = #underlying{px = 99.0},
 	Long = #side{underlyings = [Underlying]},
-	draw(#position{ long = Long }).
+	draw(#position{ long = Long }, "Long Underlying").
 
 page16() ->
 	Call = #option{px = 2.7, strike = 100.0},
 	Long = #side{calls = [Call]},
-	draw(#position{long = Long}).
+	draw(#position{long = Long}, "Long Call").
 
 page17() ->
 	Call = #option{px = 1.15, strike = 105.0},
 	Short = #side{calls = [Call]},
-	draw(#position{short = Short}).
+	draw(#position{short = Short}, "Short Call").
 
 page18() ->
 	Put = #option{px = 1.55, strike = 95.0},
 	Long = #side{puts = [Put]},
-	draw(#position{long = Long}).	
+	draw(#position{long = Long}, "Long Put").	
 
 page19() ->
 	Put = #option{px = 1.55, strike = 95.0},
 	Short = #side{puts = [Put]},
-	draw(#position{short = Short}).
+	draw(#position{short = Short}, "Short Put").
 
 page20() ->
 	Call = #option{px = 2.7, strike = 100.0},
 	Put = #option{px = 3.7, strike = 100.0},
 	Long = #side{calls = [Call], puts = [Put]},
-	draw(#position{long = Long}).	
+	draw(#position{long = Long}, "Long Straddle").	
 
 page21() ->
 	Call = #option{px = 2.7, strike = 100.0},
 	Put = #option{px = 3.7, strike = 100.0},
 	Short = #side{calls = [Call], puts = [Put]},
-	draw(#position{short = Short}).
+	draw(#position{short = Short}, "Short Straddle").
 
 page22() ->
 	Call = #option{px = 1.15, strike = 105.0},
 	Put = #option{px = 1.55, strike = 95.0},
 	Short = #side{calls = [Call], puts = [Put]},
-	draw(#position{short = Short}).
+	draw(#position{short = Short}, "Short Strangle").
 
 page23() ->
 	LongCall = #option{px = 9.35, strike = 90.0},
 	ShortCall = #option{px = 2.7, strike = 100.0},
 	Long = #side{calls = [LongCall]},
 	Short = #side{calls = [ShortCall]},
-	draw(#position{long = Long, short = Short}).
+	draw(#position{long = Long, short = Short}, "Page 23").
 
 page24() ->
 	LongPut = #option{px = 7.1, strike = 105.0},
 	ShortPut = #option{px = 3.7, strike = 100.0},
 	Long = #side{puts = [LongPut]},
 	Short = #side{puts = [ShortPut]},
-	draw(#position{long = Long, short = Short}).
+	draw(#position{long = Long, short = Short}, "Page 24").
 
 page26() ->
 	LongCall = #option{px = 5.5, strike = 95.0},
 	ShortCall = #option{px = 1.15, strike = 105.0},
 	Long = #side{calls = [LongCall]},
 	Short = #side{calls = [ShortCall, ShortCall, ShortCall]},
-	draw(#position{long = Long, short = Short}).
+	draw(#position{long = Long, short = Short}, "Call Ratio Vertical Spread").
 
 page29() ->
 	LongCall = #option{px = 2.7, strike = 100.0},
@@ -101,14 +101,14 @@ page29() ->
 	ShortPut = #option{px = 1.55, strike = 95.0},
 	Long = #side{calls = [LongCall, LongCall], puts = [LongPut, LongPut]},
 	Short = #side{calls = [ShortCall], puts = [ShortPut, ShortPut, ShortPut, ShortPut]},
-	draw(#position{long = Long, short = Short}).
+	draw(#position{long = Long, short = Short}, "Page 29").
 	
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Implementation
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-draw(Position) ->
-	view:draw(pxByPnl(Position)).
+draw(Position, Msg) ->
+	view:draw(pxByPnl(Position), Msg).
 
 pxByPnl(Position) ->
 	Pxs = pxs(Position),

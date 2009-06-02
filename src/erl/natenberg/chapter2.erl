@@ -22,13 +22,7 @@
 pages() ->
 	timer:start(),
 	Functions = [page15, page16, page17, page18, page19, page20, page21, page22, page23, page24, page26, page29],
-	pages(1, 2000, Functions).
-
-pages(Seq, _, []) ->
-	Seq;
-pages(Seq, Millis, [H|T]) ->
-	timer:apply_after(Seq * Millis, chapter2, H, []),
-	pages(Seq + 1, Millis, T).
+	[ timer:apply_after(Seq * 1000, chapter2, lists:nth(Seq, Functions), []) || Seq <- lists:seq(1, length(Functions)) ].
 
 page15() ->
 	Underlying = #underlying{px = 99.0},

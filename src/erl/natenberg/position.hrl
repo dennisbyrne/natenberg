@@ -10,7 +10,8 @@
 % License for the specific language governing permissions and limitations under
 % the License.
 
--record(underlying, {px}).
+-record(underlying, {px, name}).
 -record(option, {px, strike}).
--record(side, { underlyings=[], calls=[], puts=[] }).
--record(position, { long=#side{}, short=#side{}, deltas=dict:new() }).
+-record(side, {underlyings=[], calls=[], puts=[]}).
+-record(position, {long=#side{}, short=#side{}, deltas=dict:new()}).
+-record(portfolio, {positions = []}).

@@ -76,10 +76,10 @@ public class Natenberg {
 					fail.transition();
 				} catch (ClassCastException cce){
 					cce.printStackTrace();
-					view.show(cce.getClass().getName() + " " + cce.getCause(), sequence);
+					view.show(cce.getClass().getName(), cce.getMessage(), sequence);
 				} catch(JSONException je){
 					je.printStackTrace();
-					view.show(je.getClass().getName(), sequence);
+					view.show(je.getClass().getName(), je.getMessage(), sequence);
 				}
 			}
 		}

@@ -99,12 +99,12 @@ public class View {
 		frame.setBackground(Color.WHITE);
 	}
 
-	public void show(final String error, Long sequence) {
+	public void show(final String error, final String message, Long sequence) {
 		JPanel panel = new JPanel(){
 			public void paintComponent(java.awt.Graphics g){
-				g.drawString(error, getWidth() / 3, getHeight() / 2);
+				g.drawString(message, getWidth() / 3, getHeight() / 2);
 			}
 		};
-		show(panel, "Message # " + sequence.toString(), 400, 100);
+		show(panel, error + " : Message # " + sequence.toString(), 400, 100);
 	}
 }

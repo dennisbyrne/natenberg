@@ -17,9 +17,9 @@
 % Implementation
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-compute_standard_deviation([]) ->
+standard_deviation([]) ->
 	0.0;
-compute_standard_deviation(Sample) ->
+standard_deviation(Sample) ->
 	SampleSize = length(Sample),
 	Sum = lists:foldl(fun common:sum/2, 0, Sample),
 	Mean = Sum / SampleSize,
@@ -68,10 +68,10 @@ volatile_week_test() ->
  	?assertMatch(97, round(Left)),
 	?assertMatch(103, round(Right)).
 
-compute_standard_deviation_test() ->
+standard_deviation_test() ->
 	Sample = [2, 4, 4, 4, 5, 5, 7, 9],
-	?assertMatch(2.0, compute_standard_deviation(Sample)).
+	?assertMatch(2.0, standard_deviation(Sample)).
 
-compute_standard_deviation_outlier_test() ->
+standard_deviation_outlier_test() ->
 	Sample = [3, 7, 7, 19],
-	?assertMatch(6.0, compute_standard_deviation(Sample)).
+	?assertMatch(6.0, standard_deviation(Sample)).

@@ -30,7 +30,7 @@ pnl(Px, #position{long = Long, short = Short}) ->
 	      [-Px + C#option.strike + C#option.px || C <- Short#side.calls, Px > C#option.strike ] ++
 	      [-P#option.strike + Px + P#option.px || P <- Short#side.puts,  Px < P#option.strike ] ++
 	      [ P#option.strike - Px - P#option.px || P <- Long#side.puts,   Px < P#option.strike ],
-	lists:foldl(fun common:sum/2, 0.0, Pnl).
+	lists:sum(Pnl).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Unit Tests

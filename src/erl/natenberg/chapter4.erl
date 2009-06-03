@@ -20,12 +20,10 @@
 standard_deviation([]) ->
 	0.0;
 standard_deviation(Sample) ->
-	SampleSize = length(Sample),
-	Sum = common:sum(Sample),
-	Mean = Sum / SampleSize,
+	Mean = common:mean(Sample),
 	Fun = fun(X) -> math:pow(X - Mean, 2) end,
 	MeanDifferences = lists:map(Fun, Sample),
-	Variance = common:sum(MeanDifferences) / SampleSize,
+	Variance = common:mean(MeanDifferences),
 	math:sqrt(Variance).
 
 volatile_year(Mean, Volatility, Interest) ->

@@ -11,7 +11,7 @@
 % the License.
 
 -module(common).
--export([floor/1, ceiling/1, join/1, sum/1, sum/2, min/2, max/2]).
+-export([floor/1, ceiling/1, join/1, sum/1, sum/2, mean/1, min/2, max/2]).
 
 % things that should just be in erlang
 
@@ -36,6 +36,11 @@ sum(X, Y) ->
 
 sum(List) ->
 	lists:foldl(fun common:sum/2, 0, List).
+
+mean([]) ->
+	0.0;
+mean(List) ->
+	sum(List) / length(List).
 
 min(X, Y) when X < Y ->
 	X;

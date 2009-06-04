@@ -25,29 +25,19 @@ pages() ->
 	[ timer:apply_after(Seq * 1000, chapter2, lists:nth(Seq, Functions), []) || Seq <- lists:seq(1, length(Functions)) ].
 
 page15() ->
-	Underlying = #underlying{px = 99.0},
-	Long = #side{underlyings = [Underlying]},
-	draw(#position{ long = Long }, "Long Underlying").
+	draw(?LONG_UNDERLYING, "Long Underlying").
 
 page16() ->
-	Call = #option{px = 2.7, strike = 100.0},
-	Long = #side{calls = [Call]},
-	draw(#position{long = Long}, "Long Call").
+	draw(?LONG_CALL, "Long Call").
 
 page17() ->
-	Call = #option{px = 1.15, strike = 105.0},
-	Short = #side{calls = [Call]},
-	draw(#position{short = Short}, "Short Call").
+	draw(?SHORT_CALL, "Short Call").
 
 page18() ->
-	Put = #option{px = 1.55, strike = 95.0},
-	Long = #side{puts = [Put]},
-	draw(#position{long = Long}, "Long Put").	
+	draw(?LONG_PUT, "Long Put").
 
 page19() ->
-	Put = #option{px = 1.55, strike = 95.0},
-	Short = #side{puts = [Put]},
-	draw(#position{short = Short}, "Short Put").
+	draw(?SHORT_PUT, "Short Put").
 
 page20() ->
 	Call = #option{px = 2.7, strike = 100.0},

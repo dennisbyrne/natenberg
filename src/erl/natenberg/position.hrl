@@ -14,4 +14,9 @@
 -record(option, {px, strike}).
 -record(side, {underlyings=[], calls=[], puts=[]}).
 -record(position, {long=#side{}, short=#side{}, deltas=dict:new()}).
--record(portfolio, {positions = []}).
+
+-define(LONG_UNDERLYING, #position{ long = #side{underlyings = [#underlying{px = 99.0}]}}).
+-define(LONG_CALL, #position{long = #side{calls = [#option{px = 2.7, strike = 100.0}]}}).
+-define(SHORT_CALL, #position{short = #side{calls = [#option{px = 1.15, strike = 105.0}]}}).
+-define(LONG_PUT, #position{long = #side{puts = [#option{px = 1.55, strike = 95.0}]}}).
+-define(SHORT_PUT, #position{short = #side{puts = [#option{px = 1.55, strike = 95.0}]}}).

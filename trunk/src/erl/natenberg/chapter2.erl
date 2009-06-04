@@ -40,52 +40,25 @@ page19() ->
 	draw(?SHORT_PUT, "Short Put").
 
 page20() ->
-	Call = #option{px = 2.7, strike = 100.0},
-	Put = #option{px = 3.7, strike = 100.0},
-	Long = #side{calls = [Call], puts = [Put]},
-	draw(#position{long = Long}, "Long Straddle").	
+	draw(?LONG_STRADDLE, "Long Straddle").	
 
 page21() ->
-	Call = #option{px = 2.7, strike = 100.0},
-	Put = #option{px = 3.7, strike = 100.0},
-	Short = #side{calls = [Call], puts = [Put]},
-	draw(#position{short = Short}, "Short Straddle").
+	draw(?SHORT_STRADDLE, "Short Straddle").
 
 page22() ->
-	Call = #option{px = 1.15, strike = 105.0},
-	Put = #option{px = 1.55, strike = 95.0},
-	Short = #side{calls = [Call], puts = [Put]},
-	draw(#position{short = Short}, "Short Strangle").
+	draw(?SHORT_STRANGLE, "Short Strangle").
 
 page23() ->
-	LongCall = #option{px = 9.35, strike = 90.0},
-	ShortCall = #option{px = 2.7, strike = 100.0},
-	Long = #side{calls = [LongCall]},
-	Short = #side{calls = [ShortCall]},
-	draw(#position{long = Long, short = Short}, "Page 23").
+	draw(?PAGE_23, "Page 23").
 
 page24() ->
-	LongPut = #option{px = 7.1, strike = 105.0},
-	ShortPut = #option{px = 3.7, strike = 100.0},
-	Long = #side{puts = [LongPut]},
-	Short = #side{puts = [ShortPut]},
-	draw(#position{long = Long, short = Short}, "Page 24").
+	draw(?PAGE_24, "Page 24").
 
 page26() ->
-	LongCall = #option{px = 5.5, strike = 95.0},
-	ShortCall = #option{px = 1.15, strike = 105.0},
-	Long = #side{calls = [LongCall]},
-	Short = #side{calls = [ShortCall, ShortCall, ShortCall]},
-	draw(#position{long = Long, short = Short}, "Call Ratio Vertical Spread").
+	draw(?CALL_RATIO_VERTICAL_SPREAD, "Call Ratio Vertical Spread").
 
 page29() ->
-	LongCall = #option{px = 2.7, strike = 100.0},
-	ShortCall = #option{px = 9.35, strike = 90.0},
-	LongPut = #option{px = 3.7, strike = 100.0},
-	ShortPut = #option{px = 1.55, strike = 95.0},
-	Long = #side{calls = [LongCall, LongCall], puts = [LongPut, LongPut]},
-	Short = #side{calls = [ShortCall], puts = [ShortPut, ShortPut, ShortPut, ShortPut]},
-	draw(#position{long = Long, short = Short}, "Page 29").
+	draw(?PAGE_29, "Page 29").
 	
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Implementation

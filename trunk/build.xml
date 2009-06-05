@@ -11,11 +11,11 @@
 		<javac srcdir="src/java/com" destdir="bin">
 			<classpath refid="cp"/>
 		</javac>
-		<jar destfile="expiration.jar" basedir="bin"/>			
+		<jar destfile="natenberg.jar" basedir="bin"/>			
 		<java classname="com.drw.natenberg.Natenberg" fork="true">
 			<classpath refid="cp"/>
 			<classpath>
-				<pathelement location="expiration.jar"/>
+				<pathelement location="natenberg.jar"/>
 			</classpath>
 		</java>	
 	</target>

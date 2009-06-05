@@ -3,7 +3,6 @@
 	<classpathentry kind="src" path="src/erl/natenberg"/>
 	<classpathentry kind="src" path="src/java"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="/natenburg2/lib/OtpErlang.jar"/>
 	<classpathentry kind="lib" path="lib/json-lib-2.2.3-jdk15.jar"/>
 	<classpathentry kind="lib" path="lib/commons-lang-2.4.jar"/>
 	<classpathentry kind="lib" path="lib/OtpErlang.jar"/>

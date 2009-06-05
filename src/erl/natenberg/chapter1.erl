@@ -28,8 +28,8 @@ pnl(Px, #position{long = Long, short = Short}) ->
 	      [ P#option.px || P <- Short#side.puts,  Px >= P#option.strike ] ++
 	      [ Px - C#option.strike - C#option.px || C <- Long#side.calls,  Px > C#option.strike ] ++
 	      [-Px + C#option.strike + C#option.px || C <- Short#side.calls, Px > C#option.strike ] ++
-	      [-P#option.strike + Px + P#option.px || P <- Short#side.puts,  Px < P#option.strike ] ++
-	      [ P#option.strike - Px - P#option.px || P <- Long#side.puts,   Px < P#option.strike ],
+	      [ Px - P#option.strike + P#option.px || P <- Short#side.puts,  Px < P#option.strike ] ++
+	      [-Px + P#option.strike - P#option.px || P <- Long#side.puts,   Px < P#option.strike ],
 	lists:sum(Pnl).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -38,7 +38,7 @@ pnl(Px, #position{long = Long, short = Short}) ->
 
 pnls_empty_position_test() ->
 	Position = #position{},
-	?assertMatch(0.0, pnl(89.0, Position)).
+	?assertMatch(0, pnl(89.0, Position)).
 
 pnls_short_straddle_test() ->
 	Call = #option{px = 1.0, strike = 100.0},

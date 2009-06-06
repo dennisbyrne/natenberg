@@ -19,13 +19,12 @@
 % Implementation
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-is_backspread(Position) ->
-	% ... with all options expiring @ the same time ?
-	is_ratioed(Position) and (long_count(Position) > short_count(Position)).
+is_backspread(Position) -> % page 138
+	long_count(Position) > short_count(Position).
 
 is_ratio_vertical_spread(Position) ->
 	% ... with all options expiring @ the same time ?
-	is_ratioed(Position) and (long_count(Position) < short_count(Position)).
+	long_count(Position) < short_count(Position).
 
 is_ratioed(Position) ->
 	call_count(Position) =/= put_count(Position).

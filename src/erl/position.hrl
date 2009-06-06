@@ -11,7 +11,7 @@
 % the License.
 
 -record(underlying, {px, name}).
--record(option, {px, strike}).
+-record(option, {px, strike, expiration}).
 -record(side, {underlyings=[], calls=[], puts=[]}).
 -record(position, {long=#side{}, short=#side{}, deltas=dict:new(), description}).
 
@@ -38,17 +38,17 @@
 -define(LONG_STRADDLE, 
 		#position{description = "Long Straddle",
 				  long = #side{calls = [#option{px = 2.7, strike = 100.0}], 
-				  puts = [#option{px = 3.7, strike = 100.0}]}}).
+				  			   puts = [#option{px = 3.7, strike = 100.0}]}}).
 
 -define(SHORT_STRADDLE, 
 		#position{description = "Short Straddle",
 				  short = #side{calls = [#option{px = 2.7, strike = 100.0}], 
-				  puts = [#option{px = 3.7, strike = 100.0}]}}).
+				  				puts = [#option{px = 3.7, strike = 100.0}]}}).
 
 -define(SHORT_STRANGLE, 
 		#position{description = "Short Strangle",
 				  short = #side{calls = [#option{px = 1.15, strike = 105.0}], 
-				  puts = [#option{px = 1.55, strike = 95.0}]}}).
+				  				puts = [#option{px = 1.55, strike = 95.0}]}}).
 
 -define(PAGE_23, 
 		#position{description = "Page 23",
@@ -72,9 +72,26 @@
 				  short = #side{calls = [#option{px = 9.35, strike = 90.0}], 
 								puts = lists:duplicate(4, #option{px = 1.55, strike = 95.0})}}).
 
+-define(MARCH_OPTION, #option{expiration = {2009, 3}}).
+
+-define(CALL_BACKSPREAD,
+		#position{description = "Call Backspread",
+				  long = #side{calls = lists:duplicate(30, (?MARCH_OPTION)#option{px = 0.95, strike = 105.0})},
+				  short = #side{calls = lists:duplicate(10, (?MARCH_OPTION)#option{px = 5.82, strike = 95.0})}}).
+
+-define(JUNE_OPTION, #option{expiration = {2009, 6}}).
+
 -define(PUT_BACKSPREAD,
 		#position{description = "Put Backspread",
-				  long = #side{puts = lists:duplicate(80, #option{px = 0.17, strike = 90.0}) ++
-									  lists:duplicate(45, #option{px = 2.55, strike = 95.0})},
-				  short = #side{puts = lists:duplicate(10, #option{px = 2.68, strike = 100.0}) ++
-									   lists:duplicate(30, #option{px = 4.71, strike = 100.0})}}).
+				  long = #side{puts = lists:duplicate(45, (?JUNE_OPTION)#option{px = 2.55, strike = 95.0})},
+				  short = #side{puts = lists:duplicate(30, (?JUNE_OPTION)#option{px = 4.71, strike = 100.0})}}).
+
+-define(PUT_RATIO_VERTICAL_SPREAD,
+		#position{description = "Put Ratio Verical Spread, Page 140",
+				  long = #side{puts = lists:duplicate(20, (?MARCH_OPTION)#option{px = 0.85, strike = 95.0})},
+				  short = #side{puts = lists:duplicate(60, (?MARCH_OPTION)#option{px = 0.17, strike = 90.0})}}).
+
+-define(LONG_STRANGLE,
+		#position{description = "Long Strangle, Page 143",
+				  long = #side{calls = lists:duplicate(20, (?MARCH_OPTION)#option{px = 0.95, strike = 105.0}),
+							   puts = lists:duplicate(20, (?MARCH_OPTION)#option{px = 5.82, strike = 95.0})}}).

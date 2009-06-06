@@ -20,11 +20,24 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 is_backspread(Position) -> % page 138
-	long_count(Position) > short_count(Position).
+	expiration_count(Position) =:= 1 andalso 
+		long_count(Position) > short_count(Position).
 
-is_ratio_vertical_spread(Position) ->
-	% ... with all options expiring @ the same time ?
-	long_count(Position) < short_count(Position).
+is_ratio_vertical_spread(Position) -> % page 139
+	expiration_count(Position) =:= 1 andalso 
+		long_count(Position) < short_count(Position).
+
+is_straddle(Position) -> % page 140
+	strike_count(Position) =:= 1 andalso
+		call_count(Position) > 0 andalso
+			put_count(Position) > 0 andalso
+				(is_backspread(Position) xor is_ratio_vertical_spread(Position)).
+
+is_strangle(Position) -> % page 143
+	strike_count(Position) =/= 1 andalso
+		call_count(Position) > 0 andalso
+			put_count(Position) > 0 andalso
+				(is_backspread(Position) xor is_ratio_vertical_spread(Position)).
 
 is_ratioed(Position) ->
 	call_count(Position) =/= put_count(Position).
@@ -47,15 +60,64 @@ long_count(#position{long = Long}) ->
 	#side{calls = LongCalls, puts = LongPuts} = Long,
 	length(LongCalls ++ LongPuts).
 
+expiration_count(Position) ->
+	Expirations = [ Option#option.expiration || Option <- options(Position) ],
+	length(lists:usort(Expirations)).
+
+strike_count(Position) ->
+	Strikes = [ Option#option.strike || Option <- options(Position) ],
+	length(lists:usort(Strikes)).
+
+options(#position{long = Long, short = Short}) ->
+	Long#side.calls ++ Long#side.puts ++ Short#side.calls ++ Short#side.puts.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Implementation
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+is_strangle_test() ->
+	?assertEqual(true, is_strangle(?SHORT_STRANGLE)),
+	?assertEqual(true, is_strangle(?LONG_STRANGLE)),
+	?assertEqual(false, is_strangle(?LONG_STRADDLE)),
+	?assertEqual(false, is_strangle(?SHORT_STRADDLE)),
+	?assertEqual(false, is_strangle(?PUT_BACKSPREAD)),
+	?assertEqual(false, is_strangle(?CALL_BACKSPREAD)),
+	?assertEqual(false, is_strangle(?CALL_RATIO_VERTICAL_SPREAD)),
+	?assertEqual(false, is_strangle(?PUT_RATIO_VERTICAL_SPREAD)).
+
+is_straddle_test() ->
+	?assertEqual(false, is_straddle(?SHORT_STRANGLE)),
+	?assertEqual(false, is_straddle(?LONG_STRANGLE)),	
+	?assertEqual(true, is_straddle(?LONG_STRADDLE)),
+	?assertEqual(true, is_straddle(?SHORT_STRADDLE)),
+	?assertEqual(false, is_straddle(?PUT_BACKSPREAD)),
+	?assertEqual(false, is_straddle(?CALL_BACKSPREAD)),
+	?assertEqual(false, is_straddle(?CALL_RATIO_VERTICAL_SPREAD)),
+	?assertEqual(false, is_straddle(?PUT_RATIO_VERTICAL_SPREAD)).
+
 is_backspread_test() ->
-	?assertEqual(true, is_backspread(?PUT_BACKSPREAD)).
+	?assertEqual(false, is_backspread(?SHORT_STRANGLE)),
+	?assertEqual(true, is_backspread(?LONG_STRANGLE)),	
+	?assertEqual(true, is_backspread(?LONG_STRADDLE)),
+	?assertEqual(false, is_backspread(?SHORT_STRADDLE)),	
+	?assertEqual(true, is_backspread(?PUT_BACKSPREAD)),
+	?assertEqual(true, is_backspread(?CALL_BACKSPREAD)),
+	?assertEqual(false, is_backspread(?CALL_RATIO_VERTICAL_SPREAD)),
+	?assertEqual(false, is_backspread(?PUT_RATIO_VERTICAL_SPREAD)).
 
 is_ratio_vertical_spread_test() ->
-	?assertEqual(true, is_ratio_vertical_spread(?CALL_RATIO_VERTICAL_SPREAD)).
+	?assertEqual(true, is_ratio_vertical_spread(?SHORT_STRANGLE)),
+	?assertEqual(false, is_ratio_vertical_spread(?LONG_STRANGLE)),	
+	?assertEqual(false, is_ratio_vertical_spread(?LONG_STRADDLE)),
+	?assertEqual(true, is_ratio_vertical_spread(?SHORT_STRADDLE)),
+	?assertEqual(false, is_ratio_vertical_spread(?PUT_BACKSPREAD)),
+	?assertEqual(false, is_ratio_vertical_spread(?CALL_BACKSPREAD)),	
+	?assertEqual(true, is_ratio_vertical_spread(?CALL_RATIO_VERTICAL_SPREAD)),
+	?assertEqual(true, is_ratio_vertical_spread(?PUT_RATIO_VERTICAL_SPREAD)).
+
+expirations_test() ->
+	?assertEqual(0, expiration_count(#position{})),
+	?assertEqual(1, expiration_count(?CALL_BACKSPREAD)).
 
 call_count_test() ->
 	?assertEqual(1, call_count(?LONG_CALL)),

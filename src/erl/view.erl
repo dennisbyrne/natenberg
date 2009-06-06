@@ -106,7 +106,10 @@ scaleY(X, Y, Min, Max, Tix, Labels) ->
 	NewY = to_y(Y, Min, Max),
 	Tick = {{X, NewY}, {X + 5, NewY}},
 	Label = {{X, NewY}, integer_to_list(Y)},
-	scaleY(X, Y + 1, Min, Max, Tix ++ [Tick], Labels ++ [Label]).
+	TickSize = if Max - Min < 20 -> 1;
+				  true -> 10
+			   end,
+	scaleY(X, Y + TickSize, Min, Max, Tix ++ [Tick], Labels ++ [Label]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Unit Tests

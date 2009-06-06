@@ -23,7 +23,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 start() ->
-	os:cmd("cd ../../.. && ant &").
+	os:cmd("cd ../.. && ant &").
 
 draw(Points, Desc) ->
 	Rectangle = min_bounding_rectangle(Points),

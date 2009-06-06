@@ -66,6 +66,13 @@ volatile_week_test() ->
  	?assertMatch(97, round(Left)),
 	?assertMatch(103, round(Right)).
 
+volatile_day_test() ->
+	[{OneLow, OneHigh}, {TwoLow, TwoHigh}, {ThreeLow, ThreeHigh}] = volatile_day(100.0, 20.0),
+	?assert(OneLow > TwoLow),
+	?assert(TwoLow > ThreeLow),
+	?assert(ThreeHigh > TwoHigh),
+	?assert(TwoHigh > OneHigh).
+
 standard_deviation_test() ->
 	Sample = [2, 4, 4, 4, 5, 5, 7, 9],
 	?assertMatch(2.0, standard_deviation(Sample)).

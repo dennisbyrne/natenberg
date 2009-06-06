@@ -16,7 +16,9 @@
 -include_lib("position.hrl").
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
 % http://notdennisbyrne.blogspot.com/2009/06/option-profit-and-loss-in-erlang.html
+%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 pnl(Px, #position{long = Long, short = Short}) ->

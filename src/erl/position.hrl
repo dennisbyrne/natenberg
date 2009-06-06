@@ -95,3 +95,15 @@
 		#position{description = "Long Strangle, Page 143",
 				  long = #side{calls = lists:duplicate(20, (?MARCH_OPTION)#option{px = 0.95, strike = 105.0}),
 							   puts = lists:duplicate(20, (?MARCH_OPTION)#option{px = 5.82, strike = 95.0})}}).
+
+-define(LONG_BUTTERFLY,
+		#position{description = "Long Butterfly, Page 146",
+				  long = #side{calls = lists:duplicate(10, (?MARCH_OPTION)#option{px = 5.82, strike = 95.0}) ++
+							  		   lists:duplicate(10, (?MARCH_OPTION)#option{px = 0.95, strike = 105.0})},
+				  short = #side{calls = lists:duplicate(20, (?MARCH_OPTION)#option{px = 2.69, strike = 100.0})}}).
+
+-define(SHORT_BUTTERFLY,
+		#position{description = "Short Butterfly, Page 146",
+				  long = #side{puts = lists:duplicate(50, (?JUNE_OPTION)#option{px = 4.71, strike = 100.0})},
+				  short = #side{puts = lists:duplicate(25, (?JUNE_OPTION)#option{px = 2.55, strike = 95.0}) ++
+									   lists:duplicate(25, (?JUNE_OPTION)#option{px = 7.66, strike = 105.0})}}).

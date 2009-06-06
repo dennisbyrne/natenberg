@@ -25,12 +25,12 @@
 start() ->
 	os:cmd("cd ../../.. && ant &").
 
-draw(Points, Msg) ->
+draw(Points, Desc) ->
 	Rectangle = min_bounding_rectangle(Points),
 	{XAxis, YAxis} = axes(Rectangle),
 	Lines = points_to_lines(Points, Rectangle),
 	{Scales, Labels} = scale(XAxis, YAxis, Rectangle),
-	Json = json:to_json(Msg, ?WIDTH, ?HEIGHT, Lines ++ [XAxis, YAxis] ++ Scales, Labels),
+	Json = json:to_json(Desc, ?WIDTH, ?HEIGHT, Lines ++ [XAxis, YAxis] ++ Scales, Labels),
 	?TO ! {draw, Json}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

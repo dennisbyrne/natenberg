@@ -14,13 +14,13 @@
 -export([to_json/5]).
 -include_lib("eunit/include/eunit.hrl").
 
-to_json(Msg, Width, Height, Lines, Labels) ->
-	JsonMsg = "message:'" ++ Msg ++ "'",
+to_json(Desc, Width, Height, Lines, Labels) ->
+	JsonDesc = "description:'" ++ Desc ++ "'",
 	JsonWidth = "width:" ++ integer_to_list(Width),
 	JsonHeight = "height:" ++ integer_to_list(Height),
 	JsonLines = "lines:" ++ to_lines(Lines),
 	JsonLabels = "labels:" ++ to_labels(Labels), 
-	to_json([JsonMsg, JsonWidth, JsonHeight, JsonLines, JsonLabels]).
+	to_json([JsonDesc, JsonWidth, JsonHeight, JsonLines, JsonLabels]).
 
 to_lines(Lines) ->
 	JsonLines = lists:map(fun to_line/1, Lines),

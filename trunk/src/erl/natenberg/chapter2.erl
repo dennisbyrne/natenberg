@@ -65,8 +65,8 @@ page29() ->
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 draw(Position) ->
-	Msg = Position#position.description,
-	view:draw(pxByPnl(Position), Msg).
+	Desc = Position#position.description,
+	view:draw(pxByPnl(Position), Desc).
 
 pxByPnl(Position) ->
 	Pxs = pxs(Position),

@@ -46,8 +46,8 @@ public class View {
 		JPanel panel = new GraphPanel(lines, labels);
 		Integer width = root.getInt("width");
 		Integer height = root.getInt("height");
-		String message = root.getString("message");
-		show(panel, message + " (Message # " + sequence.toString() + ")", width, height);
+		String description = root.getString("description");
+		show(panel, description + " (Message # " + sequence.toString() + ")", width, height);
 	}
 
 	private class GraphPanel extends JPanel{
@@ -86,10 +86,10 @@ public class View {
 		}
 	}
 
-	private void show(JPanel panel, String label, Integer width, Integer height) {
+	private void show(JPanel panel, String description, Integer width, Integer height) {
 		if(frame != null)
 			frame.dispose();
-		frame = new JFrame(label);
+		frame = new JFrame(description);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		// add 30 to make up for the window bar
 		frame.setSize(width + MARGIN + 5, height + MARGIN + 30);

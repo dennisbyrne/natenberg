@@ -11,7 +11,7 @@
 % the License.
 
 -module(chapter8).
--export([]).
+-export([page139/0]).
 -include_lib("eunit/include/eunit.hrl").
 -include_lib("position.hrl").
 
@@ -48,9 +48,15 @@ long_count(#position{long = Long}) ->
 	#side{calls = LongCalls, puts = LongPuts} = Long,
 	length(LongCalls ++ LongPuts).
 	
+page139() ->
+	chapter2:draw(?PUT_BACKSPREAD).
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Implementation
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+is_backspread_test() ->
+	?assertEqual(true, is_backspread(?PUT_BACKSPREAD)).
 
 is_ratio_vertical_spread_test() ->
 	?assertEqual(true, is_ratio_vertical_spread(?CALL_RATIO_VERTICAL_SPREAD)).

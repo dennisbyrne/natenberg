@@ -89,10 +89,9 @@ pxs(#side{underlyings = Underlyings, calls = Calls, puts = Puts}) ->
 
 break_even(Px, Risk, Position) ->
 	Pnl = chapter1:pnl(Px, Position),
-	if Risk * Pnl < 0 ->
-		Pnl / -Risk;
-	   true ->
-		2 % stretch the x axis by 2 if pnl does not approach 0
+	% stretch the x axis by 2 if pnl does not approach 0
+	if Risk * Pnl < 0 -> Pnl / -Risk;
+	   true -> 2
 	end.
 
 risk(#position{long = Long, short = Short}) ->

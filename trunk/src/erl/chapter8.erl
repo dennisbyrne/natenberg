@@ -34,7 +34,7 @@ is_straddle(Position) -> % page 140
 				(is_backspread(Position) xor is_ratio_vertical_spread(Position)).
 
 is_strangle(Position) -> % page 143
-	strike_count(Position) =/= 1 andalso
+	strike_count(Position) > 1 andalso
 		call_count(Position) > 0 andalso
 			put_count(Position) > 0 andalso
 				(is_backspread(Position) xor is_ratio_vertical_spread(Position)).

@@ -71,3 +71,10 @@
 							   puts = lists:duplicate(2, #option{px = 3.7, strike = 100.0})}, 
 				  short = #side{calls = [#option{px = 9.35, strike = 90.0}], 
 								puts = lists:duplicate(4, #option{px = 1.55, strike = 95.0})}}).
+
+-define(PUT_BACKSPREAD,
+		#position{description = "Put Backspread",
+				  long = #side{puts = lists:duplicate(80, #option{px = 0.17, strike = 90.0}) ++
+									  lists:duplicate(45, #option{px = 2.55, strike = 95.0})},
+				  short = #side{puts = lists:duplicate(10, #option{px = 2.68, strike = 100.0}) ++
+									   lists:duplicate(30, #option{px = 4.71, strike = 100.0})}}).

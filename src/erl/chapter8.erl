@@ -11,7 +11,7 @@
 % the License.
 
 -module(chapter8).
--export([page139/0]).
+-export([]).
 -include_lib("eunit/include/eunit.hrl").
 -include_lib("position.hrl").
 
@@ -47,9 +47,6 @@ short_count(#position{short = Short}) ->
 long_count(#position{long = Long}) ->
 	#side{calls = LongCalls, puts = LongPuts} = Long,
 	length(LongCalls ++ LongPuts).
-	
-page139() ->
-	chapter2:draw(?PUT_BACKSPREAD).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Implementation

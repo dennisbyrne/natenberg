@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.drw.natenberg;
+package net.dbyrne.natenberg;
 
 import java.awt.Color;
 import java.awt.Graphics;

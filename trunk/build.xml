@@ -12,7 +12,7 @@
 			<classpath refid="cp"/>
 		</javac>
 		<jar destfile="natenberg.jar" basedir="bin"/>			
-		<java classname="com.drw.natenberg.Natenberg" fork="true">
+		<java classname="net.dbyrne.natenberg.Natenberg" fork="true">
 			<classpath refid="cp"/>
 			<classpath>
 				<pathelement location="natenberg.jar"/>

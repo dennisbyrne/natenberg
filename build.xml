@@ -8,7 +8,7 @@
 	
 	<target name="go">
 		<delete dir="bin/com"/>
-		<javac srcdir="src/java/com" destdir="bin">
+		<javac srcdir="src/java/net" destdir="bin">
 			<classpath refid="cp"/>
 		</javac>
 		<jar destfile="natenberg.jar" basedir="bin"/>			

@@ -7,7 +7,7 @@
 	</path>
 	
 	<target name="go">
-		<delete dir="bin/com"/>
+		<delete dir="bin/net"/>
 		<javac srcdir="src/java/net" destdir="bin">
 			<classpath refid="cp"/>
 		</javac>

@@ -39,6 +39,13 @@ is_strangle(Position) -> % page 143
 			put_count(Position) > 0 andalso
 				(is_backspread(Position) xor is_ratio_vertical_spread(Position)).
 
+is_butterfly(Position) ->
+	Strikes = strikes(Position),
+	((call_count(Position) =:= 0) xor (put_count(Position) =:= 0)) andalso
+		long_count(Position) =:= short_count(Position) andalso
+  			3 =:= length(Strikes) andalso
+				(lists:nth(2, Strikes) - hd(Strikes) =:= lists:last(Strikes) - lists:nth(2, Strikes)).
+
 is_ratioed(Position) ->
 	call_count(Position) =/= put_count(Position).
 
@@ -64,9 +71,11 @@ expiration_count(Position) ->
 	Expirations = [ Option#option.expiration || Option <- options(Position) ],
 	length(lists:usort(Expirations)).
 
+strikes(Position) ->
+	lists:usort([ Option#option.strike || Option <- options(Position) ]).
+
 strike_count(Position) ->
-	Strikes = [ Option#option.strike || Option <- options(Position) ],
-	length(lists:usort(Strikes)).
+	length(strikes(Position)).
 
 options(#position{long = Long, short = Short}) ->
 	Long#side.calls ++ Long#side.puts ++ Short#side.calls ++ Short#side.puts.
@@ -76,6 +85,8 @@ options(#position{long = Long, short = Short}) ->
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 is_strangle_test() ->
+	?assertEqual(false, is_strangle(?LONG_BUTTERFLY)),
+	?assertEqual(false, is_strangle(?SHORT_BUTTERFLY)),	
 	?assertEqual(true, is_strangle(?SHORT_STRANGLE)),
 	?assertEqual(true, is_strangle(?LONG_STRANGLE)),
 	?assertEqual(false, is_strangle(?LONG_STRADDLE)),
@@ -86,6 +97,8 @@ is_strangle_test() ->
 	?assertEqual(false, is_strangle(?PUT_RATIO_VERTICAL_SPREAD)).
 
 is_straddle_test() ->
+	?assertEqual(false, is_straddle(?LONG_BUTTERFLY)),
+	?assertEqual(false, is_straddle(?SHORT_BUTTERFLY)),	
 	?assertEqual(false, is_straddle(?SHORT_STRANGLE)),
 	?assertEqual(false, is_straddle(?LONG_STRANGLE)),	
 	?assertEqual(true, is_straddle(?LONG_STRADDLE)),
@@ -96,6 +109,8 @@ is_straddle_test() ->
 	?assertEqual(false, is_straddle(?PUT_RATIO_VERTICAL_SPREAD)).
 
 is_backspread_test() ->
+	?assertEqual(false, is_backspread(?LONG_BUTTERFLY)),
+	?assertEqual(false, is_backspread(?SHORT_BUTTERFLY)),	
 	?assertEqual(false, is_backspread(?SHORT_STRANGLE)),
 	?assertEqual(true, is_backspread(?LONG_STRANGLE)),	
 	?assertEqual(true, is_backspread(?LONG_STRADDLE)),
@@ -106,6 +121,8 @@ is_backspread_test() ->
 	?assertEqual(false, is_backspread(?PUT_RATIO_VERTICAL_SPREAD)).
 
 is_ratio_vertical_spread_test() ->
+	?assertEqual(false, is_ratio_vertical_spread(?LONG_BUTTERFLY)),
+	?assertEqual(false, is_ratio_vertical_spread(?SHORT_BUTTERFLY)),	
 	?assertEqual(true, is_ratio_vertical_spread(?SHORT_STRANGLE)),
 	?assertEqual(false, is_ratio_vertical_spread(?LONG_STRANGLE)),	
 	?assertEqual(false, is_ratio_vertical_spread(?LONG_STRADDLE)),
@@ -114,6 +131,18 @@ is_ratio_vertical_spread_test() ->
 	?assertEqual(false, is_ratio_vertical_spread(?CALL_BACKSPREAD)),	
 	?assertEqual(true, is_ratio_vertical_spread(?CALL_RATIO_VERTICAL_SPREAD)),
 	?assertEqual(true, is_ratio_vertical_spread(?PUT_RATIO_VERTICAL_SPREAD)).
+
+is_butterfly_test() ->
+	?assertEqual(true, is_butterfly(?LONG_BUTTERFLY)),
+	?assertEqual(true, is_butterfly(?SHORT_BUTTERFLY)),
+	?assertEqual(false, is_butterfly(?SHORT_STRANGLE)),
+	?assertEqual(false, is_butterfly(?LONG_STRANGLE)),	
+	?assertEqual(false, is_butterfly(?LONG_STRADDLE)),
+	?assertEqual(false, is_butterfly(?SHORT_STRADDLE)),
+	?assertEqual(false, is_butterfly(?PUT_BACKSPREAD)),
+	?assertEqual(false, is_butterfly(?CALL_BACKSPREAD)),	
+	?assertEqual(false, is_butterfly(?CALL_RATIO_VERTICAL_SPREAD)),
+	?assertEqual(false, is_butterfly(?PUT_RATIO_VERTICAL_SPREAD)).
 
 expirations_test() ->
 	?assertEqual(0, expiration_count(#position{})),

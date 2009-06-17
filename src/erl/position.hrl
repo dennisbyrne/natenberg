@@ -107,3 +107,27 @@
 				  long = #side{puts = lists:duplicate(50, (?JUNE_OPTION)#option{px = 4.71, strike = 100.0})},
 				  short = #side{puts = lists:duplicate(25, (?JUNE_OPTION)#option{px = 2.55, strike = 95.0}) ++
 									   lists:duplicate(25, (?JUNE_OPTION)#option{px = 7.66, strike = 105.0})}}).
+
+-define(LONG_CALL_XMAS_TREE,
+		#position{description = "Long Call Christmas Tree, Page 158",
+				  long = #side{calls = lists:duplicate(10, (?MARCH_OPTION)#option{px = 5.82, strike = 95.0})},
+				  short = #side{calls = lists:duplicate(10, (?MARCH_OPTION)#option{px = 2.69, strike = 100.0}) ++
+										lists:duplicate(10, (?MARCH_OPTION)#option{px = 0.95, strike = 105.0})}}).
+
+-define(LONG_PUT_XMAS_TREE,
+		#position{description = "Long Put Christmas Tree, Page 158",
+				  long = #side{puts = lists:duplicate(25, (?JUNE_OPTION)#option{px = 11.3, strike = 110.0})},
+				  short = #side{puts = lists:duplicate(25, (?JUNE_OPTION)#option{px = 4.71, strike = 100.0}) ++
+										lists:duplicate(25, (?JUNE_OPTION)#option{px = 2.55, strike = 95.0})}}).
+
+-define(SHORT_CALL_XMAS_TREE,
+		#position{description = "Short Call Christmas Tree, Page 158",
+				  short = #side{calls = lists:duplicate(5, (?JUNE_OPTION)#option{px = 10.97, strike = 90.0})},
+				  long = #side{calls = lists:duplicate(5, (?JUNE_OPTION)#option{px = 4.71, strike = 100.0}) ++
+									   lists:duplicate(5, (?JUNE_OPTION)#option{px = 2.77, strike = 105.0})}}).
+
+-define(SHORT_PUT_XMAS_TREE,
+		#position{description = "Short Put Christmas Tree, Page 158",
+				  short = #side{puts = lists:duplicate(33, (?MARCH_OPTION)#option{px = 10.16, strike = 110.0})},
+				  long = #side{puts = lists:duplicate(33, (?MARCH_OPTION)#option{px = 5.92, strike = 105.0}) ++
+									   lists:duplicate(33, (?MARCH_OPTION)#option{px = 0.85, strike = 95.0})}}).

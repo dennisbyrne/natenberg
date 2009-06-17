@@ -164,6 +164,3 @@ is_ratioed_test() ->
 	?assertEqual(true, is_ratioed(?CALL_RATIO_VERTICAL_SPREAD)),
 	?assertEqual(true, is_ratioed(?LONG_BUTTERFLY)),
 	?assertEqual(true, is_ratioed(?SHORT_BUTTERFLY)).
-
-
-

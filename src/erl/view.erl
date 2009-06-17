@@ -94,7 +94,7 @@ scaleX(_, X, _, Max, Tix, Labels) when X > Max -> % base case
 scaleX(Y, X, Min, Max, Tix, Labels) ->
 	NewX = to_x(X, Min, Max),
 	Tick = {{NewX, Y + 5}, {NewX, Y - 5}},
-	Label = {{NewX, Y}, integer_to_list(X)},
+	Label = {{NewX - 4, Y}, integer_to_list(X)},
 	scaleX(Y, X + 1, Min, Max, Tix ++ [Tick], Labels ++ [Label]).
 
 scaleY(Axis, Min, Max) ->

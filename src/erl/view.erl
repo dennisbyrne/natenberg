@@ -40,7 +40,7 @@ draw(Points, Desc) ->
 
 min_bounding_rectangle(Points) ->
 	{X, Y} = lists:last(Points),
-	{MinX, MaxX, MinY, MaxY} = lists:foldl(fun rectangle/2, {X, Y, X, Y}, Points),
+	{MinX, MaxX, MinY, MaxY} = lists:foldl(fun rectangle/2, {X, X, Y, Y}, Points),
 	#rectangle{minX = common:floor(MinX), 
 			   maxX = common:ceiling(MaxX),
 			   minY = common:floor(MinY) - 1, 
@@ -122,7 +122,7 @@ scaleX_test() ->
 	MaxX = 12,
 	{Ticks, Labels} = scaleX(XAxis, MinX, MaxX),
 	?assertMatch([{{325, 405}, {325, 395}}, {{650, 405}, {650, 395}}], Ticks),
-	?assertMatch([{{325, 400}, "11"}, {{650, 400}, "12"}], Labels).
+	?assertMatch([{{321, 400}, "11"}, {{646, 400}, "12"}], Labels).
 
 axes_test() ->
 	Rectangle = #rectangle{minX = 50, maxX = 150, minY = -10, maxY = 10},

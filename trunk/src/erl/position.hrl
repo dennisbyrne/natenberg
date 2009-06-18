@@ -145,3 +145,10 @@
 							   puts = lists:duplicate(15, (?JUNE_OPTION)#option{px = 2.55, strike = 95.0})},
 				  short = #side{calls = lists:duplicate(15, (?JUNE_OPTION)#option{px = 4.71, strike = 100.0}),
 							    puts = lists:duplicate(15, (?JUNE_OPTION)#option{px = 4.71, strike = 100.0})}}).
+
+-define(LONG_CALL_CONDOR,
+   		#position{description = "Long Condor, Page 159",
+				  long = #side{calls = lists:duplicate(10, (?MARCH_OPTION)#option{px = 10.1, strike = 90.0}) ++
+									   lists:duplicate(10, (?MARCH_OPTION)#option{px = 0.95, strike = 105.0})},
+				  short = #side{calls = lists:duplicate(10, (?MARCH_OPTION)#option{px = 5.82, strike = 95.0}) ++
+										lists:duplicate(10, (?MARCH_OPTION)#option{px = 2.69, strike = 100.0})}}).

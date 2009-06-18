@@ -131,3 +131,17 @@
 				  long = #side{puts = lists:duplicate(50, (?MARCH_OPTION)#option{px = 5.92, strike = 105.0}) ++
 									  lists:duplicate(50, (?MARCH_OPTION)#option{px = 0.85, strike = 95.0})},
 				  short = #side{puts = lists:duplicate(50, (?MARCH_OPTION)#option{px = 10.16, strike = 110.0})}}).
+
+-define(LONG_IRON_BUTTERFLY, 
+		#position{description = "Long Iron Butterfly, Page 159",
+				  long = #side{calls = lists:duplicate(10, (?MARCH_OPTION)#option{px = 2.69, strike = 100.0}),
+							   puts = lists:duplicate(10, (?MARCH_OPTION)#option{px = 2.68, strike = 100.0})},
+				  short = #side{calls = lists:duplicate(10, (?MARCH_OPTION)#option{px = 0.95, strike = 105.0}),
+								puts = lists:duplicate(10, (?MARCH_OPTION)#option{px = 0.85, strike = 95.0})}}).
+
+-define(SHORT_IRON_BUTTERFLY,
+		#position{description = "Short Iron Butterfly, Page 159",
+				  long = #side{calls = lists:duplicate(15, (?JUNE_OPTION)#option{px = 2.77, strike = 105.0}),
+							   puts = lists:duplicate(15, (?JUNE_OPTION)#option{px = 2.55, strike = 95.0})},
+				  short = #side{calls = lists:duplicate(15, (?JUNE_OPTION)#option{px = 4.71, strike = 100.0}),
+							    puts = lists:duplicate(15, (?JUNE_OPTION)#option{px = 4.71, strike = 100.0})}}).

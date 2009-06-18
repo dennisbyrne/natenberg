@@ -122,12 +122,12 @@
 
 -define(SHORT_CALL_XMAS_TREE,
 		#position{description = "Short Call Christmas Tree, Page 158",
-				  short = #side{calls = lists:duplicate(5, (?JUNE_OPTION)#option{px = 10.97, strike = 90.0})},
 				  long = #side{calls = lists:duplicate(5, (?JUNE_OPTION)#option{px = 4.71, strike = 100.0}) ++
-									   lists:duplicate(5, (?JUNE_OPTION)#option{px = 2.77, strike = 105.0})}}).
+									   lists:duplicate(5, (?JUNE_OPTION)#option{px = 2.77, strike = 105.0})},
+				  short = #side{calls = lists:duplicate(5, (?JUNE_OPTION)#option{px = 10.97, strike = 90.0})}}).
 
 -define(SHORT_PUT_XMAS_TREE,
 		#position{description = "Short Put Christmas Tree, Page 158",
-				  short = #side{puts = lists:duplicate(50, (?MARCH_OPTION)#option{px = 10.16, strike = 110.0})},
 				  long = #side{puts = lists:duplicate(50, (?MARCH_OPTION)#option{px = 5.92, strike = 105.0}) ++
-									   lists:duplicate(50, (?MARCH_OPTION)#option{px = 0.85, strike = 95.0})}}).
+									  lists:duplicate(50, (?MARCH_OPTION)#option{px = 0.85, strike = 95.0})},
+				  short = #side{puts = lists:duplicate(50, (?MARCH_OPTION)#option{px = 10.16, strike = 110.0})}}).

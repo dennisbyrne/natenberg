@@ -41,10 +41,10 @@ page22() ->
 	chapter2:draw(?SHORT_STRANGLE).
 
 page23() ->
-	chapter2:draw(?PAGE_23).
+	chapter2:draw(?CALL_BULL_SPREAD).
 
 page24() ->
-	chapter2:draw(?PAGE_24).
+	chapter2:draw(?PUT_BEAR_SPREAD).
 
 page26() ->
 	chapter2:draw(?CALL_RATIO_VERTICAL_SPREAD).

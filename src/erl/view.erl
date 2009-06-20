@@ -112,6 +112,18 @@ scaleY(X, Y, Min, Max, Tix, Labels) ->
 			   end,
 	scaleY(X, Y + TickSize, Min, Max, Tix ++ [Tick], Labels ++ [Label]).
 
+color([]) ->
+	[];
+color(Lines) ->
+	Length = length(Lines),
+	Step = 16777215 div Length, % 0xFFFFFF
+	Colors = lists:seq(0, Length * Step, Step),
+	Fun = fun(Seq) ->
+				  {X, Y} = lists:nth(Seq, Lines),
+				  {X, Y, lists:nth(Seq, Colors)} 
+		  end,
+	[ Fun(Seq) || Seq <- lists:seq(1, length(Lines)) ].
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Unit Tests
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -212,3 +224,12 @@ to_line_fractional_test() ->
 	?assertMatch({{0,650}, {325,325}}, to_line({Left, Middle}, Rectangle)),
 	?assertMatch({{325,325}, {650,0}}, to_line({Middle, Right}, Rectangle)),
 	?assertMatch({{0,650}, {650,0}}, to_line({Left, Right}, Rectangle)).
+
+color_empty_test() ->
+	?assertEqual([], color([])).
+
+color_single_test() ->
+	?assertEqual([{1,2,0}], color([{1,2}])).
+
+color_multiple_test() ->
+	?assertEqual([{1,2,0},{1,3,8388607}], color([{1,2},{1,3}])).

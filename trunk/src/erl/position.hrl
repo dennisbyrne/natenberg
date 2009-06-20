@@ -50,22 +50,22 @@
 				  short = #side{calls = [#option{px = 1.15, strike = 105.0}], 
 				  				puts = [#option{px = 1.55, strike = 95.0}]}}).
 
--define(PAGE_23, 
-		#position{description = "Page 23",
+-define(CALL_BULL_SPREAD,
+		#position{description = "Call Bull Spread, Page 23",
 				  long = #side{calls = [#option{px = 9.35, strike = 90.0}]}, 
 				  short = #side{calls = [#option{px = 2.7, strike = 100.0}]}}).
 
--define(PAGE_24, 
-		#position{description = "Page 24",
+-define(PUT_BEAR_SPREAD,
+		#position{description = "Put Bear Spread, Page 24",
 				  long = #side{puts = [#option{px = 7.1, strike = 105.0}]}, 
 				  short = #side{puts = [#option{px = 3.7, strike = 100.0}]}}).
 
--define(CALL_RATIO_VERTICAL_SPREAD, 
+-define(CALL_RATIO_VERTICAL_SPREAD,
 		#position{description = "Call Ratio Vertical Spread",
 				  long = #side{calls = [#option{px = 5.5, strike = 95.0}]}, 
 				  short = #side{calls = lists:duplicate(3, #option{px = 1.15, strike = 105.0})}}).
 
--define(PAGE_29, 
+-define(PAGE_29,
 		#position{description = "Page 29",
 				  long = #side{calls = lists:duplicate(2, #option{px = 2.7, strike = 100.0}), 
 							   puts = lists:duplicate(2, #option{px = 3.7, strike = 100.0})}, 

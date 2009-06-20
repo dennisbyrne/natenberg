@@ -11,7 +11,7 @@
 % the License.
 
 -module(chapter8).
--export([]).
+-export([long_count/1, short_count/1, call_count/1, put_count/1, expiration_count/1, strike_count/1]).
 -include_lib("eunit/include/eunit.hrl").
 -include_lib("position.hrl").
 

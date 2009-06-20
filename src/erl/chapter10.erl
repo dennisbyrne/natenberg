@@ -1,7 +1,7 @@
 -module(chapter10).
 -export([]).
 -include_lib("eunit/include/eunit.hrl").
--include_lib("position.hrl").
+-include_lib("struct.hrl").
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Implementation

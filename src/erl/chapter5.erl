@@ -13,7 +13,7 @@
 -module(chapter5).
 -export([delta/2]).
 -include_lib("eunit/include/eunit.hrl").
--include_lib("position.hrl").
+-include_lib("struct.hrl").
 
 -define(FUTURES_DELTA, [62, 46, 53, 56, 74, 45, 35, 50, 93]).
 -define(FUTURES_PXS, [102.26, 99.07, 100.39, 100.76, 103.59, 99.26, 98.28, 99.98, 103.78]).

@@ -13,7 +13,7 @@
 -module(chapter2).
 -export([draw/1]).
 -include_lib("eunit/include/eunit.hrl").
--include_lib("position.hrl").
+-include_lib("struct.hrl").
 	
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Implementation

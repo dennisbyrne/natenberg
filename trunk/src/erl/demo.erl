@@ -4,7 +4,7 @@
 		 page139/0, page140/0, page143/0, page146/0, page147/0, page158a/0, 
 		 page158b/0, page158c/0, page158d/0, page159a/0, page159b/0, page159c/0,
 		 page159d/0, page159e/0, page159f/0]).
--include_lib("position.hrl").
+-include_lib("struct.hrl").
 
 pages() ->
 	timer:start(),

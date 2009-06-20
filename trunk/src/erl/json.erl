@@ -13,6 +13,7 @@
 -module(json).
 -export([to_json/5]).
 -include_lib("eunit/include/eunit.hrl").
+-include_lib("struct.hrl").
 
 to_json(Desc, Width, Height, Lines, Labels) ->
 	JsonDesc = "description:'" ++ Desc ++ "'",

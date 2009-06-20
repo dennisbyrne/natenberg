@@ -13,7 +13,7 @@
 -module(chapter1).
 -export([pnl/2]).
 -include_lib("eunit/include/eunit.hrl").
--include_lib("position.hrl").
+-include_lib("struct.hrl").
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %

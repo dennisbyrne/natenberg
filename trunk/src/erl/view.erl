@@ -17,6 +17,7 @@
 -export([start/0, draw/2]).
 -record(rectangle, {minX = 0, maxX = 100, minY = -100, maxY = 100}).
 -include_lib("eunit/include/eunit.hrl").
+-include_lib("struct.hrl").
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % API

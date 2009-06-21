@@ -92,9 +92,9 @@ description(Positions, Descriptions) ->
 	Keys = dict:fetch_keys(Dict),
 	description(Positions, Keys, Dict).
 
-description(Positions, [H|T], Dict) ->
-	All = lists:all(H, Positions),
-	if All -> dict:fetch(H, Dict);
+description(Positions, [Predicate|T], Dict) ->
+	All = lists:all(Predicate, Positions),
+	if All -> dict:fetch(Predicate, Dict);
 	   true -> description(Positions, T, Dict)
 	end.
 

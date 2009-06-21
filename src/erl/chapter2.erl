@@ -43,12 +43,10 @@ pxs(#side{underlyings = Underlyings, calls = Calls, puts = Puts}) ->
 
 stretch(Points, Positions) when is_list(Positions) ->
 	PointsByPositions = lists:zip(Points, Positions),
-	{Pxs, Pnls} = lists:unzip(lists:flatten(Points)),
+	{Pxs, _} = lists:unzip(lists:flatten(Points)),
 	MinPx = lists:min(lists:flatten(Pxs)),
 	MaxPx = lists:max(lists:flatten(Pxs)),
-	MinPnl = lists:min(lists:flatten(Pnls)),
-	MaxPnl = lists:max(lists:flatten(Pnls)),
-	[ stretch(MinPx, MaxPx, MinPnl, MaxPnl, Pts, Position) || {Pts, Position} <- PointsByPositions ];
+	[ stretch(MinPx, MaxPx, Pts, Position) || {Pts, Position} <- PointsByPositions ];
 stretch(Pxs, Position) ->
 	{DownsideRisk, UpsideRisk} = risk(Position),
 	Low = hd(Pxs),
@@ -57,12 +55,12 @@ stretch(Pxs, Position) ->
 	HighPx = High + break_even(High, UpsideRisk, Position),
 	[common:floor(LowPx)] ++ Pxs ++ [common:ceiling(HighPx)].
 
-stretch(MinPx, MaxPx, MinPnl, MaxPnl, Points, Position) ->
+stretch(MinPx, MaxPx, Points, Position) ->
 	{LeftPx, _} = hd(Points),
 	{RightPx, _} = lists:last(Points),
 	Left = common:min(LeftPx, MinPx),
 	Right = common:max(RightPx, MaxPx),
-	[{Left, chapter1:pnl(Left, Position)}] ++ Points ++ [{Right, chapter1:pnl(Right, Position)}].
+	lists:usort([{Left, chapter1:pnl(Left, Position)}] ++ Points ++ [{Right, chapter1:pnl(Right, Position)}]).
 
 break_even(Px, Risk, Position) ->
 	Pnl = chapter1:pnl(Px, Position),
@@ -113,6 +111,12 @@ stretch_one_short_one_put_test() ->
 	Position = #position{ short = Short },
 	?assertMatch([98, 100.0, 102], stretch(pxs(Position), Position)).
 
+stretch_one_short_one_put_list_test() ->
+	Put = #option{px = 2.00, strike = 100.0},
+	Short = #side{puts = [Put]},
+	Position = #position{ short = Short },
+	?assertMatch([[{98, 0.0}, {100.0, 2.0}, {102, 2.0}]], stretch([pxByPnl(Position)], [Position])).
+
 stretch_one_short_one_put_force_stretch_test() ->
 	Put = #option{px = 2.01, strike = 100.0},
 	Short = #side{puts = [Put]},
@@ -125,6 +129,13 @@ stretch_long_straddle_test() ->
 	Long = #side{calls = [Call], puts = [Put]},
 	Position = #position{long = Long},	
 	?assertMatch([97, 100.0, 103], stretch(pxs(Position), Position)).
+
+stretch_long_straddle_list_test() ->
+	Call = #option{px = 0.70, strike = 100.0},
+	Put = #option{px = 1.70, strike = 100.0},
+	Long = #side{calls = [Call], puts = [Put]},
+	Position = #position{long = Long},	
+	?assertMatch([[{97, _}, {100.0, -2.4}, {103, _}]], stretch([pxByPnl(Position)], [Position])).
 
 stretch_short_straddle_test() ->
 	Call = #option{px = 0.7, strike = 100.0},

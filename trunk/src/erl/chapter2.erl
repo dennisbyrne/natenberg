@@ -19,9 +19,12 @@
 % Implementation
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+draw(Positions) when is_list(Positions) ->
+	Descs = [ P#position.description || P <- Positions ],
+	Points = lists:map(fun pxByPnl/1, Positions),
+	view:draw(Points, Descs);
 draw(Position) ->
-	Desc = Position#position.description,
-	view:draw(pxByPnl(Position), Desc).
+	draw([Position]).
 
 pxByPnl(Position) ->
 	Pxs = pxs(Position),

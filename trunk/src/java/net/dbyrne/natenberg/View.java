@@ -18,6 +18,11 @@
  */
 package net.dbyrne.natenberg;
 
+import static java.awt.Color.decode;
+import static java.awt.Color.black;
+import static java.lang.Long.toHexString;
+import static net.sf.json.JSONObject.fromObject;
+
 import java.awt.Color;
 import java.awt.Graphics;
 
@@ -40,7 +45,7 @@ public class View {
 		OtpErlangTuple msg = (OtpErlangTuple) received;
 		String data = msg.elementAt(1).toString();
 		String json = data.substring(1, data.length() - 1);
-		JSONObject root = JSONObject.fromObject(json);
+		JSONObject root = fromObject(json);
 		JSONArray lines = (JSONArray) root.get("lines");
 		JSONArray labels = (JSONArray) root.get("labels");
 		JPanel panel = new GraphPanel(lines, labels);
@@ -58,8 +63,8 @@ public class View {
 			this.labels = labels;
 		}
 		public void paintComponent(Graphics g){
-			paintLines(g, 0);
 			paintLabels(g, 0);
+			paintLines(g, 0);
 		}
 		private void paintLines(Graphics g, Integer i){
 			if(i == lines.size())
@@ -67,6 +72,9 @@ public class View {
 			JSONObject line = lines.getJSONObject(i);
 			JSONObject from = line.getJSONObject("from");
 			JSONObject to = line.getJSONObject("to");
+			Color color = line.has("color") ? 
+					decode("0x" + toHexString(line.getLong("color"))) : black;
+			g.setColor(color);
 			g.drawLine(from.getInt("x") + MARGIN,
 					   from.getInt("y") + MARGIN,
 					   to.getInt("x") + MARGIN,

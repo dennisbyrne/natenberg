@@ -1,5 +1,5 @@
 -module(chapter10).
--export([]).
+-export([is_vertical_spread/1]).
 -include_lib("eunit/include/eunit.hrl").
 -include_lib("struct.hrl").
 

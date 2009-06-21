@@ -11,7 +11,7 @@
 % the License.
 
 -module(common).
--export([floor/1, ceiling/1, join/1, mean/1, min/2, max/2]).
+-export([floor/1, ceiling/1, join/1, join/2, mean/1, min/2, max/2]).
 
 % things that should just be in erlang
 
@@ -47,10 +47,13 @@ max(_, Y) ->
 	Y.
 
 join(List) ->
-    join(List, []).
-join([], Acc) ->
+	join(List, ",").
+
+join(List, Delimiter) ->
+    join(List, [], Delimiter).
+join([], Acc, _) ->
     Acc;
-join([H|T], []) ->
-    join(T, H);
-join([H|T], Acc) ->
-    join(T, lists:append([Acc, ",", H])).
+join([H|T], [], Delimiter) ->
+    join(T, H, Delimiter);
+join([H|T], Acc, Delimiter) ->
+    join(T, lists:append([Acc, Delimiter, H]), Delimiter).

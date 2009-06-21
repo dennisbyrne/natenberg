@@ -15,12 +15,16 @@
 -record(side, {underlyings=[], calls=[], puts=[]}).
 -record(position, {long=#side{}, short=#side{}, deltas=dict:new(), description}).
 
+-define(UNDERLYING, #side{underlyings = [#underlying{px = 99.0}]}).
+
 -define(LONG_UNDERLYING, 
-		#position{description = "Long Underlying",
-				  long = #side{underlyings = [#underlying{px = 99.0}]}}).
+		#position{description = "Long Underlying, Page 15", long = ?UNDERLYING}).
+
+-define(SHORT_UNDERLYING, 
+		#position{description = "Short Underlying, Page 15", short = ?UNDERLYING}).
 
 -define(LONG_CALL, 
-		#position{description = "Long Call",
+		#position{description = "Long Call, page 16",
 				  long = #side{calls = [#option{px = 2.7, strike = 100.0}]}}).
 
 -define(SHORT_CALL, 

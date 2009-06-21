@@ -27,7 +27,7 @@ start() ->
 	Fun = fun() -> os:cmd("cd ../.. && ant") end,
 	spawn(Fun).
 
-draw(Points, Descs) ->
+draw(Points, Desc) ->
 	Rectangle = min_bounding_rectangle(lists:flatten(Points)),
 	{XAxis, YAxis} = axes(Rectangle),
 	Length = length(Points),
@@ -36,7 +36,7 @@ draw(Points, Descs) ->
 	PointsToColors = lists:zip(Points, Colors),
 	Lines = [ points_to_lines(P, Rectangle, Color) || {P, Color} <- PointsToColors ],
 	{Scales, Labels} = scale(XAxis, YAxis, Rectangle),
-	Json = json:to_json(Descs, ?WIDTH, ?HEIGHT, lists:flatten(Lines) ++ [XAxis, YAxis] ++ Scales, Labels),
+	Json = json:to_json(Desc, ?WIDTH, ?HEIGHT, lists:flatten(Lines) ++ [XAxis, YAxis] ++ Scales, Labels),
 	?TO ! {draw, Json}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

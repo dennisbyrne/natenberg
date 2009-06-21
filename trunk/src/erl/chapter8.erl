@@ -11,7 +11,8 @@
 % the License.
 
 -module(chapter8).
--export([long_count/1, short_count/1, call_count/1, put_count/1, expiration_count/1, strike_count/1]).
+-export([long_count/1, short_count/1, call_count/1, put_count/1, expiration_count/1, strike_count/1, 
+		 is_backspread/1, is_ratio_vertical_spread/1, is_straddle/1, is_strangle/1, is_butterfly/1]).
 -include_lib("eunit/include/eunit.hrl").
 -include_lib("struct.hrl").
 
@@ -20,12 +21,18 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 is_backspread(Position) -> % page 138
+	LongCount = long_count(Position),
+	ShortCount = short_count(Position),	
 	expiration_count(Position) =:= 1 andalso 
-		long_count(Position) > short_count(Position).
+		LongCount > ShortCount andalso
+			LongCount + ShortCount > 1.
 
 is_ratio_vertical_spread(Position) -> % page 139
-	expiration_count(Position) =:= 1 andalso 
-		long_count(Position) < short_count(Position).
+	LongCount = long_count(Position),
+	ShortCount = short_count(Position),
+	expiration_count(Position) =:= 1 andalso
+		LongCount < ShortCount andalso
+			LongCount + ShortCount > 1.
 
 is_straddle(Position) -> % page 140
 	strike_count(Position) =:= 1 andalso
@@ -85,6 +92,7 @@ options(#position{long = Long, short = Short}) ->
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 is_strangle_test() ->
+	?assertEqual(false, is_strangle(?LONG_UNDERLYING)),
 	?assertEqual(false, is_strangle(?LONG_BUTTERFLY)),
 	?assertEqual(false, is_strangle(?SHORT_BUTTERFLY)),	
 	?assertEqual(true, is_strangle(?SHORT_STRANGLE)),

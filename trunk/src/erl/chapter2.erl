@@ -21,9 +21,10 @@
 
 draw(Positions) when is_list(Positions) ->
 	Descs = [ P#position.description || P <- Positions ],
+	Description = description(Positions, Descs),
 	Points = lists:map(fun pxByPnl/1, Positions),
 	Stretched = stretch(Points, Positions),
-	view:draw(Stretched, Descs);
+	view:draw(Stretched, Description);
 draw(Position) ->
 	draw([Position]).
 
@@ -77,9 +78,40 @@ risk(#position{long = Long, short = Short}) ->
 	{length(LongPuts) - length(ShortPuts) + length(ShortUnderlyings) - length(LongUnderlyings), 
 	 length(LongCalls) - length(ShortCalls) - length(ShortUnderlyings) + length(LongUnderlyings)}.
 
+description([_], [Description]) ->
+	Description;
+description(Positions, Descriptions) ->
+	Keys = [fun chapter8:is_strangle/1,
+			fun chapter8:is_straddle/1,
+		    fun chapter8:is_butterfly/1,
+			fun chapter8:is_ratio_vertical_spread/1,
+			fun chapter8:is_backspread/1,
+			fun chapter10:is_vertical_spread/1,
+			fun(_) -> true end],
+	Values = ["Strangles",
+			  "Straddles",
+			  "Butterflies",
+			  "Ratio Vertical Spreads",
+			  "Backspreads",
+			  "Vertical Spreads",
+			  common:join(Descriptions, ", ")],
+	Dict = dict:from_list(lists:zip(Keys, Values)),
+	description(Positions, Keys, Dict).
+
+description(Positions, [H|T], Dict) ->
+	All = lists:all(H, Positions),
+	if All -> dict:fetch(H, Dict);
+	   true -> description(Positions, T, Dict)
+	end.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Unit Tests
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+description_test() ->
+	?assertEqual("Vertical Spreads", description([?CALL_BULL_SPREAD, ?PUT_BEAR_SPREAD], ["a", "b"])),
+	?assertEqual("a, b", description([?CALL_BULL_SPREAD, ?LONG_CALL], ["a", "b"])),
+	?assertEqual("a", description([?LONG_CALL], ["a"])).
 
 risk_underlying_test() ->
 	Underlying = #underlying{px = 99.0},

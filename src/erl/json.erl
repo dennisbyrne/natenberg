@@ -16,7 +16,7 @@
 -include_lib("struct.hrl").
 
 to_json(Desc, Width, Height, Lines, Labels) ->
-	JsonDesc = "description:'" ++ common:join(Desc) ++ "'",
+	JsonDesc = "description:'" ++ common:join(Desc, ", ") ++ "'",
 	JsonWidth = "width:" ++ integer_to_list(Width),
 	JsonHeight = "height:" ++ integer_to_list(Height),
 	JsonLines = "lines:" ++ to_lines(Lines),

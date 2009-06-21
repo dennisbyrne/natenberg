@@ -81,21 +81,15 @@ risk(#position{long = Long, short = Short}) ->
 description([_], [Description]) ->
 	Description;
 description(Positions, Descriptions) ->
-	Keys = [fun chapter8:is_strangle/1,
-			fun chapter8:is_straddle/1,
-		    fun chapter8:is_butterfly/1,
-			fun chapter8:is_ratio_vertical_spread/1,
-			fun chapter8:is_backspread/1,
-			fun chapter10:is_vertical_spread/1,
-			fun(_) -> true end],
-	Values = ["Strangles",
-			  "Straddles",
-			  "Butterflies",
-			  "Ratio Vertical Spreads",
-			  "Backspreads",
-			  "Vertical Spreads",
-			  common:join(Descriptions, ", ")],
-	Dict = dict:from_list(lists:zip(Keys, Values)),
+	Map = [{fun chapter8:is_strangle/1, "Strangles"},
+		   {fun chapter8:is_straddle/1, "Straddles"},
+		   {fun chapter8:is_butterfly/1, "Butterflies"},
+		   {fun chapter8:is_ratio_vertical_spread/1, "Ratio Vertical Spreads"},
+		   {fun chapter8:is_backspread/1, "Backspreads"},
+		   {fun chapter10:is_vertical_spread/1, "Vertical Spreads"},
+		   {fun(_) -> true end, common:join(Descriptions, ", ")}],
+	Dict = dict:from_list(Map),
+	Keys = dict:fetch_keys(Dict),
 	description(Positions, Keys, Dict).
 
 description(Positions, [H|T], Dict) ->

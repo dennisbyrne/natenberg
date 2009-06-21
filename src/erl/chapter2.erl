@@ -22,7 +22,8 @@
 draw(Positions) when is_list(Positions) ->
 	Descs = [ P#position.description || P <- Positions ],
 	Points = lists:map(fun pxByPnl/1, Positions),
-	view:draw(Points, Descs);
+	Stretched = stretch(Points, Positions),
+	view:draw(Stretched, Descs);
 draw(Position) ->
 	draw([Position]).
 
@@ -40,13 +41,14 @@ pxs(#side{underlyings = Underlyings, calls = Calls, puts = Puts}) ->
 	[Underlying#underlying.px || Underlying <- Underlyings] ++ 
 	[Option#option.strike || Option <- Calls ++ Puts].
 
-%stretch(Points, Positions) ->
-%	PointsByPosition = lists:zip(Points, Positions),
-%	MinPx = lists:min(lists:flatten(Pxs)),
-%	MaxPx = lists:max(lists:flatten(Pxs)),
-%	MinPnl = lists:min(lists:flatten(Pnls)),
-%	MaxPnl = lists:max(lists:flatten(Pnls)),
-	
+stretch(Points, Positions) when is_list(Positions) ->
+	PointsByPositions = lists:zip(Points, Positions),
+	{Pxs, Pnls} = lists:unzip(lists:flatten(Points)),
+	MinPx = lists:min(lists:flatten(Pxs)),
+	MaxPx = lists:max(lists:flatten(Pxs)),
+	MinPnl = lists:min(lists:flatten(Pnls)),
+	MaxPnl = lists:max(lists:flatten(Pnls)),
+	[ stretch(MinPx, MaxPx, MinPnl, MaxPnl, Pts, Position) || {Pts, Position} <- PointsByPositions ];
 stretch(Pxs, Position) ->
 	{DownsideRisk, UpsideRisk} = risk(Position),
 	Low = hd(Pxs),
@@ -54,6 +56,13 @@ stretch(Pxs, Position) ->
 	High = lists:last(Pxs),
 	HighPx = High + break_even(High, UpsideRisk, Position),
 	[common:floor(LowPx)] ++ Pxs ++ [common:ceiling(HighPx)].
+
+stretch(MinPx, MaxPx, MinPnl, MaxPnl, Points, Position) ->
+	{LeftPx, _} = hd(Points),
+	{RightPx, _} = lists:last(Points),
+	Left = common:min(LeftPx, MinPx),
+	Right = common:max(RightPx, MaxPx),
+	[{Left, chapter1:pnl(Left, Position)}] ++ Points ++ [{Right, chapter1:pnl(Right, Position)}].
 
 break_even(Px, Risk, Position) ->
 	Pnl = chapter1:pnl(Px, Position),

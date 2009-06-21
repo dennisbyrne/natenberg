@@ -32,8 +32,9 @@ draw(Points, Descs) ->
 	{XAxis, YAxis} = axes(Rectangle),
 	Length = length(Points),
 	Step = 16777215 div Length, % 0xFFFFFF
-	Colors = lists:seq(0, Length * Step, Step), % should use zip
-	Lines = [ points_to_lines(lists:nth(Seq, Points), Rectangle, lists:nth(Seq, Colors)) || Seq <- lists:seq(1, Length) ],
+	Colors = lists:seq(0, (Length - 1) * Step, Step), % should use zip
+	PointsToColors = lists:zip(Points, Colors),
+	Lines = [ points_to_lines(P, Rectangle, Color) || {P, Color} <- PointsToColors ],
 	{Scales, Labels} = scale(XAxis, YAxis, Rectangle),
 	Json = json:to_json(Descs, ?WIDTH, ?HEIGHT, lists:flatten(Lines) ++ [XAxis, YAxis] ++ Scales, Labels),
 	?TO ! {draw, Json}.
@@ -115,18 +116,6 @@ scaleY(X, Y, Min, Max, Tix, Labels) ->
 				  true -> 10
 			   end,
 	scaleY(X, Y + TickSize, Min, Max, Tix ++ [Tick], Labels ++ [Label]).
-
-color([]) ->
-	[];
-color(Lines) ->
-	Length = length(Lines),
-	Step = 16777215 div Length, % 0xFFFFFF
-	Colors = lists:seq(0, Length * Step, Step),
-	Fun = fun(Seq) ->
-				  {X, Y} = lists:nth(Seq, Lines),
-				  {X, Y, lists:nth(Seq, Colors)} 
-		  end,
-	[ Fun(Seq) || Seq <- lists:seq(1, length(Lines)) ].
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Unit Tests

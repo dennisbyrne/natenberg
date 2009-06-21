@@ -14,7 +14,7 @@
 -export([draw/1]).
 -include_lib("eunit/include/eunit.hrl").
 -include_lib("struct.hrl").
-	
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Implementation
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -60,7 +60,9 @@ stretch(MinPx, MaxPx, Points, Position) ->
 	{RightPx, _} = lists:last(Points),
 	Left = common:min(LeftPx, MinPx),
 	Right = common:max(RightPx, MaxPx),
-	lists:usort([{Left, chapter1:pnl(Left, Position)}] ++ Points ++ [{Right, chapter1:pnl(Right, Position)}]).
+	LeftPoint = {Left, chapter1:pnl(Left, Position)},
+	RightPoint = {Right, chapter1:pnl(Right, Position)},
+	lists:usort([LeftPoint] ++ Points ++ [RightPoint]).
 
 break_even(Px, Risk, Position) ->
 	Pnl = chapter1:pnl(Px, Position),

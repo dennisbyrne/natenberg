@@ -106,7 +106,7 @@ many_long_calls() ->
 	chapter2:draw([Long95Call, ?LONG_CALL, Long105Call]).
 
 long_call(Px, Strike) ->
-	#position{description = "Long Call, Page 17",
+	#position{description = "Long Call on Pg 17",
 			  long = #side{calls = [#option{px = Px, strike = Strike}]}}.
 	  
 many_short_calls() ->
@@ -116,5 +116,4 @@ many_short_calls() ->
 
 short_call(Px, Strike) ->
 	LongCall = long_call(Px, Strike),
-	#position{description = "Short Call, Page 17",
-			  short = LongCall#position.long}.
+	#position{description = "Short Call on Pg 17", short = LongCall#position.long}.

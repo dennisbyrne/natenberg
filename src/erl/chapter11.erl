@@ -1,5 +1,5 @@
 -module(chapter11).
--export([]).
+-export([conversion/2, synthetic_long/2]).
 -include_lib("eunit/include/eunit.hrl").
 -include_lib("struct.hrl").
 
@@ -8,19 +8,28 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 conversion(Position, ToOption) ->
-	Underlyings = (Position#position.long)#side.underlyings,
-	{Puts, Calls} = put_call_parity(Underlyings, ToOption),
-	Synthetic = #position{long = #side{puts = Puts}, short = #side{calls = Calls}},
+	Synthetic = synthetic_long(Position, ToOption),
 	merge(Synthetic, Position, "Converted " ++ Position#position.description).
 
+synthetic_long(Position, ToOption) ->
+	{Puts, Calls} = put_call_parity(Position#position.long, ToOption),
+	#position{description = "Synthetic", long = #side{puts = Puts}, short = #side{calls = Calls}}.
+
 reversal(Position, ToOption) ->
-	Underlyings = (Position#position.short)#side.underlyings,
-	{Puts, Calls} = put_call_parity(Underlyings, ToOption),
-	Synthetic = #position{long = #side{calls = Calls}, short = #side{puts = Puts}},
+	Synthetic = synthetic_short(Position, ToOption),
 	merge(Synthetic, Position, "Reversed " ++ Position#position.description).
 
-put_call_parity(Underlyings, ToOption) ->
-	Pxs = [ {dict:fetch(U, ToOption), U#underlying.px} || U <- Underlyings],
+synthetic_short(Position, ToOption) ->
+	{Puts, Calls} = put_call_parity(Position#position.short, ToOption),
+	#position{long = #side{calls = Calls}, short = #side{puts = Puts}}.
+
+%three_way_long(Position, ToOption) ->
+%	Synthetic = synthetic_long(Position, ToOption),
+%	InTheMoney = #option{},
+%	merge(Synthetic, #position{}).
+
+put_call_parity(Side, ToOption) ->
+	Pxs = [ {dict:fetch(U, ToOption), U#underlying.px} || U <- Side#side.underlyings],
 	{[ #option{px = Px, strike = Strike} || {{_, Px}, Strike} <- Pxs],
 	 [ #option{px = Px, strike = Strike} || {{Px, _}, Strike} <- Pxs]}.
 

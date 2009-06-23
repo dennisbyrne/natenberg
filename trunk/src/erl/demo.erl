@@ -4,7 +4,7 @@
 		 page139/0, page140/0, page143/0, page146/0, page147/0, page158a/0, 
 		 page158b/0, page158c/0, page158d/0, page159a/0, page159b/0, page159c/0,
 		 page159d/0, page159e/0, page159f/0, many_long_calls/0, many_short_calls/0,
-		 page215/0]).
+		 page215/0, page218/0]).
 -include_lib("struct.hrl").
 
 pages() ->
@@ -14,7 +14,8 @@ pages() ->
 				 page138, page139, page140, page143, page146, 
 				 page147, page158a, page158b, page158c, page158d,
 				 page159a, page159b, page159c, page159d, page159e,
-				 page159f, many_long_calls, many_short_calls, page215],
+				 page159f, many_long_calls, many_short_calls, page215,
+				 page218],
 	[ timer:apply_after(Seq * 1000, demo, lists:nth(Seq, Functions), []) || Seq <- lists:seq(1, length(Functions)) ].
 
 page15() ->
@@ -124,7 +125,13 @@ page215() ->
 	Put = #option{px = 5.0, strike = 100.0},
 	LongPosition = #position{description = "Long Position", long = #side{calls = [Call]}},
 	ShortPosition = #position{description = "Short Position", short = #side{puts = [Put]}},
-	Synthetic = #position{description = "Synthetic",
+	Combined = #position{description = "Synthetic",
 						  long = #side{calls = [Call]},
 						  short = #side{puts = [Put]}},
-	chapter2:draw([LongPosition, Synthetic, ShortPosition]).
+	chapter2:draw([LongPosition, Combined, ShortPosition]).
+
+page218() ->
+	ToOption = dict:from_list([{?UNDERLYING, {3.0, 5.0}}]),
+	Synthetic = chapter11:synthetic_long(?LONG_UNDERLYING, ToOption),
+	Conversion = chapter11:conversion(?LONG_UNDERLYING, ToOption),
+	chapter2:draw([?LONG_UNDERLYING, Synthetic, Conversion]).

@@ -23,10 +23,13 @@ synthetic_short(Position, ToOption) ->
 	{Puts, Calls} = put_call_parity(Position#position.short, ToOption),
 	#position{long = #side{calls = Calls}, short = #side{puts = Puts}}.
 
-%three_way_long(Position, ToOption) ->
-%	Synthetic = synthetic_long(Position, ToOption),
-%	InTheMoney = #option{},
-%	merge(Synthetic, #position{}).
+three_way_long(Position, ToOption) ->
+	Synthetic = synthetic_long(Position, ToOption),
+	[Underlying] = (Position#position.long)#side.underlyings,
+	{CallParity, _} = dict:fetch(Underlying, ToOption),
+	At = #option{px = CallParity, strike = Underlying#underlying.px},
+	In = At#option{strike = At#option.strike + 20, px = At#option.px + 20},
+	merge(Synthetic, #position{long = #side{calls = [In]}}, "Three Way").
 
 put_call_parity(Side, ToOption) ->
 	Pxs = [ {dict:fetch(U, ToOption), U#underlying.px} || U <- Side#side.underlyings],
@@ -48,6 +51,13 @@ merge(To, From) ->
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 -define(TO_OPTION, dict:from_list([{?UNDERLYING, {3.0, 5.0}}])).
+
+three_way_long_test() ->
+	ThreeWay = #position{description = "Three Way",
+						 long = #side{calls = [#option{px = 23.0, strike = 119.0}],
+									  puts = [#option{px = 5.0, strike = 99.0}]},
+						 short = #side{calls = [#option{px = 3.0, strike = 99.0}]}},
+	?assertEqual(ThreeWay, three_way_long(?LONG_UNDERLYING, ?TO_OPTION)).
 
 combined_reversal_test() ->
 	Combined = reversal(?SHORT_UNDERLYING, ?TO_OPTION),

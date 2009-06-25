@@ -11,7 +11,7 @@
 % the License.
 
 -module(chapter2).
--export([draw/1]).
+-export([draw/1, risk/1]).
 -include_lib("eunit/include/eunit.hrl").
 -include_lib("struct.hrl").
 
@@ -94,6 +94,8 @@ description(Positions, Descriptions) ->
 
 description(Positions, [Predicate|T], Dict) ->
 	All = lists:all(Predicate, Positions),
+	erlang:display(All),
+	erlang:display(dict:fetch(Predicate, Dict)),
 	if All -> dict:fetch(Predicate, Dict);
 	   true -> description(Positions, T, Dict)
 	end.
@@ -132,6 +134,15 @@ risk_spread_test() ->
 	Short = #side{calls = [ShortCall]},
 	Position = #position{long = Long, short = Short},	
 	?assertMatch({0, 0}, risk(Position)).
+
+-define(TO_OPTION, dict:from_list([{?UNDERLYING, {3.0, 5.0}}])).
+
+risk_reversal_test() ->
+	Combined = chapter11:reversal(?SHORT_UNDERLYING, ?TO_OPTION),
+	Synthetic = chapter11:synthetic_short(?SHORT_UNDERLYING, ?TO_OPTION),
+	{0, 0} = risk(Combined),
+	{1, -1} = risk(?SHORT_UNDERLYING),
+	{-1, 1} = risk(Synthetic).	
 
 stretch_one_short_one_put_test() ->
 	Put = #option{px = 2.00, strike = 100.0},

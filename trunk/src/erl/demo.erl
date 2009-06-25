@@ -4,7 +4,7 @@
 		 page139/0, page140/0, page143/0, page146/0, page147/0, page158a/0, 
 		 page158b/0, page158c/0, page158d/0, page159a/0, page159b/0, page159c/0,
 		 page159d/0, page159e/0, page159f/0, many_long_calls/0, many_short_calls/0,
-		 page215/0, page218/0, page219/0]).
+		 page215/0, page218/0, page219/0, page229a/0, page229b/0]).
 -include_lib("struct.hrl").
 
 pages() ->
@@ -15,7 +15,7 @@ pages() ->
 				 page147, page158a, page158b, page158c, page158d,
 				 page159a, page159b, page159c, page159d, page159e,
 				 page159f, many_long_calls, many_short_calls, page215,
-				 page218, page219],
+				 page218, page219, page229a, page229b],
 	[ timer:apply_after(Seq * 1000, demo, lists:nth(Seq, Functions), []) || Seq <- lists:seq(1, length(Functions)) ].
 
 page15() ->
@@ -141,4 +141,14 @@ page219() ->
 	Synthetic = chapter11:synthetic_short(?SHORT_UNDERLYING, ?TO_OPTION),
 	Reversal = chapter11:reversal(?SHORT_UNDERLYING, ?TO_OPTION),
 	chapter2:draw([?SHORT_UNDERLYING, Synthetic, Reversal]).
+
+page229a() ->
+	Synthetic = chapter11:synthetic_long(?LONG_UNDERLYING, ?TO_OPTION),
+	ThreeWay = chapter11:three_way_long(?LONG_UNDERLYING, ?TO_OPTION),
+	chapter2:draw([?LONG_UNDERLYING, Synthetic, ThreeWay]).
+
+page229b() ->
+	Synthetic = chapter11:synthetic_short(?SHORT_UNDERLYING, ?TO_OPTION),
+	ThreeWay = chapter11:three_way_short(?SHORT_UNDERLYING, ?TO_OPTION),
+	chapter2:draw([?SHORT_UNDERLYING, Synthetic, ThreeWay]).
 

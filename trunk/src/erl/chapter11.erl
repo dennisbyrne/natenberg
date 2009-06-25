@@ -1,5 +1,5 @@
 -module(chapter11).
--export([conversion/2, synthetic_long/2]).
+-export([conversion/2, reversal/2, synthetic_long/2, synthetic_short/2, three_way_long/2, three_way_short/2]).
 -include_lib("eunit/include/eunit.hrl").
 -include_lib("struct.hrl").
 
@@ -21,7 +21,7 @@ reversal(Position, ToOption) ->
 
 synthetic_short(Position, ToOption) ->
 	{Puts, Calls} = put_call_parity(Position#position.short, ToOption),
-	#position{long = #side{calls = Calls}, short = #side{puts = Puts}}.
+	#position{description = "Synthetic", long = #side{calls = Calls}, short = #side{puts = Puts}}.
 
 three_way_long(Position, ToOption) ->
 	Synthetic = synthetic_long(Position, ToOption),
@@ -30,6 +30,14 @@ three_way_long(Position, ToOption) ->
 	At = #option{px = CallParity, strike = Underlying#underlying.px},
 	In = At#option{strike = At#option.strike + 20, px = At#option.px + 20},
 	merge(Synthetic, #position{long = #side{calls = [In]}}, "Three Way").
+
+three_way_short(Position, ToOption) ->
+	Synthetic = synthetic_short(Position, ToOption),
+	[Underlying] = (Position#position.short)#side.underlyings,
+	{_, PutParity} = dict:fetch(Underlying, ToOption),
+	At = #option{px = PutParity, strike = Underlying#underlying.px},
+	In = At#option{strike = At#option.strike - 20, px = 0.01},
+	merge(Synthetic, #position{long = #side{puts = [In]}}, "Three Way").
 
 put_call_parity(Side, ToOption) ->
 	Pxs = [ {dict:fetch(U, ToOption), U#underlying.px} || U <- Side#side.underlyings],
@@ -51,6 +59,13 @@ merge(To, From) ->
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 -define(TO_OPTION, dict:from_list([{?UNDERLYING, {3.0, 5.0}}])).
+
+three_way_short_test() ->
+	ThreeWay = #position{description = "Three Way",
+						 long = #side{calls = [#option{px = 3.0, strike = 99.0}],
+									  puts = [#option{px = 0.01, strike = 79.0}]},
+						 short = #side{puts = [#option{px = 5.0, strike = 99.0}]}},
+	?assertEqual(ThreeWay, three_way_short(?SHORT_UNDERLYING, ?TO_OPTION)).
 
 three_way_long_test() ->
 	ThreeWay = #position{description = "Three Way",

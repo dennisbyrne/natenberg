@@ -16,7 +16,7 @@ pages() ->
 				 page147, page158a, page158b, page158c, page158d,
 				 page159a, page159b, page159c, page159d, page159e,
 				 page159f, many_long_calls, many_short_calls, page215,
-				 page218, page219, page229a, page229b, page230a],
+				 page218, page219, page229a, page229b, page230a, page230b],
 	[ timer:apply_after(Seq * 1000, demo, lists:nth(Seq, Functions), []) || Seq <- lists:seq(1, length(Functions)) ].
 
 page15() ->
@@ -160,7 +160,7 @@ page230a() ->
 	High = #position{description = "Synthetic Short",
 					 long = #side{puts = [#option{px = 5.0, strike = 100.0}]},
 					 short = #side{calls = [#option{px = 3.0, strike = 100.0}]}},
-	chapter2:draw([Low, High, chapter11:merge(Low, High, "Box")]).
+	chapter2:draw([Low, High, position:merge(Low, High, "Box")]).
 
 page230b() ->
 	PutBearSpread = #position{description = "Call Bear Spread",

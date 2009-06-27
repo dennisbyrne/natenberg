@@ -8,10 +8,10 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 is_vertical_spread(Position) -> %page 202
-	chapter8:long_count(Position) =:= chapter8:short_count(Position) andalso
-		chapter8:expiration_count(Position) =:= 1 andalso
-			chapter8:strike_count(Position) =:= 2 andalso
-				((chapter8:call_count(Position) =:= 0) xor (chapter8:put_count(Position) =:= 0)).
+	position:long_count(Position) =:= position:short_count(Position) andalso
+		position:expiration_count(Position) =:= 1 andalso
+			position:strike_count(Position) =:= 2 andalso
+				((position:call_count(Position) =:= 0) xor (position:put_count(Position) =:= 0)).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Unit Tests

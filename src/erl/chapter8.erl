@@ -11,8 +11,7 @@
 % the License.
 
 -module(chapter8).
--export([long_count/1, short_count/1, call_count/1, put_count/1, expiration_count/1, strike_count/1, 
-		 is_backspread/1, is_ratio_vertical_spread/1, is_straddle/1, is_strangle/1, is_butterfly/1]).
+-export([is_backspread/1, is_ratio_vertical_spread/1, is_straddle/1, is_strangle/1, is_butterfly/1]).
 -include_lib("eunit/include/eunit.hrl").
 -include_lib("struct.hrl").
 
@@ -21,71 +20,37 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 is_backspread(Position) -> % page 138
-	LongCount = long_count(Position),
-	ShortCount = short_count(Position),	
-	expiration_count(Position) =:= 1 andalso 
+	LongCount = position:long_count(Position),
+	ShortCount = position:short_count(Position),	
+	position:expiration_count(Position) =:= 1 andalso 
 		LongCount > ShortCount andalso
 			LongCount + ShortCount > 1.
 
 is_ratio_vertical_spread(Position) -> % page 139
-	LongCount = long_count(Position),
-	ShortCount = short_count(Position),
-	expiration_count(Position) =:= 1 andalso
+	LongCount = position:long_count(Position),
+	ShortCount = position:short_count(Position),
+	position:expiration_count(Position) =:= 1 andalso
 		LongCount < ShortCount andalso
 			LongCount + ShortCount > 1.
 
 is_straddle(Position) -> % page 140
-	strike_count(Position) =:= 1 andalso
-		call_count(Position) > 0 andalso
-			put_count(Position) > 0 andalso
+	position:strike_count(Position) =:= 1 andalso
+		position:call_count(Position) > 0 andalso
+			position:put_count(Position) > 0 andalso
 				(is_backspread(Position) xor is_ratio_vertical_spread(Position)).
 
 is_strangle(Position) -> % page 143
-	strike_count(Position) > 1 andalso
-		call_count(Position) > 0 andalso
-			put_count(Position) > 0 andalso
+	position:strike_count(Position) > 1 andalso
+		position:call_count(Position) > 0 andalso
+			position:put_count(Position) > 0 andalso
 				(is_backspread(Position) xor is_ratio_vertical_spread(Position)).
 
 is_butterfly(Position) ->
-	Strikes = strikes(Position),
-	((call_count(Position) =:= 0) xor (put_count(Position) =:= 0)) andalso
-		long_count(Position) =:= short_count(Position) andalso
+	Strikes = position:strikes(Position),
+	((position:call_count(Position) =:= 0) xor (position:put_count(Position) =:= 0)) andalso
+		position:long_count(Position) =:= position:short_count(Position) andalso
   			3 =:= length(Strikes) andalso
 				(lists:nth(2, Strikes) - hd(Strikes) =:= lists:last(Strikes) - lists:nth(2, Strikes)).
-
-is_ratioed(Position) ->
-	call_count(Position) =/= put_count(Position).
-
-call_count(#position{long = Long, short = Short}) ->
-	#side{calls = LongCalls} = Long,
-	#side{calls = ShortCalls} = Short,
-	length(LongCalls ++ ShortCalls).
-	
-put_count(#position{long = Long, short = Short}) ->
-	#side{puts = LongPuts} = Long,
-	#side{puts = ShortPuts} = Short,
-	length(LongPuts ++ ShortPuts).
-
-short_count(#position{short = Short}) ->
-	#side{calls = ShortCalls, puts = ShortPuts} = Short,
-	length(ShortCalls ++ ShortPuts).
-
-long_count(#position{long = Long}) ->
-	#side{calls = LongCalls, puts = LongPuts} = Long,
-	length(LongCalls ++ LongPuts).
-
-expiration_count(Position) ->
-	Expirations = [ Option#option.expiration || Option <- options(Position) ],
-	length(lists:usort(Expirations)).
-
-strikes(Position) ->
-	lists:usort([ Option#option.strike || Option <- options(Position) ]).
-
-strike_count(Position) ->
-	length(strikes(Position)).
-
-options(#position{long = Long, short = Short}) ->
-	Long#side.calls ++ Long#side.puts ++ Short#side.calls ++ Short#side.puts.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Implementation
@@ -151,24 +116,3 @@ is_butterfly_test() ->
 	?assertEqual(false, is_butterfly(?CALL_BACKSPREAD)),	
 	?assertEqual(false, is_butterfly(?CALL_RATIO_VERTICAL_SPREAD)),
 	?assertEqual(false, is_butterfly(?PUT_RATIO_VERTICAL_SPREAD)).
-
-expirations_test() ->
-	?assertEqual(0, expiration_count(#position{})),
-	?assertEqual(1, expiration_count(?CALL_BACKSPREAD)).
-
-call_count_test() ->
-	?assertEqual(1, call_count(?LONG_CALL)),
-	?assertEqual(1, call_count(?SHORT_CALL)),
-	?assertEqual(0, call_count(?SHORT_PUT)).
-
-put_count_test() ->
-	?assertEqual(0, put_count(?LONG_CALL)),
-	?assertEqual(1, put_count(?LONG_PUT)),
-	?assertEqual(1, put_count(?SHORT_PUT)).
-
-is_ratioed_test() ->
-	?assertEqual(true, is_ratioed(?LONG_CALL)),
-	?assertEqual(false, is_ratioed(?SHORT_STRANGLE)),
-	?assertEqual(true, is_ratioed(?CALL_RATIO_VERTICAL_SPREAD)),
-	?assertEqual(true, is_ratioed(?LONG_BUTTERFLY)),
-	?assertEqual(true, is_ratioed(?SHORT_BUTTERFLY)).

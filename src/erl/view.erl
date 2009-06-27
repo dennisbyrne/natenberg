@@ -20,7 +20,7 @@
 -include_lib("struct.hrl").
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% API
+% Implementation
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 start() ->
@@ -38,10 +38,6 @@ draw(Points, Desc) ->
 	{Scales, Labels} = scale(XAxis, YAxis, Rectangle),
 	Json = json:to_json(Desc, ?WIDTH, ?HEIGHT, lists:flatten(Lines) ++ [XAxis, YAxis] ++ Scales, Labels),
 	?TO ! {draw, Json}.
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Implementation
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 min_bounding_rectangle(Points) ->
 	{X, Y} = lists:last(Points),

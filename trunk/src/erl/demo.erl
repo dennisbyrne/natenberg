@@ -4,7 +4,8 @@
 		 page139/0, page140/0, page143/0, page146/0, page147/0, page158a/0, 
 		 page158b/0, page158c/0, page158d/0, page159a/0, page159b/0, page159c/0,
 		 page159d/0, page159e/0, page159f/0, many_long_calls/0, many_short_calls/0,
-		 page215/0, page218/0, page219/0, page229a/0, page229b/0]).
+		 page215/0, page218/0, page219/0, page229a/0, page229b/0, page230a/0,
+		 page230b/0]).
 -include_lib("struct.hrl").
 
 pages() ->
@@ -15,7 +16,7 @@ pages() ->
 				 page147, page158a, page158b, page158c, page158d,
 				 page159a, page159b, page159c, page159d, page159e,
 				 page159f, many_long_calls, many_short_calls, page215,
-				 page218, page219, page229a, page229b],
+				 page218, page219, page229a, page229b, page230a],
 	[ timer:apply_after(Seq * 1000, demo, lists:nth(Seq, Functions), []) || Seq <- lists:seq(1, length(Functions)) ].
 
 page15() ->
@@ -152,3 +153,21 @@ page229b() ->
 	ThreeWay = chapter11:three_way_short(?SHORT_UNDERLYING, ?TO_OPTION),
 	chapter2:draw([?SHORT_UNDERLYING, Synthetic, ThreeWay]).
 
+page230a() ->
+	Low = #position{description = "Synthetic Long",
+					long = #side{calls = [#option{px = 3.0, strike = 90.0}]},
+					short = #side{puts = [#option{px = 5.0, strike = 90.0}]}},
+	High = #position{description = "Synthetic Short",
+					 long = #side{puts = [#option{px = 5.0, strike = 100.0}]},
+					 short = #side{calls = [#option{px = 3.0, strike = 100.0}]}},
+	chapter2:draw([Low, High, chapter11:merge(Low, High, "Box")]).
+
+page230b() ->
+	PutBearSpread = #position{description = "Call Bear Spread",
+				  			  long = #side{calls = [#option{px = 3.76, strike = 100.0}]}, 
+				  			  short = #side{calls = [#option{px = 6.53, strike = 95.0}]}},
+	CallBullSpread = #position{description = "Call Bull Spread on Pg 23",
+				  			   long = #side{calls = [#option{px = 6.53, strike = 95.0}]}, 
+				  			   short = #side{calls = [#option{px = 3.76, strike = 100.0}]}},	
+	Box = position:merge(CallBullSpread, PutBearSpread, "Hidden Box"),
+	chapter2:draw([CallBullSpread, PutBearSpread, Box]).

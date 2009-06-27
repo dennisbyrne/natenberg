@@ -1,5 +1,6 @@
 -module(chapter11).
--export([conversion/2, reversal/2, synthetic_long/2, synthetic_short/2, three_way_long/2, three_way_short/2]).
+-export([conversion/2, reversal/2, synthetic_long/2, synthetic_short/2, 
+		 three_way_long/2, three_way_short/2]).
 -include_lib("eunit/include/eunit.hrl").
 -include_lib("struct.hrl").
 
@@ -9,7 +10,7 @@
 
 conversion(Position, ToOption) ->
 	Synthetic = synthetic_long(Position, ToOption),
-	merge(Synthetic, Position, "Converted " ++ Position#position.description).
+	position:merge(Synthetic, Position, "Converted " ++ Position#position.description).
 
 synthetic_long(Position, ToOption) ->
 	{Puts, Calls} = put_call_parity(Position#position.long, ToOption),
@@ -17,7 +18,7 @@ synthetic_long(Position, ToOption) ->
 
 reversal(Position, ToOption) ->
 	Synthetic = synthetic_short(Position, ToOption),
-	merge(Synthetic, Position, "Reversed " ++ Position#position.description).
+	position:merge(Synthetic, Position, "Reversed " ++ Position#position.description).
 
 synthetic_short(Position, ToOption) ->
 	{Puts, Calls} = put_call_parity(Position#position.short, ToOption),
@@ -28,28 +29,18 @@ three_way_long(Position, ToOption) ->
 	[U] = (Position#position.long)#side.underlyings,
 	{CallParity, _} = dict:fetch(U, ToOption),
 	In = #option{px = CallParity + 10, strike = U#underlying.px - 10},
-	merge(Synthetic, #position{long = #side{calls = [In]}}, "Three Way").
+	position:merge(Synthetic, #position{long = #side{calls = [In]}}, "Three Way").
 
 three_way_short(Position, ToOption) ->
 	Synthetic = synthetic_short(Position, ToOption),
 	[U] = (Position#position.short)#side.underlyings,
 	In = #option{px = 0.01, strike = U#underlying.px + 10},
-	merge(Synthetic, #position{long = #side{puts = [In]}}, "Three Way").
+	position:merge(Synthetic, #position{long = #side{puts = [In]}}, "Three Way").
 
 put_call_parity(Side, ToOption) ->
 	Pxs = [ {dict:fetch(U, ToOption), U#underlying.px} || U <- Side#side.underlyings],
 	{[ #option{px = Px, strike = Strike} || {{_, Px}, Strike} <- Pxs],
 	 [ #option{px = Px, strike = Strike} || {{Px, _}, Strike} <- Pxs]}.
-
-merge(To, From, Description) ->
-	#position{description = Description,
-			  long = merge(To#position.long, From#position.long), 
-			  short = merge(To#position.short, From#position.short)}.
-
-merge(To, From) ->
-	#side{calls = To#side.calls ++ From#side.calls,
-		  puts = To#side.puts ++ From#side.puts,
-		  underlyings = To#side.underlyings ++ From#side.underlyings}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Unit Tests

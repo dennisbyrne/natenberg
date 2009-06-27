@@ -5,7 +5,7 @@
 		 page158b/0, page158c/0, page158d/0, page159a/0, page159b/0, page159c/0,
 		 page159d/0, page159e/0, page159f/0, many_long_calls/0, many_short_calls/0,
 		 page215/0, page218/0, page219/0, page229a/0, page229b/0, page230a/0,
-		 page230b/0]).
+		 page230b/0, page231/0]).
 -include_lib("struct.hrl").
 
 pages() ->
@@ -16,7 +16,8 @@ pages() ->
 				 page147, page158a, page158b, page158c, page158d,
 				 page159a, page159b, page159c, page159d, page159e,
 				 page159f, many_long_calls, many_short_calls, page215,
-				 page218, page219, page229a, page229b, page230a, page230b],
+				 page218, page219, page229a, page229b, page230a, 
+				 page230b, page231],
 	[ timer:apply_after(Seq * 1000, demo, lists:nth(Seq, Functions), []) || Seq <- lists:seq(1, length(Functions)) ].
 
 page15() ->
@@ -166,8 +167,18 @@ page230b() ->
 	PutBearSpread = #position{description = "Call Bear Spread",
 				  			  long = #side{calls = [#option{px = 3.76, strike = 100.0}]}, 
 				  			  short = #side{calls = [#option{px = 6.53, strike = 95.0}]}},
-	CallBullSpread = #position{description = "Call Bull Spread on Pg 23",
+	CallBullSpread = #position{description = "Call Bull Spread",
 				  			   long = #side{calls = [#option{px = 6.53, strike = 95.0}]}, 
 				  			   short = #side{calls = [#option{px = 3.76, strike = 100.0}]}},	
 	Box = position:merge(CallBullSpread, PutBearSpread, "Hidden Box"),
 	chapter2:draw([CallBullSpread, PutBearSpread, Box]).
+
+page231() ->
+	Reversal = #position{description = "Reversal - Underlying",
+			  			 long = #side{calls = [(?MARCH_OPTION)#option{px = 2.69, strike = 100.0}]},
+			  			 short = #side{puts = [(?MARCH_OPTION)#option{px = 2.68, strike = 100.0}]}},
+	Conversion = #position{description = "Conversion - Underlying",
+			  			 long = #side{puts = [(?JUNE_OPTION)#option{px = 4.71, strike = 100.0}]},
+			  			 short = #side{calls = [(?JUNE_OPTION)#option{px = 4.71, strike = 100.0}]}},
+	Roll = position:merge(Reversal, Conversion, "Jelly Roll"),
+	chapter2:draw([Reversal, Conversion, Roll]).

@@ -41,17 +41,16 @@ draw(Points, Desc) ->
 
 min_bounding_rectangle(Points) ->
 	{X, Y} = lists:last(Points),
-	{MinX, MaxX, MinY, MaxY} = lists:foldl(fun rectangle/2, {X, X, Y, Y}, Points),
-	#rectangle{minX = common:floor(MinX), 
-			   maxX = common:ceiling(MaxX),
-			   minY = common:floor(MinY) - 1, 
-			   maxY = common:ceiling(MaxY) + 1}.
+	Rectangle = #rectangle{minX = X, maxX = X, minY = Y, maxY = Y},
+	Minimum = lists:foldl(fun rectangle/2, Rectangle, Points),
+	Minimum#rectangle{minY = Minimum#rectangle.minY - 1,
+			   		  maxY = Minimum#rectangle.maxY + 1}.
 
-rectangle({X, Y}, {MinX, MaxX, MinY, MaxY}) ->
-	{common:min(X, MinX),
-	 common:max(X, MaxX),
-	 common:min(Y, MinY),
-	 common:max(Y, MaxY)}.
+rectangle({X, Y}, {rectangle, MinX, MaxX, MinY, MaxY}) ->
+	#rectangle{minX = common:floor(common:min(X, MinX)),
+	 		   maxX = common:ceiling(common:max(X, MaxX)),
+	 		   minY = common:floor(common:min(Y, MinY)),
+	 		   maxY = common:ceiling(common:max(Y, MaxY))}.
 
 axes(Rectangle = #rectangle{minX = MinX, maxX = MaxX, minY = MinY, maxY = MaxY}) ->
 	XAxis = {{MinX, 0}, {MaxX, 0}},

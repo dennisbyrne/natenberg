@@ -50,7 +50,7 @@ to_json(List) ->
 to_json_graph_test() ->
 	Line = {{1,2}, {3,4}, 0},
 	Expected = "{description:'Msg',width:650,height:650,lines:[{to:{x:1,y:2},from:{x:3,y:4},color:0}],labels:[{pt:{x:1,y:3},text:'A'}]}",
-	?assertMatch(Expected, to_json(["Msg"], 650, 650, [Line], [{{1,3}, "A"}])).
+	?assertMatch(Expected, to_json("Msg", 650, 650, [Line], [{{1,3}, "A"}])).
 
 to_lines_two_points_test() ->
 	First = {{1,2}, {3,4}, 0},

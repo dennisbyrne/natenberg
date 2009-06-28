@@ -32,7 +32,7 @@ draw(Points, Desc) ->
 	{XAxis, YAxis} = axes(Rectangle),
 	Length = length(Points),
 	Step = 16777215 div Length, % 0xFFFFFF
-	Colors = lists:seq(0, (Length - 1) * Step, Step), % should use zip
+	Colors = lists:seq(0, (Length - 1) * Step, Step),
 	PointsToColors = lists:zip(Points, Colors),
 	Lines = [ points_to_lines(P, Rectangle, Color) || {P, Color} <- PointsToColors ],
 	{Scales, Labels} = scale(XAxis, YAxis, Rectangle),

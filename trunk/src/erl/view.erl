@@ -63,8 +63,9 @@ to_lines(Lines, Rectangle, Color) ->
 to_line({To, From}, Rectangle, Color) ->
 	{to_point(To, Rectangle), to_point(From, Rectangle), Color}.
 
-to_point({X, Y}, #rectangle{minX = MinX, maxX = MaxX, minY = MinY, maxY = MaxY}) ->
-	{to_x(X, MinX, MaxX), to_y(Y, MinY, MaxY)}.
+to_point({X, Y}, Rectangle) ->
+	{to_x(X, Rectangle#rectangle.minX, Rectangle#rectangle.maxX), 
+	 to_y(Y, Rectangle#rectangle.minY, Rectangle#rectangle.maxY)}.
 
 to_x(Value, Min, Max) when Max >= Value andalso Value >= Min andalso Min >= 0 ->
 	translate(Value - Min, {Min, Max}, ?WIDTH).
@@ -108,7 +109,7 @@ scaleY(X, Y, Min, Max, Tix, Labels) ->
 	Tick = {{X, NewY}, {X + 5, NewY}, 0},
 	Label = {{X, NewY}, integer_to_list(Y)},
 	TickSize = if Max - Min < 20 -> 1;
-				  true -> 10
+				  true -> 5
 			   end,
 	scaleY(X, Y + TickSize, Min, Max, Tix ++ [Tick], Labels ++ [Label]).
 

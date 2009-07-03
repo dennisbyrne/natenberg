@@ -101,7 +101,7 @@ public class Natenberg {
 
 	private class StateTransitionLogger implements State{
 		private final State wrapped;
-		public StateTransitionLogger(State wrapped) {
+		StateTransitionLogger(State wrapped) {
 			this.wrapped = wrapped;
 		}
 		public void transition() {

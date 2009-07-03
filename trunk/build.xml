@@ -1,4 +1,4 @@
-<project name="natenberg" default="go" basedir=".">
+<project name="natenberg" default="standalone" basedir=".">
 
 	<path id="cp">
 	   <fileset dir="lib">
@@ -6,7 +6,7 @@
 	   </fileset>
 	</path>
 	
-	<target name="go">
+	<target name="standalone">
 		<delete dir="bin/net"/>
 		<javac srcdir="src/java/net" destdir="bin">
 			<classpath refid="cp"/>
@@ -17,7 +17,7 @@
 			<classpath>
 				<pathelement location="natenberg.jar"/>
 			</classpath>
-		</java>	
+		</java>
 	</target>
 
 </project>

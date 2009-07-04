@@ -1,12 +1,13 @@
 package net.dbyrne.natenberg;
 
+import static java.lang.System.out;
+
 import java.io.IOException;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import static java.lang.System.out;
-import net.sf.json.JSON;
+import static javax.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 import net.sf.json.JSONObject;
 
 import org.mortbay.jetty.servlet.Context;
@@ -71,11 +72,11 @@ public class Server {
 				res = new JSONObject()
 					.accumulate("node", tuple.elementAt(1).toString())
 					.toString();
-			} catch (OtpErlangExit e) {
-				res = createErrorMsg(e);
-			} catch (OtpErlangDecodeException e) {
+			} catch (Exception e) {
+				response.setStatus(SC_INTERNAL_SERVER_ERROR);
 				res = createErrorMsg(e);
 			}
+			node.close();
 			response.getWriter().print(res);
 		}
 		

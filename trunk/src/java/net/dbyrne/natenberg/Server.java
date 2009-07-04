@@ -60,9 +60,14 @@ public class Server {
 			throw new RuntimeException("Could not ping " + PEER_NAME);
 		}
 		org.mortbay.jetty.Server server = new org.mortbay.jetty.Server(8080);
+
+		Context context_static = new Context(server, "/", SESSIONS);
+		context_static.setHandler(new ResourceHandler());
+		context_static.setResourceBase("./");
+		context_static.setContextPath("/");
+		
 		Context root = new Context(server, "/", SESSIONS);
 		root.addServlet(new ServletHolder(new JsonServelet()), "*.json");
-		root.addServlet(HomeServlet.class, "/");
 		server.start();
 		server.join();
 		// TODO node.close();

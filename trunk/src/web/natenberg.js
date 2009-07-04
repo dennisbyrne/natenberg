@@ -1,6 +1,7 @@
  $(document).ready(function(){
     registerEvent("page15");
     registerEvent("page16");
+    registerEvent("page24");
  });
  
  function registerEvent(functionName){

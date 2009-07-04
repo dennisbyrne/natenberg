@@ -60,30 +60,14 @@ public class Server {
 			throw new RuntimeException("Could not ping " + PEER_NAME);
 		}
 		org.mortbay.jetty.Server server = new org.mortbay.jetty.Server(8080);
-
-		Context context_static = new Context(server, "/", SESSIONS);
-		context_static.setHandler(new ResourceHandler());
-		context_static.setResourceBase("./");
-		context_static.setContextPath("/");
-		
+		Context statik = new Context(server, "/", SESSIONS);
+		statik.setHandler(new ResourceHandler());
+		statik.setResourceBase("./src/web");
 		Context root = new Context(server, "/", SESSIONS);
 		root.addServlet(new ServletHolder(new JsonServelet()), "*.json");
 		server.start();
 		server.join();
 		// TODO node.close();
-	}
-
-	@SuppressWarnings("serial")
-	public static class HomeServlet extends DefaultServlet {
-		@Override protected void doGet(HttpServletRequest request,
-				HttpServletResponse response) throws ServletException, IOException {
-			String html = "<html>" +
-						 	"<head></head>" +
-							"<body></body>" +
-						  "</html>";
-			response.setContentType("text/html");
-			response.getWriter().print(html);
-		}
 	}
 
 	@SuppressWarnings("serial")

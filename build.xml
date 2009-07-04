@@ -7,11 +7,14 @@
 	</path>
 	
 	<target name="app">
-		<delete dir="bin/net"/>
-		<javac srcdir="src/java/net" destdir="bin">
+		<mkdir dir="dist"/>
+		<delete>
+		    <fileset dir="dist" includes="**/*.class"/>
+		</delete>	
+		<javac srcdir="src/java/net" destdir="dist">
 			<classpath refid="cp"/>
 		</javac>
-		<jar destfile="natenberg.jar" basedir="bin"/>
+		<jar destfile="natenberg.jar" basedir="dist"/>
 		<copy file="natenberg.jar" todir="src/web" overwrite="true"/>
 		<copy todir="src/web" overwrite="true">
 			<fileset dir="lib">
@@ -24,6 +27,9 @@
 				<pathelement location="natenberg.jar"/>
 			</classpath>
 		</java>
+		<delete>
+		    <fileset dir="dist" includes="**/*.class"/>
+		</delete>
 	</target>
 
 </project>

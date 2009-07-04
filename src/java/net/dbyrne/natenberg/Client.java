@@ -50,12 +50,8 @@ public class Client extends Applet {
 		JSONObject root = fromObject(state);
 		JSONArray lines = (JSONArray) root.get("lines");
 		JSONArray labels = (JSONArray) root.get("labels");
-		JPanel panel = new GraphPanel(lines, labels);
-		Integer width = root.getInt("width");
-		Integer height = root.getInt("height");
 		String description = root.getString("description");
 		new GraphPanel(lines, labels).paintComponent(g);
-		//show(panel, description + " (Message # " + (++sequence).toString() + ")", width, height);
     }
     
     public void draw(String state){ /* called by JavaScript */

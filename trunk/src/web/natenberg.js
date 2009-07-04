@@ -1,5 +1,8 @@
 function hello(){
-	document.write('hello again');
+    $.get("page15.json", function(data){
+        document.getElementById("graph").draw(data);
+    });
 }
 
-hello();
+window.setTimeout(hello, 1000);
+

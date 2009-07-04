@@ -33,41 +33,36 @@ import javax.swing.JPanel;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
-import com.ericsson.otp.erlang.OtpErlangObject;
-import com.ericsson.otp.erlang.OtpErlangTuple;
-
 @SuppressWarnings("serial")
 public class Client extends Applet {
-
 	private JFrame frame;
 	private static final Integer MARGIN = 5;
-	private String state;
+	private String state = null;
+	private Long sequence = new Long(0);
 
     public void init(){}
+    
     public void stop(){}
+    
     public void paint(Graphics g){
-    	g.drawString(state,20,20);
-    	g.drawString("Hellooow World",20,40);
-    }
-    public void draw(String draw){
-    	this.state = draw;
-    	repaint();
-    }
-	
-	public void show(OtpErlangObject received, Long sequence) {
-		OtpErlangTuple msg = (OtpErlangTuple) received;
-		String data = msg.elementAt(1).toString();
-		String json = data.substring(1, data.length() - 1);
-		JSONObject root = fromObject(json);
+    	if(state == null)
+    		return;
+		JSONObject root = fromObject(state);
 		JSONArray lines = (JSONArray) root.get("lines");
 		JSONArray labels = (JSONArray) root.get("labels");
 		JPanel panel = new GraphPanel(lines, labels);
 		Integer width = root.getInt("width");
 		Integer height = root.getInt("height");
 		String description = root.getString("description");
-		show(panel, description + " (Message # " + sequence.toString() + ")", width, height);
-	}
-
+		new GraphPanel(lines, labels).paintComponent(g);
+		//show(panel, description + " (Message # " + (++sequence).toString() + ")", width, height);
+    }
+    
+    public void draw(String state){ /* called by JavaScript */
+    	this.state = state;
+    	repaint();
+    }
+	
 	private class GraphPanel extends JPanel{
 		private final JSONArray lines;
 		private final JSONArray labels;
@@ -120,12 +115,4 @@ public class Client extends Applet {
 		frame.setBackground(Color.WHITE);
 	}
 
-	public void show(final String error, final String message, Long sequence) {
-		JPanel panel = new JPanel(){
-			public void paintComponent(java.awt.Graphics g){
-				g.drawString(message, getWidth() / 3, getHeight() / 2);
-			}
-		};
-		show(panel, error + " : Message # " + sequence.toString(), 400, 100);
-	}
 }

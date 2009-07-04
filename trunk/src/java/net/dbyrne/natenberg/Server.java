@@ -47,7 +47,7 @@ import com.ericsson.otp.erlang.OtpNode;
 public class Server {
 	private OtpNode node = null;
 	private final String PEER_NAME = "server@127.0.0.1";
-	
+
 	public static void main(String[] args) throws Exception{
 		new Server().go();
 	}
@@ -110,5 +110,4 @@ public class Server {
 	private JSONObject newErrorMsg(Exception e){
 		return new JSONObject().accumulate("error", e.getClass() + ":" + e.getMessage());
 	}
-
 }

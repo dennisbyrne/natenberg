@@ -23,6 +23,7 @@ import static java.awt.Color.black;
 import static java.lang.Long.toHexString;
 import static net.sf.json.JSONObject.fromObject;
 
+import java.applet.Applet;
 import java.awt.Color;
 import java.awt.Graphics;
 
@@ -36,11 +37,23 @@ import com.ericsson.otp.erlang.OtpErlangObject;
 import com.ericsson.otp.erlang.OtpErlangTuple;
 
 @SuppressWarnings("serial")
-public class Client {
+public class Client extends Applet {
 
 	private JFrame frame;
 	private static final Integer MARGIN = 5;
+	private String state;
 
+    public void init(){}
+    public void stop(){}
+    public void paint(Graphics g){
+    	g.drawString(state,20,20);
+    	g.drawString("Hellooow World",20,40);
+    }
+    public void draw(String draw){
+    	this.state = draw;
+    	repaint();
+    }
+	
 	public void show(OtpErlangObject received, Long sequence) {
 		OtpErlangTuple msg = (OtpErlangTuple) received;
 		String data = msg.elementAt(1).toString();

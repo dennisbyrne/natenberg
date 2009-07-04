@@ -11,7 +11,13 @@
 		<javac srcdir="src/java/net" destdir="bin">
 			<classpath refid="cp"/>
 		</javac>
-		<jar destfile="natenberg.jar" basedir="bin"/>			
+		<jar destfile="natenberg.jar" basedir="bin"/>
+		<copy file="natenberg.jar" todir="src/web" overwrite="true"/>
+		<copy todir="src/web" overwrite="true">
+			<fileset dir="lib">
+				<include name="*.jar"/>
+			</fileset>
+		</copy>
 		<java classname="net.dbyrne.natenberg.Server" fork="true">
 			<classpath refid="cp"/>
 			<classpath>

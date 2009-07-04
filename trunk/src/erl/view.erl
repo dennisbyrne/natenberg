@@ -12,8 +12,6 @@
 
 -module(view).
 -define(TO, {graph, 'view@127.0.0.1'}).
--define(WIDTH, 650).
--define(HEIGHT, 650).
 -export([start/0, draw/2]).
 -record(rectangle, {minX = 0, maxX = 100, minY = -100, maxY = 100}).
 -include_lib("eunit/include/eunit.hrl").
@@ -36,7 +34,7 @@ draw(Points, Desc) ->
 	PointsToColors = lists:zip(Points, Colors),
 	Lines = [ points_to_lines(P, Rectangle, Color) || {P, Color} <- PointsToColors ],
 	{Scales, Labels} = scale(XAxis, YAxis, Rectangle),
-	json:to_json(Desc, ?WIDTH, ?HEIGHT, lists:flatten(Lines) ++ [XAxis, YAxis] ++ Scales, Labels).
+	json:to_json(Desc, lists:flatten(Lines) ++ [XAxis, YAxis] ++ Scales, Labels).
 
 min_bounding_rectangle(Points) ->
 	{X, Y} = lists:last(Points),
@@ -67,10 +65,10 @@ to_point({X, Y}, Rectangle) ->
 	 to_y(Y, Rectangle#rectangle.minY, Rectangle#rectangle.maxY)}.
 
 to_x(Value, Min, Max) when Max >= Value andalso Value >= Min andalso Min >= 0 ->
-	translate(Value - Min, {Min, Max}, ?WIDTH).
+	translate(Value - Min, {Min, Max}, 650).
 
 to_y(Value, Min, Max) when Max >= Value andalso Value >= Min ->
-	translate(abs(Max - Value), {Min, Max}, ?HEIGHT).
+	translate(abs(Max - Value), {Min, Max}, 650).
 
 translate(Value, {Min, Max}, Pixels) when Max >= Min ->
 	round(Pixels * Value / (Max - Min)).

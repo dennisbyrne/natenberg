@@ -1,9 +1,17 @@
  $(document).ready(function(){
-    var closure = function(){
-        $.get("page15.json", function(data){
-            document.getElementById("graph").draw(data);
+    registerEvent("page15");
+    registerEvent("page16");
+ });
+ 
+ function registerEvent(functionName){
+    $("#" + functionName).click(callback(functionName));
+ }
+ 
+ function callback(functionName){
+    return function(){
+        $.get(functionName + ".json", function(data){
+            $("#graph")[0].draw(data);
         });
     };
-    $("#page15").click(closure);
- });
+ }
 

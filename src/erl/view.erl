@@ -65,10 +65,10 @@ to_point({X, Y}, Rectangle) ->
 	 to_y(Y, Rectangle#rectangle.minY, Rectangle#rectangle.maxY)}.
 
 to_x(Value, Min, Max) when Max >= Value andalso Value >= Min andalso Min >= 0 ->
-	translate(Value - Min, {Min, Max}, 650).
+	translate(Value - Min, {Min, Max}, 550).
 
 to_y(Value, Min, Max) when Max >= Value andalso Value >= Min ->
-	translate(abs(Max - Value), {Min, Max}, 650).
+	translate(abs(Max - Value), {Min, Max}, 550).
 
 translate(Value, {Min, Max}, Pixels) when Max >= Min ->
 	round(Pixels * Value / (Max - Min)).

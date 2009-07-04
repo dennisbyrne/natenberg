@@ -49,7 +49,7 @@ public class Client extends Applet {
     	JSONObject root = fromObject(state);
 		lines = (JSONArray) root.get("lines");
 		labels = (JSONArray) root.get("labels");
-    	repaint();
+		repaint(); repaint(); repaint();
     }
 
 	private void paintLines(Graphics g, Integer i){

@@ -13,7 +13,7 @@
 -module(natenberg_app).
 -behaviour(application).
 -export([start/2, stop/1]).
- 
+
 start(_Type, Args) ->
   erlang:display(atom_to_list(?MODULE) ++ " starting ..."),
   natenberg_sup:start_link(Args).

@@ -1,4 +1,4 @@
-<project name="natenberg" default="standalone" basedir=".">
+<project name="natenberg" default="app" basedir=".">
 
 	<path id="cp">
 	   <fileset dir="lib">
@@ -6,13 +6,13 @@
 	   </fileset>
 	</path>
 	
-	<target name="standalone">
+	<target name="app">
 		<delete dir="bin/net"/>
 		<javac srcdir="src/java/net" destdir="bin">
 			<classpath refid="cp"/>
 		</javac>
 		<jar destfile="natenberg.jar" basedir="bin"/>			
-		<java classname="net.dbyrne.natenberg.Natenberg" fork="true">
+		<java classname="net.dbyrne.natenberg.Server" fork="true">
 			<classpath refid="cp"/>
 			<classpath>
 				<pathelement location="natenberg.jar"/>

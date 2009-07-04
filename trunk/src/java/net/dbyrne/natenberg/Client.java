@@ -36,7 +36,7 @@ import com.ericsson.otp.erlang.OtpErlangObject;
 import com.ericsson.otp.erlang.OtpErlangTuple;
 
 @SuppressWarnings("serial")
-public class View {
+public class Client {
 
 	private JFrame frame;
 	private static final Integer MARGIN = 5;

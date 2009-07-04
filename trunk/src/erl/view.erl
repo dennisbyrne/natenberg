@@ -36,8 +36,7 @@ draw(Points, Desc) ->
 	PointsToColors = lists:zip(Points, Colors),
 	Lines = [ points_to_lines(P, Rectangle, Color) || {P, Color} <- PointsToColors ],
 	{Scales, Labels} = scale(XAxis, YAxis, Rectangle),
-	Json = json:to_json(Desc, ?WIDTH, ?HEIGHT, lists:flatten(Lines) ++ [XAxis, YAxis] ++ Scales, Labels),
-	?TO ! {draw, Json}.
+	json:to_json(Desc, ?WIDTH, ?HEIGHT, lists:flatten(Lines) ++ [XAxis, YAxis] ++ Scales, Labels),
 
 min_bounding_rectangle(Points) ->
 	{X, Y} = lists:last(Points),

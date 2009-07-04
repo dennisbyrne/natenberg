@@ -12,9 +12,12 @@
 
 -module(natenberg).
 -behaviour(gen_server).
--export([start/0, stop/0, start_link/0, demo/0]).
 % callbacks
--export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
+-export([start/0, stop/0, start_link/0, init/1, handle_call/3, 
+		 handle_cast/2, handle_info/2, terminate/2, code_change/3]).
+-include_lib("struct.hrl").
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 start() ->
   application:start(natenberg).
@@ -25,20 +28,14 @@ stop() ->
 start_link() ->
   gen_server:start_link({local, ?MODULE}, ?MODULE, self(), []).
 
-demo() ->
-  gen_server:call(?MODULE, {demo}).
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 init(_From) ->
   erlang:display(atom_to_list(?MODULE) ++ " starting ..."),
-  view:start(),
   process_flag(trap_exit,true),
-  {ok, {}}.
+  {ok, 0}.
 
-handle_call({demo}, _From, State) ->
-  demo:pages(),
-  {reply, ok, State}.
+handle_call(Function, _From, State) ->
+  Json = erlang:apply(demo, Function, []),
+  {reply, Json, State + 1}.
 
 handle_cast(_Msg, State) ->
   {noreply, State}.

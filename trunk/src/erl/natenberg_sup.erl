@@ -19,6 +19,6 @@ start_link(Args) ->
   supervisor:start_link({local, ?MODULE}, ?MODULE, Args).
 
 init(_Args) ->
-    {ok, {{one_for_one, 10, 10},
-          [{natenberg, {natenberg, start_link, []},
-            permanent, 2000, worker, [natenberg]}]}}.
+	{ok, {{one_for_one, 10, 10},
+    	[{natenberg, {natenberg, start_link, []},
+          permanent, 2000, worker, [natenberg]}]}}.

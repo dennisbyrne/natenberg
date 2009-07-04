@@ -18,8 +18,8 @@
  */
 package net.dbyrne.natenberg;
 
-import static java.awt.Color.decode;
 import static java.awt.Color.black;
+import static java.awt.Color.decode;
 import static java.lang.Long.toHexString;
 import static net.sf.json.JSONObject.fromObject;
 
@@ -27,88 +27,57 @@ import java.applet.Applet;
 import java.awt.Color;
 import java.awt.Graphics;
 
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 @SuppressWarnings("serial")
 public class Client extends Applet {
-	private JFrame frame;
 	private static final Integer MARGIN = 5;
-	private String state = null;
-	private Long sequence = new Long(0);
-
+	private JSONArray lines = new JSONArray();
+	private JSONArray labels = new JSONArray();
+	
     public void init(){}
-    
+
     public void stop(){}
-    
+
     public void paint(Graphics g){
-    	if(state == null)
-    		return;
-		JSONObject root = fromObject(state);
-		JSONArray lines = (JSONArray) root.get("lines");
-		JSONArray labels = (JSONArray) root.get("labels");
-		String description = root.getString("description");
-		new GraphPanel(lines, labels).paintComponent(g);
+    	paintLabels(g, 0);
+    	paintLines(g, 0);
     }
-    
+
     public void draw(String state){ /* called by JavaScript */
-    	this.state = state;
+    	JSONObject root = fromObject(state);
+		lines = (JSONArray) root.get("lines");
+		labels = (JSONArray) root.get("labels");
     	repaint();
     }
-	
-	private class GraphPanel extends JPanel{
-		private final JSONArray lines;
-		private final JSONArray labels;
-		GraphPanel(JSONArray lines, JSONArray labels) {
-			this.lines = lines;
-			this.labels = labels;
-		}
-		public void paintComponent(Graphics g){
-			paintLabels(g, 0);
-			paintLines(g, 0);
-		}
-		private void paintLines(Graphics g, Integer i){
-			if(i == lines.size())
-				return;
-			JSONObject line = lines.getJSONObject(i);
-			JSONObject from = line.getJSONObject("from");
-			JSONObject to = line.getJSONObject("to");
-			Color color = line.has("color") ? 
-					decode("0x" + toHexString(line.getLong("color"))) : black;
-			g.setColor(color);
-			g.drawLine(from.getInt("x") + MARGIN,
-					   from.getInt("y") + MARGIN,
-					   to.getInt("x") + MARGIN,
-					   to.getInt("y") + MARGIN);
-			paintLines(g, ++i);
-		}
-		private void paintLabels(Graphics g, Integer i){
-			if(i == labels.size())
-				return;
-			JSONObject label = labels.getJSONObject(i);
-			JSONObject pt = label.getJSONObject("pt");
-			String text = label.getString("text");
-			g.drawString(text,
-						 pt.getInt("x") + MARGIN + 5,
-						 pt.getInt("y") + MARGIN + 15);
-			paintLabels(g, ++i);
-		}
+
+	private void paintLines(Graphics g, Integer i){
+		if(i == lines.size())
+			return;
+		JSONObject line = lines.getJSONObject(i);
+		JSONObject from = line.getJSONObject("from");
+		JSONObject to = line.getJSONObject("to");
+		Color color = line.has("color") ? 
+				decode("0x" + toHexString(line.getLong("color"))) : black;
+		g.setColor(color);
+		g.drawLine(from.getInt("x") + MARGIN,
+				   from.getInt("y") + MARGIN,
+				   to.getInt("x") + MARGIN,
+				   to.getInt("y") + MARGIN);
+		paintLines(g, ++i);
 	}
 
-	private void show(JPanel panel, String description, Integer width, Integer height) {
-		if(frame != null)
-			frame.dispose();
-		frame = new JFrame(description);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		// add 30 to make up for the window bar
-		frame.setSize(width + MARGIN + 5, height + MARGIN + 30);
-		frame.add(panel);
-		frame.setVisible(true);
-		frame.setResizable(false);
-		frame.setBackground(Color.WHITE);
+	private void paintLabels(Graphics g, Integer i){
+		if(i == labels.size())
+			return;
+		JSONObject label = labels.getJSONObject(i);
+		JSONObject pt = label.getJSONObject("pt");
+		String text = label.getString("text");
+		g.drawString(text,
+					 pt.getInt("x") + MARGIN + 5,
+					 pt.getInt("y") + MARGIN + 15);
+		paintLabels(g, ++i);
 	}
 
 }

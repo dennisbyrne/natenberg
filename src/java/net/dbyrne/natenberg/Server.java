@@ -31,6 +31,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import net.sf.json.JSONObject;
 
+import org.mortbay.jetty.handler.ResourceHandler;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.DefaultServlet;
 import org.mortbay.jetty.servlet.ServletHolder;
@@ -54,8 +55,10 @@ public class Server {
 	private void go() throws Exception {
 		node = new OtpNode("web@127.0.0.1");
 		out.println(node.node() + " started w/ " + node.cookie());
-		if (!node.ping(PEER_NAME, 3000l))
+		if (!node.ping(PEER_NAME, 3000l)){
+			node.close();
 			throw new RuntimeException("Could not ping " + PEER_NAME);
+		}
 		org.mortbay.jetty.Server server = new org.mortbay.jetty.Server(8080);
 		Context root = new Context(server, "/", SESSIONS);
 		root.addServlet(new ServletHolder(new JsonServelet()), "*.json");

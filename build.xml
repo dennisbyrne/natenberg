@@ -24,9 +24,6 @@
 				<pathelement location="src/web/natenberg.jar"/>
 			</classpath>
 		</java>
-		<delete>
-		    <fileset dir="dist" includes="**/*.class"/>
-		</delete>
 	</target>
 
 </project>

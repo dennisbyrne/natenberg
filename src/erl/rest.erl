@@ -11,7 +11,7 @@
 % the License.
 
 -module(rest).
--export([pages/0, page15/0, page16/0, page17/0, page18/0, page19/0, page20/0, 
+-export([page15/0, page16/0, page17/0, page18/0, page19/0, page20/0, 
 		 page21/0, page22/0, page23/0, page24/0, page26/0, page29/0, page138/0,
 		 page139/0, page140/0, page143/0, page146/0, page147/0, page158a/0, 
 		 page158b/0, page158c/0, page158d/0, page159a/0, page159b/0, page159c/0,
@@ -22,14 +22,7 @@
 
 pages() ->
 	timer:start(),
-	Functions = [page15, page16, page17, page18, page19, page20, 
-				 page21, page22, page23, page24, page26, page29, 
-				 page138, page139, page140, page143, page146, 
-				 page147, page158a, page158b, page158c, page158d,
-				 page159a, page159b, page159c, page159d, page159e,
-				 page159f, many_long_calls, many_short_calls, page215,
-				 page218, page219, page229a, page229b, page230a, 
-				 page230b, page231],
+	Functions = [],
 	[ timer:apply_after(Seq * 1000, demo, lists:nth(Seq, Functions), []) || Seq <- lists:seq(1, length(Functions)) ].
 
 page15() ->

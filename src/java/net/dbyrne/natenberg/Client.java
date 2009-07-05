@@ -21,14 +21,14 @@ package net.dbyrne.natenberg;
 import static java.awt.Color.black;
 import static java.awt.Color.decode;
 import static java.lang.Long.toHexString;
-import static net.sf.json.JSONObject.fromObject;
+import static org.json.simple.JSONValue.parse;
 
 import java.applet.Applet;
 import java.awt.Color;
 import java.awt.Graphics;
 
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
 @SuppressWarnings("serial")
 public class Client extends Applet {
@@ -46,7 +46,7 @@ public class Client extends Applet {
     }
 
     public void draw(String state){ /* called by JavaScript */
-    	JSONObject root = fromObject(state);
+    	JSONObject root = (JSONObject) parse(state);
 		lines = (JSONArray) root.get("lines");
 		labels = (JSONArray) root.get("labels");
 		repaint(); repaint(); repaint();
@@ -54,23 +54,26 @@ public class Client extends Applet {
 
 	private void paintLines(Graphics g){
 		for(int i = 0; i < this.lines.size(); i++){
-			JSONObject line = lines.getJSONObject(i);
-			JSONObject from = line.getJSONObject("from");
-			JSONObject to = line.getJSONObject("to");
-			Color color = line.has("color") ? 
-				decode("0x" + toHexString(line.getLong("color"))) : black;
+			JSONObject line = (JSONObject) lines.get(i);
+			JSONObject from = (JSONObject) line.get("from");
+			JSONObject to = (JSONObject) line.get("to");
+			Color color = line.containsKey("color") ?
+				decode("0x" + toHexString(((Long)line.get("color")))) : black;
 			g.setColor(color);
-			g.drawLine(from.getInt("x") + MARGIN, from.getInt("y") + MARGIN,
-					to.getInt("x") + MARGIN, to.getInt("y") + MARGIN);
+			g.drawLine(((Long)from.get("x")).intValue() + MARGIN,
+					((Long)from.get("y")).intValue() + MARGIN,
+					((Long)to.get("x")).intValue() + MARGIN, 
+					((Long)to.get("y")).intValue() + MARGIN);
 		}
 	}
 
 	private void paintLabels(Graphics g){
 		for(int i = 0; i < labels.size(); i++){
-			JSONObject label = labels.getJSONObject(i);
-			JSONObject pt = label.getJSONObject("pt");
-			String text = label.getString("text");
-			g.drawString(text, pt.getInt("x") + MARGIN + 5, pt.getInt("y") + MARGIN + 15);
+			JSONObject label = (JSONObject) labels.get(i);
+			JSONObject pt = (JSONObject) label.get("pt");
+			String text = label.get("text").toString();
+			g.drawString(text, ((Long)pt.get("x")).intValue() + MARGIN + 5, 
+					((Long)pt.get("y")).intValue() + MARGIN + 15);
 		}
 	}
 

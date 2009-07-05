@@ -16,9 +16,9 @@
 -include_lib("struct.hrl").
 
 to_json(Desc, Lines, Labels) ->
-	JsonDesc = "description:'" ++ Desc ++ "'",
-	JsonLines = "lines:" ++ to_lines(Lines),
-	JsonLabels = "labels:" ++ to_labels(Labels), 
+	JsonDesc = "\"description\":\"" ++ Desc ++ "\"",
+	JsonLines = "\"lines\":" ++ to_lines(Lines),
+	JsonLabels = "\"labels\":" ++ to_labels(Labels), 
 	to_json([JsonDesc, JsonLines, JsonLabels]).
 
 to_lines(Lines) ->
@@ -26,17 +26,17 @@ to_lines(Lines) ->
 	"[" ++ common:join(JsonLines) ++ "]".
 
 to_line({To, From, Color}) ->
-	to_json(["to:" ++ to_point(To), "from:" ++ to_point(From), "color:" ++ integer_to_list(Color)]).
+	to_json(["\"to\":" ++ to_point(To), "\"from\":" ++ to_point(From), "\"color\":" ++ integer_to_list(Color)]).
 
 to_labels(Labels) ->
 	JsonLabels = lists:map(fun to_label/1, Labels),
 	"[" ++ common:join(JsonLabels) ++ "]".
 
 to_label({Point, Chars}) ->
-	to_json(["pt:" ++ to_point(Point), "text:'" ++  Chars ++ "'"]).
+	to_json(["\"pt\":" ++ to_point(Point), "\"text\":\"" ++  Chars ++ "\""]).
 
 to_point({X, Y}) ->
-	to_json(["x:" ++ integer_to_list(X), "y:" ++ integer_to_list(Y)]).
+	to_json(["\"x\":" ++ integer_to_list(X), "\"y\":" ++ integer_to_list(Y)]).
 
 to_json(List) ->
 	"{" ++ common:join(List) ++ "}".

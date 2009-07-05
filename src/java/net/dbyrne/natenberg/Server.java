@@ -20,7 +20,7 @@ package net.dbyrne.natenberg;
 
 import static java.lang.System.out;
 import static javax.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
-import static net.sf.json.JSONObject.fromObject;
+import static org.json.simple.JSONValue.parse;
 import static org.mortbay.jetty.servlet.Context.SESSIONS;
 
 import java.io.IOException;
@@ -29,8 +29,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import net.sf.json.JSONObject;
-
+import org.json.simple.JSONObject;
 import org.mortbay.jetty.handler.ResourceHandler;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.DefaultServlet;
@@ -82,7 +81,7 @@ public class Server {
 			try {
 				OtpErlangTuple tuple = (OtpErlangTuple) mailbox.receive(3000l);
 				String json = tuple.elementAt(1).toString();
-				res = fromObject(json.substring(1, json.length() - 1));
+				res = (JSONObject) parse(json.substring(1, json.length() - 1));
 			} catch (Exception e) {
 				e.printStackTrace();
 				response.setStatus(SC_INTERNAL_SERVER_ERROR);
@@ -90,7 +89,7 @@ public class Server {
 			}
 			mailbox.close();
 			response.setContentType("application/json");
-			response.getWriter().print(res);
+			response.getWriter().print(res.toJSONString());
 		}
 	}
 
@@ -107,7 +106,10 @@ public class Server {
 				new OtpErlangAtom("user")})});
 	}
 
+	@SuppressWarnings("unchecked")
 	private JSONObject newErrorMsg(Exception e){
-		return new JSONObject().accumulate("error", e.getClass() + ":" + e.getMessage());
+		JSONObject error = new JSONObject();
+		error.put("error", e.getClass() + ":" + e.getMessage());
+		return error;
 	}
 }

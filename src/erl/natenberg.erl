@@ -34,7 +34,7 @@ init(_From) ->
   {ok, 0}.
 
 handle_call(Function, _From, State) ->
-  Json = erlang:apply(demo, Function, []),
+  Json = erlang:apply(rest, Function, []),
   {reply, Json, State + 1}.
 
 handle_cast(_Msg, State) ->

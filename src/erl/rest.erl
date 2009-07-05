@@ -10,7 +10,7 @@
 % License for the specific language governing permissions and limitations under
 % the License.
 
--module(demo).
+-module(rest).
 -export([pages/0, page15/0, page16/0, page17/0, page18/0, page19/0, page20/0, 
 		 page21/0, page22/0, page23/0, page24/0, page26/0, page29/0, page138/0,
 		 page139/0, page140/0, page143/0, page146/0, page147/0, page158a/0, 

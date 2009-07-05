@@ -60,10 +60,8 @@ public class Client extends Applet {
 			Color color = line.has("color") ? 
 				decode("0x" + toHexString(line.getLong("color"))) : black;
 			g.setColor(color);
-			g.drawLine(from.getInt("x") + MARGIN,
-				from.getInt("y") + MARGIN,
-				to.getInt("x") + MARGIN,
-				to.getInt("y") + MARGIN);
+			g.drawLine(from.getInt("x") + MARGIN, from.getInt("y") + MARGIN,
+					to.getInt("x") + MARGIN, to.getInt("y") + MARGIN);
 		}
 	}
 
@@ -72,9 +70,7 @@ public class Client extends Applet {
 			JSONObject label = labels.getJSONObject(i);
 			JSONObject pt = label.getJSONObject("pt");
 			String text = label.getString("text");
-			g.drawString(text,
-						 pt.getInt("x") + MARGIN + 5,
-						 pt.getInt("y") + MARGIN + 15);
+			g.drawString(text, pt.getInt("x") + MARGIN + 5, pt.getInt("y") + MARGIN + 15);
 		}
 	}
 

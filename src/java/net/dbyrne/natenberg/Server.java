@@ -88,7 +88,7 @@ public class Server {
 				response.setStatus(SC_INTERNAL_SERVER_ERROR);
 				res = newErrorMsg(e);
 			}
-			node.close();
+			mailbox.close();
 			response.setContentType("application/json");
 			response.getWriter().print(res);
 		}

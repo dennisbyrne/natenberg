@@ -41,8 +41,8 @@ public class Client extends Applet {
     public void stop(){}
 
     public void paint(Graphics g){
-    	paintLabels(g, 0);
-    	paintLines(g, 0);
+    	paintLabels(g);
+    	paintLines(g);
     }
 
     public void draw(String state){ /* called by JavaScript */
@@ -52,32 +52,30 @@ public class Client extends Applet {
 		repaint(); repaint(); repaint();
     }
 
-	private void paintLines(Graphics g, Integer i){
-		if(i == lines.size())
-			return;
-		JSONObject line = lines.getJSONObject(i);
-		JSONObject from = line.getJSONObject("from");
-		JSONObject to = line.getJSONObject("to");
-		Color color = line.has("color") ? 
+	private void paintLines(Graphics g){
+		for(int i = 0; i < this.lines.size(); i++){
+			JSONObject line = lines.getJSONObject(i);
+			JSONObject from = line.getJSONObject("from");
+			JSONObject to = line.getJSONObject("to");
+			Color color = line.has("color") ? 
 				decode("0x" + toHexString(line.getLong("color"))) : black;
-		g.setColor(color);
-		g.drawLine(from.getInt("x") + MARGIN,
-				   from.getInt("y") + MARGIN,
-				   to.getInt("x") + MARGIN,
-				   to.getInt("y") + MARGIN);
-		paintLines(g, ++i);
+			g.setColor(color);
+			g.drawLine(from.getInt("x") + MARGIN,
+				from.getInt("y") + MARGIN,
+				to.getInt("x") + MARGIN,
+				to.getInt("y") + MARGIN);
+		}
 	}
 
-	private void paintLabels(Graphics g, Integer i){
-		if(i == labels.size())
-			return;
-		JSONObject label = labels.getJSONObject(i);
-		JSONObject pt = label.getJSONObject("pt");
-		String text = label.getString("text");
-		g.drawString(text,
-					 pt.getInt("x") + MARGIN + 5,
-					 pt.getInt("y") + MARGIN + 15);
-		paintLabels(g, ++i);
+	private void paintLabels(Graphics g){
+		for(int i = 0; i < labels.size(); i++){
+			JSONObject label = labels.getJSONObject(i);
+			JSONObject pt = label.getJSONObject("pt");
+			String text = label.getString("text");
+			g.drawString(text,
+						 pt.getInt("x") + MARGIN + 5,
+						 pt.getInt("y") + MARGIN + 15);
+		}
 	}
 
 }

@@ -13,21 +13,15 @@
 		<mkdir dir="dist"/>
 		<delete>
 		    <fileset dir="dist" includes="**/*.class"/>
-		</delete>	
+		</delete>
 		<javac srcdir="src/java/net" destdir="dist">
 			<classpath refid="cp"/>
 		</javac>
-		<jar destfile="natenberg.jar" basedir="dist"/>
-		<copy file="natenberg.jar" todir="src/web" overwrite="true"/>
-		<copy todir="src/web" overwrite="true">
-			<fileset dir="lib">
-				<include name="*.jar"/>
-			</fileset>
-		</copy>
+		<jar destfile="src/web/natenberg.jar" basedir="dist"/>
 		<java classname="net.dbyrne.natenberg.Server" fork="true">
 			<classpath refid="cp"/>
 			<classpath>
-				<pathelement location="natenberg.jar"/>
+				<pathelement location="src/web/natenberg.jar"/>
 			</classpath>
 		</java>
 		<delete>

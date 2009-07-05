@@ -1,12 +1,10 @@
  $(document).ready(function(){
-    registerEvent("page15");
-    registerEvent("page16");
-    registerEvent("page24");
+    $("select").change(function(){
+        $("select option:selected").each(function(){
+            callback($(this)[0].value)();
+        });
+    });
  });
- 
- function registerEvent(functionName){
-    $("#" + functionName).click(callback(functionName));
- }
  
  function callback(functionName){
     return function(){

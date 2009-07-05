@@ -66,7 +66,6 @@ public class Server {
 		root.addServlet(new ServletHolder(new JsonServelet()), "*.json");
 		server.start();
 		server.join();
-		// TODO node.close();
 	}
 
 	@SuppressWarnings("serial")
@@ -101,8 +100,8 @@ public class Server {
 				new OtpErlangAtom("gen_server"),
 				new OtpErlangAtom("call"),
 				new OtpErlangList(new OtpErlangObject[]{ /* args */
-						new OtpErlangAtom("natenberg"),
-						new OtpErlangAtom(function)}),
+					new OtpErlangAtom("natenberg"),
+					new OtpErlangAtom(function)}),
 				new OtpErlangAtom("user")})});
 	}
 

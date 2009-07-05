@@ -1,4 +1,5 @@
 $(document).ready(function(){
+    $("select")[0].size = $("option").length;
     $("select").change(function(){
         $("select option:selected").each(function(){
             show($(this)[0].value);

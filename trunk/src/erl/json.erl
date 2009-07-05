@@ -47,25 +47,25 @@ to_json(List) ->
 
 to_json_graph_test() ->
 	Line = {{1,2}, {3,4}, 0},
-	Expected = "{description:'Msg',lines:[{to:{x:1,y:2},from:{x:3,y:4},color:0}],labels:[{pt:{x:1,y:3},text:'A'}]}",
+	Expected = "{\"description\":\"Msg\",\"lines\":[{\"to\":{\"x\":1,\"y\":2},\"from\":{\"x\":3,\"y\":4},\"color\":0}],\"labels\":[{\"pt\":{\"x\":1,\"y\":3},\"text\":\"A\"}]}",
 	?assertMatch(Expected, to_json("Msg", [Line], [{{1,3}, "A"}])).
 
 to_lines_two_points_test() ->
 	First = {{1,2}, {3,4}, 0},
 	Second = {{5,6}, {7,8}, 0},
-	Expected = "[{to:{x:1,y:2},from:{x:3,y:4},color:0},{to:{x:5,y:6},from:{x:7,y:8},color:0}]",
+	Expected = "[{\"to\":{\"x\":1,\"y\":2},\"from\":{\"x\":3,\"y\":4},\"color\":0},{\"to\":{\"x\":5,\"y\":6},\"from\":{\"x\":7,\"y\":8},\"color\":0}]",
 	?assertMatch(Expected, to_lines([First, Second])).
 
 to_lines_test() ->
 	Line = {{1,2}, {3,4}, 0},
-	?assertMatch("[{to:{x:1,y:2},from:{x:3,y:4},color:0}]", to_lines([Line])).
+	?assertMatch("[{\"to\":{\"x\":1,\"y\":2},\"from\":{\"x\":3,\"y\":4},\"color\":0}]", to_lines([Line])).
 
 to_lines_empty_test() ->
 	?assertMatch("[]", to_lines([])).
 
 to_line_test() ->
 	Line = {{1,2}, {3,4},0},
-	?assertMatch("{to:{x:1,y:2},from:{x:3,y:4},color:0}", to_line(Line)).
+	?assertMatch("{\"to\":{\"x\":1,\"y\":2},\"from\":{\"x\":3,\"y\":4},\"color\":0}", to_line(Line)).
 
 to_point_test() ->
-	?assertMatch("{x:2,y:7}", to_point({2, 7})).
+	?assertMatch("{\"x\":2,\"y\":7}", to_point({2, 7})).

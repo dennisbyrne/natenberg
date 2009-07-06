@@ -20,11 +20,6 @@
 		 page230b/0, page231/0]).
 -include_lib("struct.hrl").
 
-pages() ->
-	timer:start(),
-	Functions = [],
-	[ timer:apply_after(Seq * 1000, demo, lists:nth(Seq, Functions), []) || Seq <- lists:seq(1, length(Functions)) ].
-
 page15() ->
 	chapter2:draw([?LONG_UNDERLYING, ?SHORT_UNDERLYING]).
 

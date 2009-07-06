@@ -79,6 +79,8 @@ public class Server {
 			JSONObject res = null;
 			try {
 				OtpErlangTuple tuple = (OtpErlangTuple) mailbox.receive(3000l);
+				if(tuple == null)
+					throw new NullPointerException(OtpErlangTuple.class.toString());
 				String json = tuple.elementAt(1).toString();
 				res = (JSONObject) parse(json.substring(1, json.length() - 1));
 			} catch (Exception e) {

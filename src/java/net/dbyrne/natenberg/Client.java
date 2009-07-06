@@ -30,6 +30,10 @@ import java.awt.Graphics;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+/**
+ * Graphs a JSON message via Swing.
+ * @author Dennis Byrne
+ */
 @SuppressWarnings("serial")
 public class Client extends Applet {
 	private static final Integer MARGIN = 5;

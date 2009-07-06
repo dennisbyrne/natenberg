@@ -43,15 +43,19 @@ import com.ericsson.otp.erlang.OtpErlangTuple;
 import com.ericsson.otp.erlang.OtpMbox;
 import com.ericsson.otp.erlang.OtpNode;
 
+/**
+ * Uses jinterface to relay AJAX requests/responses to an Erlang process.
+ * @author Dennis Byrne
+ */
 public class Server {
 	private OtpNode node = null;
 	private final String PEER_NAME = "server@127.0.0.1";
 
 	public static void main(String[] args) throws Exception{
-		new Server().go();
+		new Server().start();
 	}
 
-	private void go() throws Exception {
+	private void start() throws Exception {
 		node = new OtpNode("web@127.0.0.1");
 		out.println(node.node() + " started w/ " + node.cookie());
 		if (!node.ping(PEER_NAME, 3000l)){
@@ -74,22 +78,23 @@ public class Server {
 				HttpServletResponse response) throws ServletException, IOException {
 			OtpMbox mailbox = node.createMbox();
 			String function = request.getParameter("function");
-			mailbox.send("rex", PEER_NAME, newMsg(mailbox.self(), function));
-			JSONObject res = null;
+			OtpErlangTuple msg = newMsg(mailbox.self(), function);
+			mailbox.send("rex", PEER_NAME, msg);
+			JSONObject responseBody = null;
 			try {
 				OtpErlangTuple tuple = (OtpErlangTuple) mailbox.receive(3000l);
 				if(tuple == null)
 					throw new NullPointerException(OtpErlangTuple.class.toString());
 				String json = tuple.elementAt(1).toString();
-				res = (JSONObject) parse(json.substring(1, json.length() - 1));
+				responseBody = (JSONObject) parse(json.substring(1, json.length() - 1));
 			} catch (Exception e) {
 				e.printStackTrace();
 				response.setStatus(SC_INTERNAL_SERVER_ERROR);
-				res = newErrorMsg(e);
+				responseBody = newErrorMsg(e);
 			}
 			mailbox.close();
 			response.setContentType("application/json");
-			response.getWriter().print(res.toJSONString());
+			response.getWriter().print(responseBody.toJSONString());
 		}
 	}
 

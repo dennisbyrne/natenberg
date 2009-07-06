@@ -12,7 +12,7 @@
 
 -module(view).
 -define(TO, {graph, 'view@127.0.0.1'}).
--export([start/0, draw/2]).
+-export([draw/2]).
 -record(rectangle, {minX = 0, maxX = 100, minY = -100, maxY = 100}).
 -include_lib("eunit/include/eunit.hrl").
 -include_lib("struct.hrl").
@@ -20,10 +20,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Implementation
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-start() ->
-	Fun = fun() -> os:cmd("cd ../.. && ant") end,
-	spawn(Fun).
 
 draw(Points, Desc) ->
 	Rectangle = min_bounding_rectangle(lists:flatten(Points)),

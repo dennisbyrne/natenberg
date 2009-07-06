@@ -4,16 +4,16 @@
 		<script src='natenberg.js'></script>
 	</head>
 	<body style='background-color:#F5F4EE'>
-		<table>
+		<table style="width:900px">
 		<tr>
-			<td style="background-color:white">
+			<td style="background-color:white; width:560">
 				<div style='text-align:center; border-bottom: 1px solid black;' id='table_heading'>&nbsp;</div>
 		    	<applet id='graph'
 		    		name='graph'
 		    		code='net.dbyrne.natenberg.Client.class'
 		    		archive='natenberg.jar,json_simple-1.1.jar'
 		    		width='560'
-		    		height='550'>
+		    		height='555'>
 		    		Your browser does not support applets.
 		    	</applet>
     		</td>
@@ -60,6 +60,8 @@
 				</select>
     		</td>
     	</tr>
+    	<tr><td colspan="2"><hr/></td></tr>
+    	<tr><td colspan="2" style="padding: 10px" id="wire">&nbsp;</td></tr>
     	</table>
 	</body>
 </html>

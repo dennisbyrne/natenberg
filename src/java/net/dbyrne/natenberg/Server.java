@@ -73,8 +73,7 @@ public class Server {
 		@Override protected void doGet(HttpServletRequest request,
 				HttpServletResponse response) throws ServletException, IOException {
 			OtpMbox mailbox = node.createMbox();
-			String[] split = request.getRequestURL().toString().replaceAll(".json", "").split("/");
-			String function = split[split.length - 1];
+			String function = request.getParameter("function");
 			mailbox.send("rex", PEER_NAME, newMsg(mailbox.self(), function));
 			JSONObject res = null;
 			try {

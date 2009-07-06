@@ -9,7 +9,7 @@ $(document).ready(function(){
 });
 
 show = function(functionName){
-    $.get(functionName + ".json", function(data){
+    $.get("graph.json?function=" + functionName, function(data){
         $("#graph")[0].draw(data);
         $("#wire")[0].innerHTML = data;
         $("#table_heading")[0].innerHTML = eval("(" + data + ")").description;

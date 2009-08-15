@@ -60,7 +60,7 @@ public class Server {
 		node = new OtpNode("web@127.0.0.1");
 		out.println(node.node() + " started w/ " + node.cookie());
 		if (node.ping(PEER_NAME, 3000l)){
-			System.out.println(PEER_NAME + " is responsive ...");
+			out.println(PEER_NAME + " is responsive ...");
 		}else{
 			node.close();
 			throw new RuntimeException("Could not ping " + PEER_NAME);

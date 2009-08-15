@@ -26,10 +26,10 @@ stop() ->
   application:stop(natenberg).
 
 start_link() ->
+  erlang:display(atom_to_list(?MODULE) ++ " starting ..."),
   gen_server:start_link({local, ?MODULE}, ?MODULE, self(), []).
 
 init(_From) ->
-  erlang:display(atom_to_list(?MODULE) ++ " starting ..."),
   process_flag(trap_exit,true),
   {ok, 0}.
 

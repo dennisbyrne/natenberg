@@ -15,7 +15,9 @@
 -export([start/2, stop/1]).
 
 start(_Type, Args) ->
-  erlang:display(atom_to_list(?MODULE) ++ " starting ..."),
+  erlang:display(atom_to_list(?MODULE) ++ 
+				 " starting w/ cookie " ++ 
+				 atom_to_list(erlang:get_cookie())),
   natenberg_sup:start_link(Args).
 
 stop(_State) ->

@@ -14,7 +14,7 @@
 		<delete>
 		    <fileset dir="dist" includes="**/*.class"/>
 		</delete>
-		<javac srcdir="src/java/net" destdir="dist">
+		<javac srcdir="src/java/net" destdir="dist" target="1.5">
 			<classpath refid="cp"/>
 		</javac>
 		<jar destfile="src/web/natenberg.jar" basedir="dist"/>

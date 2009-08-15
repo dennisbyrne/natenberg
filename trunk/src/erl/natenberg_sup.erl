@@ -15,7 +15,7 @@
 -export([start_link/1, init/1]).
 
 start_link(Args) ->
-  erlang:display(atom_to_list(?MODULE) ++ " terminating ..."),
+  erlang:display(atom_to_list(?MODULE) ++ " starting ..."),
   supervisor:start_link({local, ?MODULE}, ?MODULE, Args).
 
 init(_Args) ->

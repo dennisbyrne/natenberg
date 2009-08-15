@@ -34,6 +34,7 @@ import org.mortbay.jetty.handler.ResourceHandler;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.DefaultServlet;
 import org.mortbay.jetty.servlet.ServletHolder;
+import org.mortbay.log.Log;
 
 import com.ericsson.otp.erlang.OtpErlangAtom;
 import com.ericsson.otp.erlang.OtpErlangList;
@@ -61,6 +62,8 @@ public class Server {
 		if (!node.ping(PEER_NAME, 3000l)){
 			node.close();
 			throw new RuntimeException("Could not ping " + PEER_NAME);
+		}else{
+			Log.info(PEER_NAME + " is responsive ...");
 		}
 		org.mortbay.jetty.Server server = new org.mortbay.jetty.Server(8080);
 		Context statik = new Context(server, "/", SESSIONS);

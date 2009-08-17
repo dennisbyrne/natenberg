@@ -19,7 +19,7 @@
 package net.dbyrne.natenberg
 
 import java.awt.Color._
-import java.lang.Long._
+import java.lang.Long.toHexString
 import org.json.simple.JSONValue._
 import org.json.simple.JSONObject._
 
@@ -39,11 +39,11 @@ class Client extends Applet {
 	private final var lines = new JSONArray
 	private final var labels = new JSONArray
 
-	override def init = {}
+	override def init {}
 
-    override def stop = {}
+    override def stop {}
     
-    override def paint(g:Graphics) = {
+    override def paint(g:Graphics) {
 		paintLabels(g)
     	paintLines(g)
     }
@@ -61,12 +61,12 @@ class Client extends Applet {
     		val from = line.get("from").asInstanceOf[JSONObject]
     		val to = line.get("to").asInstanceOf[JSONObject]
     		val color:Color = if(line.containsKey("color"))
-    				Color.decode("0x" + toHexString((line.get("color").asInstanceOf[Long]))) else black
+    				decode("0x" + toHexString(line.get("color").asInstanceOf[Long])) else black
     		g.setColor(color)
-    		g.drawLine((from.get("x").asInstanceOf[Long]).intValue + MARGIN,
-				(from.get("y").asInstanceOf[Long]).intValue + MARGIN,
-				(to.get("x").asInstanceOf[Long]).intValue + MARGIN, 
-				(to.get("y").asInstanceOf[Long]).intValue + MARGIN)      
+    		g.drawLine(from.get("x").asInstanceOf[Long].intValue + MARGIN,
+				from.get("y").asInstanceOf[Long].intValue + MARGIN,
+				to.get("x").asInstanceOf[Long].intValue + MARGIN, 
+				to.get("y").asInstanceOf[Long].intValue + MARGIN)
     	})
 	}
 
@@ -75,8 +75,8 @@ class Client extends Applet {
 			val label = labels.get(i).asInstanceOf[JSONObject]
 			val pt = label.get("pt").asInstanceOf[JSONObject]
 			val text = label.get("text").toString
-			g.drawString(text, (pt.get("x").asInstanceOf[Long]).intValue + MARGIN + 5, 
-					(pt.get("y").asInstanceOf[Long]).intValue + MARGIN + 15)
+			g.drawString(text, pt.get("x").asInstanceOf[Long].intValue + MARGIN + 5, 
+					pt.get("y").asInstanceOf[Long].intValue + MARGIN + 15)
     	})
 	}
 }

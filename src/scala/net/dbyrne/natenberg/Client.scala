@@ -57,10 +57,10 @@ class Client extends Applet {
 
     private def paintLines(g:Graphics){
     	0.until(lines.size - 1).foreach(i => {
-    		val line:JSONObject = lines.get(i).asInstanceOf[JSONObject]
+    		val line = lines.get(i).asInstanceOf[JSONObject]
     		val from = line.get("from").asInstanceOf[JSONObject]
     		val to = line.get("to").asInstanceOf[JSONObject]
-    		val color:Color = if(line.containsKey("color"))
+    		val color = if(line.containsKey("color"))
     				decode("0x" + toHexString(line.get("color").asInstanceOf[Long])) else black
     		g.setColor(color)
     		g.drawLine(from.get("x").asInstanceOf[Long].intValue + MARGIN,

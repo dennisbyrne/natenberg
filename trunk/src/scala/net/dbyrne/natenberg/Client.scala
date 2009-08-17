@@ -35,28 +35,28 @@ import org.json.simple.JSONObject
  * @author Dennis Byrne
  */
 class Client extends Applet {
-  	private final val MARGIN = 5
-	private final var lines = new JSONArray
-	private final var labels = new JSONArray
+	 private final val MARGIN = 5
+	 private final var lines = new JSONArray
+	 private final var labels = new JSONArray
 
-	override def init {}
+	 override def init {}
 
-    override def stop {}
+	 override def stop {}
     
-    override def paint(g:Graphics) {
-		paintLabels(g)
-    	paintLines(g)
-    }
-    
-    def draw(state:String){ /* called by JavaScript */
-    	val root = parse(state).asInstanceOf[JSONObject]
-		lines = root.get("lines").asInstanceOf[JSONArray]
-		labels = root.get("labels").asInstanceOf[JSONArray]
-		repaint; repaint; repaint;
-    }
+	 override def paint(g:Graphics) {
+		 paintLabels(g)
+		 paintLines(g)
+	 }
 
-    private def paintLines(g:Graphics){
-    	0.until(lines.size - 1).foreach(i => {
+	 def draw(state:String){ /* called by JavaScript */
+		 val root = parse(state).asInstanceOf[JSONObject]
+		 lines = root.get("lines").asInstanceOf[JSONArray]
+		 labels = root.get("labels").asInstanceOf[JSONArray]
+		 repaint; repaint; repaint;
+	 }
+
+	 private def paintLines(g:Graphics){
+		 0.until(lines.size - 1).foreach(i => {
     		val line = lines.get(i).asInstanceOf[JSONObject]
     		val from = line.get("from").asInstanceOf[JSONObject]
     		val to = line.get("to").asInstanceOf[JSONObject]
@@ -64,19 +64,19 @@ class Client extends Applet {
     				decode("0x" + toHexString(line.get("color").asInstanceOf[Long])) else black
     		g.setColor(color)
     		g.drawLine(from.get("x").asInstanceOf[Long].intValue + MARGIN,
-				from.get("y").asInstanceOf[Long].intValue + MARGIN,
-				to.get("x").asInstanceOf[Long].intValue + MARGIN, 
-				to.get("y").asInstanceOf[Long].intValue + MARGIN)
-    	})
-	}
+    				from.get("y").asInstanceOf[Long].intValue + MARGIN,
+    				to.get("x").asInstanceOf[Long].intValue + MARGIN, 
+    				to.get("y").asInstanceOf[Long].intValue + MARGIN)
+		 })
+	 }
 
-    private def paintLabels(g:Graphics){
-    	0.until(labels.size - 1).foreach(i => {
-			val label = labels.get(i).asInstanceOf[JSONObject]
-			val pt = label.get("pt").asInstanceOf[JSONObject]
-			val text = label.get("text").toString
-			g.drawString(text, pt.get("x").asInstanceOf[Long].intValue + MARGIN + 5, 
-					pt.get("y").asInstanceOf[Long].intValue + MARGIN + 15)
-    	})
-	}
+	 private def paintLabels(g:Graphics){
+		 0.until(labels.size - 1).foreach(i => {
+			 val label = labels.get(i).asInstanceOf[JSONObject]
+			 val pt = label.get("pt").asInstanceOf[JSONObject]
+			 val text = label.get("text").toString
+			 g.drawString(text, pt.get("x").asInstanceOf[Long].intValue + MARGIN + 5, 
+					 pt.get("y").asInstanceOf[Long].intValue + MARGIN + 15)
+		 })
+	 }
 }

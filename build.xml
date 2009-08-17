@@ -1,5 +1,7 @@
-<project name="natenberg" default="app" basedir=".">
-
+<project name="natenberg" default="app" basedir=".">	
+	
+	<property environment="env"/>
+	
 	<path id="cp">
 	   <fileset dir="lib">
 	      <include name="*.jar"/>
@@ -8,6 +10,13 @@
 		  <include name="*.jar"/>
 	   </fileset>		
 	</path>
+
+	<taskdef resource="scala/tools/ant/antlib.xml">
+      <classpath>
+        <pathelement location="${env.SCALA_HOME}/lib/scala-compiler.jar"/>
+      	<pathelement location="${env.SCALA_HOME}/lib/scala-library.jar"/>
+      </classpath>
+    </taskdef>
 	
 	<target name="app">
 		<mkdir dir="dist"/>
@@ -17,6 +26,12 @@
 		<javac srcdir="src/java/net" destdir="dist" target="1.5">
 			<classpath refid="cp"/>
 		</javac>
+		<scalac srcdir="src/scala/net" destdir="dist" target="jvm-1.5">
+			<classpath refid="cp"/>
+			<classpath>
+				<pathelement location="${env.SCALA_HOME}/lib/scala-library.jar"/>
+			</classpath>			
+		</scalac>		
 		<jar destfile="src/web/natenberg.jar" basedir="dist"/>
 		<java classname="net.dbyrne.natenberg.Server" fork="true">
 			<classpath refid="cp"/>

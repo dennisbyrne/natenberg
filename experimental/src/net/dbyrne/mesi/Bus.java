@@ -24,5 +24,10 @@ public class Bus {
 		}
 		return line;
 	}
+
+	public void readForOwnership(Integer address) {
+		for(Processor p : this.peers)
+			p.invalidate(address);
+	}
 	
 }

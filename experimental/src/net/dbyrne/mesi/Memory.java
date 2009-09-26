@@ -6,6 +6,6 @@ public interface Memory {
 
 	ExclusiveLine read(Integer address);
 	
-	void write(Integer address, Integer value);
+	void /* write behind */ write(Integer address, Integer value);
 
 }

@@ -19,15 +19,13 @@ public abstract class Line {
 	public boolean isReadable() {
 		return true;
 	}
-
-	@Override
-	public boolean equals(Object obj) {
-		return value.equals(obj);
+	
+	public boolean isWriteable(){
+		return false;
 	}
 
-	@Override
-	public int hashCode() {
-		return value.hashCode();
+	public Line invalid() {
+		return new InvalidLine(this.value);
 	}
 	
 }

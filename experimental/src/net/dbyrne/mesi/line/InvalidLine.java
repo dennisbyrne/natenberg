@@ -5,6 +5,9 @@ public class InvalidLine extends Line{
 		super(value);
 	}
 	
+	/**
+	 * A cache may satisfy a read from any state except Invalid.
+	 */
 	@Override
 	public boolean isReadable() {
 		return false;

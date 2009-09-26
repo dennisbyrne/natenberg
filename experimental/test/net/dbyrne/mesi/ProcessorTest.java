@@ -56,12 +56,43 @@ public class ProcessorTest {
 		}});
 		Processor processor = new Processor(memory, new HashMap<Integer, Line>(), bus);
 		processor.write(1, 1);
-		assertEquals(1, processor.readRequest(1).getValue());
 		processor.write(1, 2);
 		processor.flush();
 		this.mockery.assertIsSatisfied();
 	}
 
+	@Test
+	public void sharedCacheLinesWriteOnceWhenTheValueDoesNotChange(){
+		final Memory memory = mockery.mock(Memory.class);
+		mockery.checking(new Expectations() {{
+			one(memory).write(1, 100);
+		}});
+		Processor a = new Processor(memory, new HashMap<Integer, Line>(), bus);
+		Processor b = new Processor(memory, new HashMap<Integer, Line>(), bus);
+		a.write(1, 100); // a is @ E
+		a.flush();
+		assertEquals(100, b.read(1)); // both are @ S
+		b.write(1, 100);
+		this.mockery.assertIsSatisfied();
+	}
+	
+	@Test
+	public void sharedCacheLinesWriteTwiceWhenTheValueChanges(){
+		final Memory memory = mockery.mock(Memory.class);
+		mockery.checking(new Expectations() {{
+			one(memory).write(1, 100);
+			one(memory).write(1, 101);
+		}});
+		Processor a = new Processor(memory, new HashMap<Integer, Line>(), bus);
+		Processor b = new Processor(memory, new HashMap<Integer, Line>(), bus);
+		a.write(1, 100); // a is @ E
+		a.flush();
+		assertEquals(100, b.read(1)); // both are @ S
+		b.write(1, 101);
+		b.flush();
+		this.mockery.assertIsSatisfied();
+	}
+	
 	@SuppressWarnings("serial")
 	@Test
 	public void processorShouldAvoidMainMemoryWhenCacheHitExclusive() {

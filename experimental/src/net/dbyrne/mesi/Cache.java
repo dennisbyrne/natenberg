@@ -34,4 +34,12 @@ public class Cache{
 	public boolean miss(Integer address){
 		return !this.map.containsKey(address) || !this.map.get(address).isReadable();
 	}
+
+	public void invalidate(Integer address) {
+		if(containsKey(address)){
+			Line line = get(address);
+			put(address, line.invalid());
+		}
+	}
+
 }

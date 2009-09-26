@@ -1,13 +1,11 @@
 package net.dbyrne.mesi;
 
-import java.util.Map;
+import net.dbyrne.mesi.line.ExclusiveLine;
 
-public class Memory {
+public interface Memory {
 
-	Map<Integer, Integer> data;
+	ExclusiveLine read(Integer address);
 	
-	public Memory(Map<Integer, Integer> data) {
-		this.data = data;
-	}
-	
+	void write(Integer address, Integer value);
+
 }

@@ -12,4 +12,8 @@ public class Thread {
 		return processor.read(address);
 	}
 	
+	void write(Integer address, Integer value){
+		this.processor.write(address, value);
+	}
+
 }

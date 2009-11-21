@@ -11,7 +11,7 @@
 	<body>
 		<h1>Memory Barriers and the JVM</h1>
 		<p>
-			This article is a crash coarse in memory barriers and the JVM.  Memory barriers, or fences, are 
+			This article is a crash course in memory barriers and the JVM.  Memory barriers, or fences, are 
 			a class of processor instructions used to apply ordering limitations on memory 
 			operations.  For this reason memory barriers have a fundamental impact on the performance and
 			determinism of multi-threaded programs.  This is not an article about locks or atomic 
@@ -127,7 +127,7 @@
 			pending memory operations the processor temporarily loses major opportunities for optimization.  
 			This performance hit is the cost that must be paid for correctness.
 		</p>
-		<h3>Avoiding costs with Fence Ellision</h3>
+		<h3>Avoiding costs with Fence Elision</h3>
 		<p>
 			The JVM is incredibly efficient.  When it can avoid a memory barrier, it does.
 			Sometimes it gets lucky and the consistency guarantees of the hardware memory model are greater than or equal to those of the Java memory model.  

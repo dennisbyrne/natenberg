@@ -1,5 +1,6 @@
 <html>
 	<head>
+		<title>Memory Barriers and the JVM</title>
 		<style>
 			.code{
 				background-color: #CCCCCC;
@@ -9,28 +10,44 @@
 	</head>
 	<body>
 		<p>
-			This article is about ...
+			This article is a crash coarse in memory barriers on the JVM.  Memory barriers, or fences, are 
+			a class of processor instructions used to apply ordering limitations on memory 
+			operations.  For this reason memory barriers have a fundamental impact on the performance and
+			correctness of any multi-threaded application.
 		</p>
 		<p>
-			Let's begin with a simple Java class.
+			Our first example is the WriterReader class.
 		</p>
 		<pre>
-	class Volatile{
+	class WriterReader{
 	
-	  public static volatile int v = 0;
+	  public static volatile int shared = 0;
 	
 	  public static void main(String[] _){
-	       for(int i = 0; i < 100000; i++)
-	          inc();
+	    Thread writer = new Thread(){
+	      public void run(){
+	        for(int i = 0; i < 10000; i++)
+	          set(i);
+	      }
+	    };
+	    Thread reader = new Thread(){
+	      public void run(){
+	        for(int i = 0; i < 10000; i++)
+	          get();
+	      }
+	    };
+	    writer.start();
+	    reader.start(); 
 	  }
 	
-	  private static void inc(){ v += 1; }
-	
-	}		
+	  private static void set(int newValue){ shared = newValue; }
+	  
+	  private static int get(){ return shared; }
+	}
 		</pre>
 		<p>
-			This class increments a volatile primitive integer.  Hopefully the reader knows volatile variables are not safe to 
-			use as counters.  If not, you are about to find out why as we dive into the assembly instructions this program produces.
+			The main method of this class creates two threads.  The writer thread writes to a static volatile variable.
+			The reader thread reads from that variable.  Ignore the for loops.  They are there only to trigger JIT compilation.
 			To obtain the assembly language instructions for this program we have to first install a special
 			debug version of the JVM.  The following will work for Linux.  Sun 
 			<a target="new" href="http://download.java.net/jdk6/binaries/">has installers</a> for Solaris or Windows
@@ -42,7 +59,7 @@
 			$ java -jar jdk-6u18-ea-bin-b05-linux-i586-debug-18_nov_2009.jar<br/>
 		</div>
 		<p>
-			Next we have to install a disassembler. The Kenai project <a href="http://kenai.com/projects/base-hsdis/downloads" target="new">has binaries</a>
+			Next we install a disassembler plugin. The Kenai project <a href="http://kenai.com/projects/base-hsdis/downloads" target="new">has binaries</a>
 			for Solaris, Linux and BSD.  If you are on Windows, you can build 
 			<a href="http://hg.openjdk.java.net/jdk7/hotspot/hotspot/file/tip/src/share/tools/hsdis/" target="new">hsdis</a> from source.
 		</p>
@@ -53,58 +70,105 @@
 			$ cp linux-hsdis-i386.so /usr/lib/jvm/java-6-openjdk/jre/lib/i386/cacao/<br/>
 		</div>
 		<p>
-			Now we are ready to compile and run this program, capturing the assembly instructions produced by the JIT compiler.
+			Now we are ready to compile and run this program, capturing the assembly instructions for the static set method of the WriterReader class.
 		</p>
 		<div class="code">		
-			$ /usr/lib/jvm/java-6-openjdk/bin/javac Volatile.java<br/>
-			$ /usr/lib/jvm/java-6-openjdk/jre/bin/java -XX:+UnlockDiagnosticVMOptions -XX:PrintAssemblyOptions=hsdis-print-bytes -Xbatch -XX:CompileCommand=print,Volatile.inc Volatile
+			$ /usr/lib/jvm/java-6-openjdk/bin/javac WriterReader.java<br/>
+			$ /usr/lib/jvm/java-6-openjdk/jre/bin/java -XX:+UnlockDiagnosticVMOptions -XX:PrintAssemblyOptions=hsdis-print-bytes -Xbatch -XX:CompileCommand=print,WriterReader.set WriterReader
 		</div>
 		<p>
 			The relevant output of this program falls between the push and pop instructions.  Keep in mind that we are now beyond the platform 
-			independent source code of Java.  These instructions are specific to the hardware the program was run on, a symmetric multiprocessing
-			 Intel Xeon CPU E5410.  We can observe many things about the Java memory model from this small stream of instructions.
+			independent source code of Java.  These instructions are specific to the hardware the program was run on, multi-processing Intel Xeon E5410.  
+			This short stream of instructions tells a long story.
 		</p>
 		<pre>
-   1: push   %ebp               
-   2: mov    %esp,%ebp          
-   3: sub    $0x18,%esp         
-   4: mov    $0x95ba52b8,%esi   
-   5: mov    0x148(%esi),%edi   
-   6: inc    %edi               
-   7: mov    %edi,0x148(%esi)   
-   8: mfence                    
-   9: mov    %ebp,%esp          
-  10: pop    %ebp               		
+  1: push   %ebp               ;...55
+  2: mov    %esp,%ebp          ;...8bec
+  3: sub    $0x18,%esp         ;...83ec18
+  4: mov    $0x95ba54d0,%esi   ;...bed054ba 95
+  5: mov    %ecx,0x148(%esi)   ;...898e4801 0000
+  6: mfence                    ;...0faef0
+  7: mov    %ebp,%esp          ;...8be5
+  8: pop    %ebp               ;...5d
 		</pre>
 		<p>
-			The read of this programs static volatile variable is on line (TODO).  The write to this static volatile variable is on line (TODO).
-			There is nothing to prevent a to threads from loading this value before either of them have written to it.  When this happens, the 
-			store operation of the second thread will clobber the increment of the first thread to perform the inc instruction on line six.
+			The write to the shared volatile variable is on line five.  But the most important instruction is on line six, the mfence instruction.  
+			The mfence instruction forces the processor to serialize all prior read and write memory operations.  A little background on hardware
+			architecture can help explain what this means.  
+			Memory latency is a major bottleneck.  A trip to main memory can cost in the neighborhood of 250 clock cycles on modern systems.
+			Hardware manufacturers use a cache hierarchy to avoid paying for this latency, bringing the costs of memory operations down by 
+			an order of magnitude.  These caches are write-back caches, as opposed to 
+			write-through caches.  This means that when a program write operation the value does not have to be written all the way 
+			out to main memory.  The processor instead places this operation in a write buffer and "promises" to perform this operation at a later optimal time.  
+			It is inaccurate to think of this buffer as a queue, as the operations that accumulate in it do not execute in the order in which 
+			they arrive.  This is usually a good thing, allowing the system to perform better.  But in the case of shared mutable memory, the 
+			program can behave incorrectly. For example it is possible for a thread to observe the a sequence of memory operations from another thread in
+			an out of order fashion.  To prevent this the program can use a memory barrier.  When a memory barrier forces a triggers a flush of all 
+			pending memory operations, the processor has temporarily loses many major opportunities for optimization.  
+			This performance hit is the cost that must be paid for correctness.
 		</p>
+		<h3>Fence Ellision</h3>
 		<p>
-			The most important instruction is on line eight, the mfence instruction.  The mfence instruction tells the processor that we wish 
-			to create a memory barrier.  To explain this barrier we must first cover a few things about the underlying hardware.  
-			Nowadays, memory latency is a major bottleneck.  A trip to main memory can cost in the neighborhood of 200 to 300 clock cycles (TODO).
-			One of the ways hardware manufacturers hide this latency is to use a cache hierarchy.  These caches are write-behind caches, rather 
-			than write through.  This means that when a program write to a variable, the cache does not have to write the value all the way 
-			through to main memory.  Instead, the processor can "promise" to perform this operation at a later time using a write buffer.  
-			The write operations of the buffer are often referred to as "queuing up".  However is more accurate to think of these operations as
-			"accumulating", rather than "queuing up" because the operations can be performed in an order other than the order they were given by 
-			the program.
-		</p>
+			The JVM is an amazingly efficient platform.  It is always looking for optimization opportunities.  When it can avoid a memory barrier, it does.
+			For example, on a uniprocessor system there are no needs for memory barriers because memory operations are already serialized.  Finding a 
+			uniprocessor can be a little difficult but if we run the previous experiment on a VMWare workstation image in uni-processor mode we can 
+			observe the exact same sequence of assembly instructions with one minor difference: no mfence instruction.
+  		</p>
+<pre>
+  1: push   %ebp               ;...55
+  2: mov    %esp,%ebp          ;...8bec
+  3: sub    $0x18,%esp         ;...83ec18
+  4: mov    $0x95ba54d0,%esi   ;...bed054ba 95
+  5: mov    %ecx,0x148(%esi)   ;...898e4801 0000
+  
+  <span style="font-weight:bold">No Fence</span>
+  
+  6: mov    %ebp,%esp          ;...8be5
+  7: pop    %ebp               ;...5d		
+</pre>  		
 		<p>
-			The mfence instruction tells the processor that it must flush both the write and read buffers before it can proceed.  
+			Now let's capture the instructions for the static get method of the WriterReader class.
 		</p>
+		<div class="code">		
+			$ /usr/lib/jvm/java-6-openjdk/jre/bin/java -XX:+UnlockDiagnosticVMOptions -XX:PrintAssemblyOptions=hsdis-print-bytes -Xbatch -XX:CompileCommand=print,WriterReader.get WriterReader
+		</div>
+<pre>
+  1: push   %ebp               ;...55
+  2: mov    %esp,%ebp          ;...8bec
+  3: sub    $0x18,%esp         ;...83ec18
+  4: mov    $0x95ba54d0,%eax   ;...b8d054ba 95
+  5: mov    0x148(%eax),%eax   ;...8b804801 0000
+  6: mov    %ebp,%esp          ;...8be5
+  7: pop    %ebp               ;...5d
+</pre>	
 		<p>
-			Notice how there is no fence associated with the read of this static volatile variable?
-		</p>
+			
+		</p>	
 		<br/>
 		<br/>
 		<br/>
+		<br/>
+		<br/>
+		<br/>
+		<br/>
+		<br/>
+		<br/>
+		<br/>
+		<br/>
+		<br/>		
 		volatile does not go out to main memory
 		volatile does not incur a read cost on x86
 		you cannot expire a cache
 		<br/>
-		<br/>
+		
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
 	</body>
 </html>

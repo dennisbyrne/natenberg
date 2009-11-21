@@ -123,7 +123,7 @@
 			Unfortunately programs can behave non-deterministically when memory operations on shared mutable state are re-ordered.  
 			It is possible for a thread to write values that become visible to another thread in an order that is inconsistent 
 			with the order in which they were written.		
-			To prevent this a program can use a memory barrier.  When a memory barrier triggers a flush of all 
+			To prevent this a program can use a memory barrier.  When a memory barrier serializes all 
 			pending memory operations the processor temporarily loses major opportunities for optimization.  
 			This performance hit is the cost that must be paid for correctness.
 		</p>
@@ -237,7 +237,7 @@
 		  at no point does the JVM send an explicit fence.  Instead, the JVM has killed two birds with one stone by applying a lock prefix to both cmpxchg instructions
 		  on lines 10 and 25.  The symantics of cmpxchg are beyond the scope of this article.  Only the lock prefix is relevant. 
 		  The lock prefix not only makes the write operation atomic, it also serializes all pending load and store opertions.  
-		  The write operation is now forced into visibility because it has been flushed from it's containing buffer.
+		  The write operation will now become visible before all subsequent memory operations in the program order.
 		  If we refactor and run the Counter class to use java.util.concurrent.atomic.AtomicInteger we can observe this same trick.
 		</p>
 <pre>

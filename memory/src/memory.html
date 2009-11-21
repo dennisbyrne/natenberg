@@ -13,10 +13,38 @@
 			This article is a crash coarse in memory barriers and the JVM.  Memory barriers, or fences, are 
 			a class of processor instructions used to apply ordering limitations on memory 
 			operations.  For this reason memory barriers have a fundamental impact on the performance and
-			determinism of any multi-threaded application.  This is not an article about locks or atomic 
+			determinism of multi-threaded programs.  This is not an article about locks or atomic 
 			operations per se.  Memory barriers are about an equally important element of 
 			concurrent programming called visibility.
 		</p>
+		<p>
+			Throughout this article we'll look at several concurrency constructs in Java and observe how
+			the JVM uses memory barriers to honor the guarantees of the Java Memory Model.  Along the way
+			you will notice seemingly pointless for loops in the source.  Ignore these.  These are only 
+			present in order to trigger JIT compilation.  The assembly instruction printed by these 
+			compilations are what's important.  
+		</p>
+		<p>
+			To begin we'll install a special debug version of the JVM.  The following will work for Linux.  Sun 
+			<a target="new" href="http://download.java.net/jdk6/binaries/">has installers</a> for Solaris or Windows
+			as well.
+		</p>
+		<div class="code">
+			$ wget http://www.java.net/download/jdk6/6u18/promoted/b05/binaries/jdk-6u18-ea-bin-b05-linux-i586-debug-18_nov_2009.jar<br/>
+			$ mv "jdk-6u18-ea-bin-b05-linux-i586-debug-18_nov_2009.jar?e=1258770582&h=67548292b3c14c86f56d40f66b94c302" jdk-6u18-ea-bin-b05-linux-i586-debug-18_nov_2009.jar<br/>
+			$ java -jar jdk-6u18-ea-bin-b05-linux-i586-debug-18_nov_2009.jar<br/>
+		</div>
+		<p>
+			Next we install a disassembler plugin. The Kenai project <a href="http://kenai.com/projects/base-hsdis/downloads" target="new">has binaries</a>
+			for Solaris, Linux and BSD.  The <a href="http://hg.openjdk.java.net/jdk7/hotspot/hotspot/file/tip/src/share/tools/hsdis/" target="new">hsdis</a>
+			plugin can be built from source for Windows. 
+		</p>
+		<div class="code">
+			$ wget http://kenai.com/projects/base-hsdis/downloads/download/linux-hsdis-i386.so<br/>
+			$ cp linux-hsdis-i386.so /usr/lib/jvm/java-6-openjdk/jre/lib/i386/server/<br/>
+			$ cp linux-hsdis-i386.so /usr/lib/jvm/java-6-openjdk/jre/lib/i386/client/<br/>
+			$ cp linux-hsdis-i386.so /usr/lib/jvm/java-6-openjdk/jre/lib/i386/cacao/<br/>
+		</div>
 		<p>
 			Our first example is the WriterReader class.
 		</p>
@@ -49,37 +77,17 @@
 		</pre>
 		<p>
 			The main method of this class creates two threads.  The writer thread writes to a static volatile variable.
-			The reader thread reads from that variable.  Ignore the for loops.  These are only used to trigger JIT compilation.
-			To obtain the assembly language instructions for this program we have to first install a special
-			debug version of the JVM.  The following will work for Linux.  Sun 
-			<a target="new" href="http://download.java.net/jdk6/binaries/">has installers</a> for Solaris or Windows
-			as well.
+			The reader thread reads this variable.
 		</p>
-		<div class="code">
-			$ wget http://www.java.net/download/jdk6/6u18/promoted/b05/binaries/jdk-6u18-ea-bin-b05-linux-i586-debug-18_nov_2009.jar<br/>
-			$ mv "jdk-6u18-ea-bin-b05-linux-i586-debug-18_nov_2009.jar?e=1258770582&h=67548292b3c14c86f56d40f66b94c302" jdk-6u18-ea-bin-b05-linux-i586-debug-18_nov_2009.jar<br/>
-			$ java -jar jdk-6u18-ea-bin-b05-linux-i586-debug-18_nov_2009.jar<br/>
-		</div>
 		<p>
-			Next we install a disassembler plugin. The Kenai project <a href="http://kenai.com/projects/base-hsdis/downloads" target="new">has binaries</a>
-			for Solaris, Linux and BSD.  The <a href="http://hg.openjdk.java.net/jdk7/hotspot/hotspot/file/tip/src/share/tools/hsdis/" target="new">hsdis</a>
-			plugin can be built from source for Windows. 
-		</p>
-		<div class="code">
-			$ wget http://kenai.com/projects/base-hsdis/downloads/download/linux-hsdis-i386.so<br/>
-			$ cp linux-hsdis-i386.so /usr/lib/jvm/java-6-openjdk/jre/lib/i386/server/<br/>
-			$ cp linux-hsdis-i386.so /usr/lib/jvm/java-6-openjdk/jre/lib/i386/client/<br/>
-			$ cp linux-hsdis-i386.so /usr/lib/jvm/java-6-openjdk/jre/lib/i386/cacao/<br/>
-		</div>
-		<p>
-			Now we are ready to compile and run this program, capturing the assembly instructions for the static set method of the WriterReader class.
+			The following two commands compile and run this program, producing the assembly instructions for the static set method of the WriterReader class.
 		</p>
 		<div class="code">		
 			$ /usr/lib/jvm/java-6-openjdk/bin/javac WriterReader.java<br/>
 			$ /usr/lib/jvm/java-6-openjdk/jre/bin/java -XX:+UnlockDiagnosticVMOptions -XX:PrintAssemblyOptions=hsdis-print-bytes -Xbatch -XX:CompileCommand=print,WriterReader.set WriterReader
 		</div>
 		<p>
-			The set method body translates to the instructions found between push and pop.
+			The set method translates to the instructions found between push and pop.
 		</p>
 		<pre>
   1: push   %ebp               ;...55
@@ -87,30 +95,31 @@
   3: sub    $0x18,%esp         ;...83ec18
   4: mov    $0x95ba54d0,%esi   ;...bed054ba 95
   5: mov    %ecx,0x148(%esi)   ;...898e4801 0000
-  6: mfence                    ;...0faef0
+  <span style="font-weight:bold">6: mfence                    ;...0faef0</span>
   7: mov    %ebp,%esp          ;...8be5
   8: pop    %ebp               ;...5d
 		</pre>
 		<p>
-			Keep in mind that we are now beyond the platform 
-			independent source code of Java.  These instructions are specific to the hardware the program was run on, a multi-processing Intel Xeon E5410.  
+			We are now beyond the platform independent source code of Java.  
+			These instructions are specific to the hardware the program was run on, a multi-processing Intel Xeon E5410.  
 			This short stream of instructions tells a long story.		
-			The write to the shared volatile variable is on line five, and it is immediately followed by a memory barrier on line six.  
-			The mfence instruction forces the processor to serialize all prior read and write memory operations.  (TODO this satisfies ... )
-			A little background on hardware can help explain the consequences of this.
+			The write to the shared volatile variable is on line five, and it is immediately followed by a memory barrier on line six. 
+			The JVM does this to satisfy a guarantee of the Java Memory Model - volatile reads and writes <i>happen before</i> (TODO).
+			The mfence instruction forces the processor to serialize all pending read and write memory operations.
+			This has great consequences and a little background on hardware is in order.
 		</p>
 		<h3>Determinism costs Latency</h3>
 		<p>
 			Memory latency is a major bottleneck.  A trip to main memory can cost in the neighborhood of 250 clock cycles on modern systems.
 			Hardware manufacturers use a cache hierarchy to decrease latency costs of memory operations by 
-			an order of magnitude.  These caches are write-back caches, as opposed to 
-			write-through caches.  This means the value of a write operation does not have to be written all the way 
+			orders of magnitude.  These caches are write-back, not write-through.  
+			This means the value of a write operation does not immediately have to be written all the way 
 			out to main memory.  The processor instead places this operation in a buffer and is now obligated to perform this operation at a later time.  
-			It is inaccurate to think of this buffer as a queue as the operations that accumulate in it do not execute in the order in which 
-			they arrive.  This is usually a good thing, allowing the system to perform better.  But programs can behave non-deterministically when
-			memory operations on shared mutable state are re-ordered.  
-			For example it is possible for a thread to read a series of values in an order that is inconsistent with the order in which they were written by
-			another thread.
+			It is inaccurate to think of this buffer as a queue. The operations that accumulate in it are not necessarily performed in the order in which 
+			they arrive.  This is usually a good thing because it opens the door to many optimization opportunities.  
+			Unfortunately programs can behave non-deterministically when memory operations on shared mutable state are re-ordered.  
+			It is possible for a thread to write values that become visible to another thread in an order that is inconsistent 
+			with the order in which they were written.
 		</p>
 		<p>
 			To prevent this the program can use a memory barrier.  When a memory barrier triggers a flush of all 
@@ -120,10 +129,10 @@
 		<h3>Avoiding costs with Fence Ellision</h3>
 		<p>
 			The JVM is an amazingly efficient platform.  It is always looking for optimization opportunities.  When it can avoid a memory barrier, it does.
-			Sometimes the consistency guarantees of the hardware memory model are greater than or equal to those of the Java memory model.  
+			Sometimes it gets lucky and the consistency guarantees of the hardware memory model are greater than or equal to those of the Java memory model.  
 			When this happens the JVM simply inserts a no op instead of an actual memory barrier.  For example, the memory consistency guarantees of an 
 			x86 are strong enough to eliminate the need for a memory barrier when reading a volatile variable.
-			The generated assembly instructions for the static get method of the WriterReader class actually demonstrates this.
+			The generated assembly instructions for the static get method of the WriterReader class actually demonstrate this.
 		</p>
 		<div class="code">
 			$ /usr/lib/jvm/java-6-openjdk/jre/bin/java -XX:+UnlockDiagnosticVMOptions -XX:PrintAssemblyOptions=hsdis-print-bytes -Xbatch -XX:CompileCommand=print,WriterReader.get WriterReader
@@ -161,7 +170,119 @@
 </pre> 		
 		<p>
 		Here we observe a volatile write on line five but the JVM does not chase it with a fence.
-		</p>		
+		</p>	
+		<h3>Other ways to Serialize Memory Operations</h3>
+		<p>
+			Now let's switch gears with the Counter class.  
+			The Counter class performs a classic read-modify-write operation.  The static counter field should not be made 
+			volatile because all three operations must be performed as if they were atomic.  For this reason the inc method
+			of the Counter class is synchronized.
+		</p>
+		<pre>
+	class Counter{
+	
+	  public static int counter = 0;
+	
+	  public static void main(String[] _){
+	       for(int i = 0; i < 100000; i++)
+	          inc();
+	  }
+	
+	  private static synchronized void inc(){ counter += 1; }
+	
+	}		
+		</pre>
+		<p>
+			We can compile the Counter class and observe the generated assembly instructions for the synchronized inc method with the following 
+			command lines. The java memory model guarantees the same visibility semantics for synchronized and java.util.concurrent.locks.ReentrantLock as it does for 
+			volatile, so we should expect to see another memory barrier.
+		</p>
+		<div class="code">
+		$ /usr/lib/jvm/java-6-openjdk/bin/javac Counter.java<br/>
+		$ /usr/lib/jvm/java-6-openjdk/jre/bin/java -XX:+UnlockDiagnosticVMOptions -XX:PrintAssemblyOptions=hsdis-print-bytes -XX:-UseBiasedLocking  -Xbatch -XX:CompileCommand=print,Counter.inc Counter
+		</div>
+		<pre>
+   1: push   %ebp               ;...55
+   2: mov    %esp,%ebp          ;...8bec
+   3: sub    $0x28,%esp         ;...83ec28
+   4: mov    $0x95ba5408,%esi   ;...be0854ba 95
+   5: lea    0x10(%esp),%edi    ;...8d7c2410
+   6: mov    %esi,0x4(%edi)     ;...897704
+   7: mov    (%esi),%eax        ;...8b06
+   8: or     $0x1,%eax          ;...83c801
+   9: mov    %eax,(%edi)        ;...8907
+  <span style="font-weight:bold">10: lock cmpxchg %edi,(%esi)  ;...f00fb13e</span>
+  11: je     0x011f2dda         ;...0f841000 0000
+  12: sub    %esp,%eax          ;...2bc4
+  13: and    $0xfffff003,%eax   ;...81e003f0 ffff
+  14: mov    %eax,(%edi)        ;...8907
+  15: jne    0x011f2e11         ;...0f853700 0000
+  16: mov    $0x95ba52b8,%eax   ;...b8b852ba 95
+  17: mov    0x148(%eax),%esi   ;...8bb04801 0000
+  <span style="font-weight:bold">18: inc    %esi               ;...46</span>
+  19: mov    %esi,0x148(%eax)   ;...89b04801 0000
+  20: lea    0x10(%esp),%eax    ;...8d442410
+  21: mov    (%eax),%esi        ;...8b30
+  22: test   %esi,%esi          ;...85f6
+  23: je     0x011f2e07         ;...0f840d00 0000
+  24: mov    0x4(%eax),%edi     ;...8b7804
+  <span style="font-weight:bold">25: lock cmpxchg %esi,(%edi)  ;...f00fb137</span>
+  26: jne    0x011f2e1f         ;...0f851800 0000
+  27: mov    %ebp,%esp          ;...8be5
+  28: pop    %ebp               ;...5d
+		</pre>
+		<p>
+		  To no surprise the number of instructions generated by synchronized is more than volatile.  The increment is found on line 18 but 
+		  at no point does the JVM send an explicit fence.  Instead, the JVM has killed two birds with one stone by applying a lock prefix to both cmpxchg instructions
+		  on lines 10 and 25.  The symantics of cmpxchg are beyond the scope of this article.  The lock prefix is the important part for this discussion. 
+		  The lock prefix not only makes the write operation atomic, it also serializes all pending load and store opertions.  
+		  If we refactor the Counter class to use java.util.concurrent.atomic.AtomicInteger we can observe this same trick.
+		</p>
+<pre>
+	import java.util.concurrent.atomic.AtomicInteger;
+	
+	class Counter{
+	
+	  static AtomicInteger counter = new AtomicInteger(0);
+	
+	  public static void main(String[] args){
+	    for(int i = 0; i < 1000000; i++)
+	      counter.incrementAndGet(); 
+	  }
+	
+	}
+</pre>		
+		<div class="code">
+		$ /usr/lib/jvm/java-6-openjdk/bin/javac Counter.java<br/>
+		$ /usr/lib/jvm/java-6-openjdk/jre/bin/java -XX:+UnlockDiagnosticVMOptions -XX:PrintAssemblyOptions=hsdis-print-bytes -Xbatch -XX:CompileCommand=print,*AtomicInteger.incrementAndGet Counter
+		</div>
+<pre>
+   1: push   %ebp               ;...55
+   2: mov    %esp,%ebp          ;...8bec
+   3: sub    $0x38,%esp         ;...83ec38
+   4: jmp    0x043cb20a         ;...e9080000 00
+   5: xchg   %ax,%ax            ;...6690
+   6: test   %eax,0xb788d100    ;...850500d1 88b7
+   7: mov    0x8(%ecx),%eax     ;...8b4108
+   8: mov    %eax,%esi          ;...8bf0
+   <span style="font-weight:bold">9: inc    %esi               ;...46</span>
+  10: mov    $0x9a3f03d0,%edi   ;...bfd0033f 9a
+  11: mov    0x160(%edi),%edi   ;...8bbf6001 0000
+  12: mov    %ecx,%edi          ;...8bf9
+  13: add    $0x8,%edi          ;...83c708
+  <span style="font-weight:bold">14: lock cmpxchg %esi,(%edi)  ;...f00fb137</span>
+  15: mov    $0x1,%eax          ;...b8010000 00
+  16: je     0x043cb234         ;...0f840500 0000
+  17: mov    $0x0,%eax          ;...b8000000 00
+  18: cmp    $0x0,%eax          ;...83f800
+  19: je     0x043cb204         ;...74cb
+  20: mov    %esi,%eax          ;...8bc6
+  21: mov    %ebp,%esp          ;...8be5
+  22: pop    %ebp               ;...5d
+</pre>		
+		<p>
+			Again we see the increment on line nine being made visible to all threads by the lock prefix on line 14.
+		</p>
 		<br/>
 		<br/>
 		<br/>

@@ -11,28 +11,25 @@
 	<body>
 		<h1>Memory Barriers and the JVM</h1>
 		<p>
-			This article is a crash course in memory barriers and the JVM.  Memory barriers, or fences, are 
+			This article is a crash course in memory barriers and the JVM.  Memory barriers are 
 			a class of processor instructions used to apply ordering limitations on memory 
 			operations.  For this reason memory barriers have a fundamental impact on the performance and
-			determinism of multi-threaded programs.  This is not an article about locks or atomic 
+			determinism of multi-threaded programs.  This is not an article about mutual exclusion or atomic 
 			operations per se.  Memory barriers are used to achieve an equally important element of 
 			concurrent programming called visibility.
 		</p>
 		<p>
 			Throughout this article we'll look at several concurrency constructs in Java and observe how
-			the JVM uses memory barriers to honor some guarantees of the Java memory model.  Along the way
+			the JVM uses memory barriers to honor some guarantees it's memory model.  Along the way
 			you will notice seemingly pointless for loops in the source code.  Ignore these.  These are only 
 			used to trigger JIT compilation.  The assembly instructions produced by these compilations
 			are what's important.  
-		</p>
-		<p>
 			To begin we'll install a special debug version of the JVM.  The following will work for Linux.  Sun 
 			<a target="new" href="http://download.java.net/jdk6/binaries/">has installers</a> for Solaris or Windows
 			as well.
 		</p>
 		<div class="code">
 			$ wget http://www.java.net/download/jdk6/6u18/promoted/b05/binaries/jdk-6u18-ea-bin-b05-linux-i586-debug-18_nov_2009.jar<br/>
-			$ mv "jdk-6u18-ea-bin-b05-linux-i586-debug-18_nov_2009.jar?e=1258770582&h=67548292b3c14c86f56d40f66b94c302" jdk-6u18-ea-bin-b05-linux-i586-debug-18_nov_2009.jar<br/>
 			$ java -jar jdk-6u18-ea-bin-b05-linux-i586-debug-18_nov_2009.jar<br/>
 		</div>
 		<p>
@@ -78,10 +75,7 @@
 		</pre>
 		<p>
 			The main method of this class creates two threads.  The writer thread writes to a static volatile variable.
-			The reader thread reads this variable.
-		</p>
-		<p>
-			The following two commands compile and run this program, producing the assembly instructions for the static set method of the WriterReader class.
+			The reader thread reads this variable.  The following commands give us a peek at the assembly instructions for the static set method.
 		</p>
 		<div class="code">		
 			$ /usr/lib/jvm/java-6-openjdk/bin/javac WriterReader.java<br/>
@@ -104,15 +98,15 @@
 			We are now beyond the platform independent source code of Java.  
 			These instructions are hardware specific - a multi-processing Intel Xeon E5410.  
 			This short stream of instructions tells a long story.		
-			The write to the shared volatile variable is on line five, and it is immediately followed by a memory barrier on line six. 
+			The write to the shared volatile variable is on line five, and it is immediately followed by an explicit fence on line six. 
 			The JVM uses a memory barrier to insure that all threads can observe a consistent value of the variable.
 			The mfence instruction forces the processor to serialize all pending read and write memory operations.
-			This has a lot consequences and a little background on hardware is in order.
+			This has a lot of consequences and a little background on hardware is in order.
 		</p>
 		<h3>Determinism costs Latency</h3>
 		<p>
 			Memory latency is a major bottleneck.  A trip to main memory can cost in the neighborhood of 250 clock cycles on modern systems.
-			Hardware manufacturers use a cache hierarchy to decrease latency costs of memory operations by 
+			Hardware manufacturers use caching to decrease latency costs of memory operations by 
 			orders of magnitude.  These caches are write-back, not write-through.  
 			This means the value of a write operation does not immediately have to be written all the way 
 			out to main memory.  The processor instead places this operation in a buffer and is now obligated to perform this operation at a later time.  
@@ -122,10 +116,10 @@
 		<p>
 			Unfortunately programs can behave non-deterministically when memory operations on shared mutable state are re-ordered.  
 			It is possible for a thread to write values that become visible to another thread in an order that is inconsistent 
-			with the order in which they were written.		
+			with the order in which they were written.
 			To prevent this a program can use a memory barrier.  When a memory barrier serializes all 
 			pending memory operations the processor temporarily loses major opportunities for optimization.  
-			This performance hit is the cost that must be paid for correctness.
+			This performance hit is the cost we pay for correctness.
 		</p>
 		<h3>Avoiding costs with Fence Elision</h3>
 		<p>
@@ -267,7 +261,7 @@
    6: test   %eax,0xb788d100    ;...850500d1 88b7
    7: mov    0x8(%ecx),%eax     ;...8b4108
    8: mov    %eax,%esi          ;...8bf0
-   <span style="font-weight:bold">9: inc    %esi               ;...46</span>
+   9: inc    %esi               ;...46
   10: mov    $0x9a3f03d0,%edi   ;...bfd0033f 9a
   11: mov    0x160(%edi),%edi   ;...8bbf6001 0000
   12: mov    %ecx,%edi          ;...8bf9
@@ -283,7 +277,11 @@
   22: pop    %ebp               ;...5d
 </pre>		
 		<p>
-			Again we see the increment on line nine being made visible to all threads by the lock prefix on line 14.
+			Again we see the write operation being chased with a lock prefix on line 14.  This insures the new 
+			value of the variable will become visible to other threads before all subsequent operations.
+		</p>
+		<p>
+			
 		</p>
 		<br/>
 		<br/>

@@ -104,7 +104,8 @@
 		</pre>
 		<p>
 			The main method of this class creates two threads.  The writer thread writes to a static volatile variable.
-			The reader thread reads this variable.  The following command give us a peek at the assembly instructions for the static set method.
+			The reader thread reads this variable.  The following command give us a peek at the assembly instructions for this programs.  
+			Notice how the CompileCommand option is used to filter these instructions down to just those for the static set method.
 		</p>
 		<div class="code">		
 			$ java -XX:+UnlockDiagnosticVMOptions -XX:PrintAssemblyOptions=hsdis-print-bytes -XX:CompileCommand=print,WriterReader.set WriterReader

@@ -12,9 +12,8 @@
 		<h1>Memory Barriers and the JVM</h1>
 		<p>
 			This is a crash course in memory barriers and the JVM.  Memory barriers are 
-			a class of processor instructions used to apply ordering limitations on memory 
-			operations.  For this reason memory barriers have a fundamental impact on the performance and
-			determinism of multi-threaded programs.  This is not an article about mutual exclusion or atomic 
+			a class of processor instructions that impact the performance and
+			determinism of any multi-threaded program.  This is not an article about mutual exclusion or atomic 
 			operations per se.  Memory barriers are used to achieve an equally important element of 
 			concurrent programming called visibility.
 			We'll look at several concurrency constructs in Java and observe how 
@@ -22,8 +21,8 @@
 		</p>
 		<h3>What are Memory Barriers?</h3>
 		<p>
-			Memory barriers are processor instructions with large consequences.  Before we answer this 
-			question a little background on hardware is in order.
+			Memory barriers are processor instructions used to apply ordering limitations on memory 
+			operations.  This has large consequences and a little background on hardware is in order.
 		</p>
 		<p>
 			The costs of memory latency have pushed processors to reorder and cache memory operations.
@@ -42,9 +41,11 @@
 			Programs can behave non-deterministically when memory operations on shared mutable state are re-ordered.  
 			It is possible for a thread to write values that become visible to another thread in an order that is inconsistent 
 			with the order in which they were written.
-			A good program prevents this problem using a memory barrier at the right times.
+			A good program prevents this problem using memory barriers at the right times.
 			A memory barrier instructs the processor to serialize pending memory operations.
 			This temporarily closes the door to many opportunities for optimization, sacrificing performance and simplicity for correctness.
+			<span style="font-weight:bold; color:red"> <br/>TODO: some say 'flushing' the buffer instead of just 'serializing' it.  
+			Are there actual instructions on some hardware that can force a flush?</span>
 		</p>
 		<h3>Examples</h3>
 		<p>
@@ -104,7 +105,7 @@
 		</pre>
 		<p>
 			The main method of this class creates two threads.  The writer thread writes to a static volatile variable.
-			The reader thread reads this variable.  The following command give us a peek at the assembly instructions for this programs.  
+			The reader thread reads this variable.  The following command give us a peek at the assembly instructions for this program.  
 			Notice how the CompileCommand option is used to filter these instructions down to just those for the static set method.
 		</p>
 		<div class="code">		
@@ -123,6 +124,8 @@
   7: mov    %ebp,%esp          ;...8be5
   8: pop    %ebp               ;...5d
 		</pre>
+<span style="font-weight:bold; color:red"> TODO: Need examples on other hardware than just Intel</span><br/>
+<span style="font-weight:bold; color:red"> TODO: Get one example of a non bidi fence</span>		
 		<p>
 			These instructions were captured on a multi-processing Intel Xeon E5410.
 			This short stream of instructions tells a long story.
@@ -273,7 +276,7 @@
    2: mov    %esp,%ebp          ;...8bec
    3: sub    $0x38,%esp         ;...83ec38
    4: jmp    0x043cb20a         ;...e9080000 00
-   5: xchg   %ax,%ax            ;...6690
+   5: xchg   %ax,%ax            ;...6690<span style="font-weight:bold; color:red"> TODO: this is an implicit lock prefix ... does the JVM 'xchg x x' to serialize here as well?</span>
    6: test   %eax,0xb788d100    ;...850500d1 88b7
    7: mov    0x8(%ecx),%eax     ;...8b4108
    8: mov    %eax,%esi          ;...8bf0

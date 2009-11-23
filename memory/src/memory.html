@@ -134,9 +134,9 @@
 			The write to the shared volatile variable is on line five.  The JVM must insure
 			this write operation appears to happen before all subsequent memory operations performed 
 			by the writer thread.
-			To honor this guarantee a memory barrier is created with an explicit full fence instruction
+			To honor this guarantee a memory barrier is created with an explicit fence instruction
 			on line six.   
-			The mfence instruction is a "full fence" meaning that it forces the processor to 
+			The mfence instruction is a "full fence", or bidirectional fence.  A full fence forces the processor to 
 			serialize both pending read and pending write operations.
 		</p>
 		<h3>Avoiding costs with Fence Elision</h3>
@@ -278,7 +278,7 @@
    2: mov    %esp,%ebp          ;...8bec
    3: sub    $0x38,%esp         ;...83ec38
    4: jmp    0x043cb20a         ;...e9080000 00
-   5: xchg   %ax,%ax            ;...6690<span style="font-weight:bold; color:red"> TODO: this is an implicit lock prefix ... does the JVM 'xchg x x' to serialize here as well?</span>
+   5: xchg   %ax,%ax            ;...6690<span style="font-weight:bold; color:red"> TODO: this is an implicit lock prefix ... does 'xchg x x' serialize or is this a NOP?</span>
    6: test   %eax,0xb788d100    ;...850500d1 88b7
    7: mov    0x8(%ecx),%eax     ;...8b4108
    8: mov    %eax,%esi          ;...8bf0

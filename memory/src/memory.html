@@ -44,7 +44,7 @@
 			A good program prevents this problem using memory barriers at the right times.
 			A memory barrier instructs the processor to serialize pending memory operations.
 			This temporarily closes the door to many opportunities for optimization, sacrificing performance and simplicity for correctness.
-			<span style="font-weight:bold; color:red"> <br/>TODO: Some membars flush and wait, but do all of them?</span>
+			<span style="font-weight:bold; color:red"> <br/>TODO: Some membars flush and wait (rather than just act as a ordering constraint), but do all of them?</span>
 		</p>
 		<h3>Examples</h3>
 		<p>

@@ -32,9 +32,11 @@
 			This means the value of a write operation does not immediately have to be written all the way 
 			out to main memory.
 			The processor instead places this operation in a buffer and is now obligated to perform this operation at a later time.
-			These buffers are often misunderstood as queues. They are not.  
+			These operations are said to be "in flight".
+			Memory buffers are often misunderstood as queues. They are not.  
 			The operations that accumulate in memory operation buffers are not necessarily performed in the order in which 
-			they arrive.  This is usually a good thing because it opens the door to many optimization opportunities.  
+			they arrive.  
+			This is great for data that is confined to the scope of one thread because it opens the door for many optimization opportunities.  
 		</p>
 		<p>
 			Combining these optimizations with symmetric multi-processing and shared mutable state is a nightmare.
@@ -42,9 +44,8 @@
 			It is possible for a thread to write values that become visible to another thread in an order that is inconsistent 
 			with the order in which they were written.
 			A good program prevents this problem using memory barriers at the right times.
-			A memory barrier instructs the processor to serialize pending memory operations.
-			This temporarily closes the door to many opportunities for optimization, sacrificing performance and simplicity for correctness.
-			<span style="font-weight:bold; color:red"> <br/>TODO: Some membars flush and wait (rather than just act as a ordering constraint), but do all of them?</span>
+			Memory barriers are expensive because they instruct a processor to serialize pending memory operations.
+			This also temporarily limits optimization opportunities.  Performance and simplicity are the costs for correctness.
 		</p>
 		<h3>Examples</h3>
 		<p>

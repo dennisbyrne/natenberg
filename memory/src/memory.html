@@ -11,32 +11,24 @@
 	<body>
 		<h1>Memory Barriers and the JVM</h1>
 		<p>
-			This is a crash course in memory barriers and the JVM.  Memory barriers are 
-			a class of processor instructions that impact the performance and
-			determinism of any multi-threaded program.  This is not an article about mutual exclusion or atomic 
-			operations per se.  Memory barriers are used to achieve an equally important element of 
-			concurrent programming called visibility.
-			We'll look at several concurrency constructs in Java and observe how 
-			the JVM uses memory barriers to honor some guarantees of the java memory model.
+			Memory barriers are a set of processor instructions used to apply ordering limitations on memory operations.  		
+			This article covers the impact memory barriers have on the performance and determinism of any multi-threaded program.
+			We'll look at how the JVM uses memory barriers to implement volatile, synchronized and atomic conditionals.
+			This is not an article about mutual exclusion, parallelism or atomic operations per se.
+			Memory barriers are used to achieve an equally important element of concurrent programming called visibility.
 		</p>
-		<h3>What are Memory Barriers?</h3>
-		<p>
-			Memory barriers are processor instructions used to apply ordering limitations on memory 
-			operations.  This has large consequences and a little background on hardware is called for.
-		</p>
+		<h3>Memory Barriers are Expensive</h3>
 		<p>
 			The costs of memory latency have pushed processors to reorder and cache memory operations.
 			A trip to main memory costs hundreds of clock cycles on commodity hardware.
 			Processors use caching to decrease latency costs of memory operations by orders of magnitude.  
 			These caches are write-back, not write-through.
-			This means the value of a write operation does not immediately have to be written all the way 
-			out to main memory.
+			This means the value of a write operation does not immediately have to be written all the way out to main memory.
 			The processor instead places this operation in a buffer and is now obligated to perform this operation at a later time.
-			These operations are said to be "in flight".
-			Memory buffers are often misunderstood as queues. They are not.  
-			The operations that accumulate in memory operation buffers are not necessarily performed in the order in which 
-			they arrive.  
-			This is great for data that is confined to the scope of one thread because it opens the door for many optimization opportunities.  
+			Buffered operations are said to be "in flight".
+			Buffers are often misunderstood as queues. They are not.  
+			In-flight operations are not necessarily performed in the order in which they are fed to the processor.
+			This is good when data is confined to the scope of one thread because it opens the door for many optimizations.  
 		</p>
 		<p>
 			Combining these optimizations with symmetric multi-processing and shared mutable state is a nightmare.
@@ -44,26 +36,16 @@
 			It is possible for a thread to write values that become visible to another thread in an order that is inconsistent 
 			with the order in which they were written.
 			A good program prevents this problem using memory barriers at the right times.
-			Memory barriers are expensive because they instruct a processor to serialize pending memory operations.
-			This also temporarily limits optimization opportunities.  Performance and simplicity are the costs for correctness.
+			Memory barriers are expensive - they instruct a processor to serialize pending memory operations.
 		</p>
-		<h3>Examples</h3>
+		<h3>Memory Barriers are Protocols</h3>
 		<p>
 			The JVM translates language level concurrency primitives into memory barriers. 
-			Let's look at the source code and assembly instructions for three simple Java programs. 
-			A debug version of the JVM can be used to obtain the generated instructions for each Java program. 
-			<span style="font-weight:bold; color:red">Not true.  You only need the debug version for PrintOptoAssembly.</span> The following works for Linux.  
-			Sun <a target="new" href="http://download.java.net/jdk6/binaries/">has installers</a> for Solaris or Windows
-			as well.
-		</p>
-		<div class="code">
-			$ wget http://www.java.net/download/jdk6/6u18/promoted/b05/binaries/jdk-6u18-ea-bin-b05-linux-i586-debug-18_nov_2009.jar<br/>
-			$ java -jar jdk-6u18-ea-bin-b05-linux-i586-debug-18_nov_2009.jar<br/>
-		</div>
-		<p>
-			A disassembler plugin is required also. The Kenai project <a href="http://kenai.com/projects/base-hsdis/downloads" target="new">has binaries</a>
+			Let's look at the source code and assembly instructions of some simple Java programs to see how. 
+			This requires the latest OpenJDK release or a new version of HotSpot, update 14 or above.
+			A disassembler plugin is also required. The Kenai project <a href="http://kenai.com/projects/base-hsdis/downloads" target="new">has binaries</a>
 			for Solaris, Linux and BSD.  The <a href="http://hg.openjdk.java.net/jdk7/hotspot/hotspot/file/tip/src/share/tools/hsdis/" target="new">hsdis</a>
-			plugin is an alternative that can be built from source for Windows. 
+			plugin is an alternative that can be built from source for Windows.  The following works for Linux.
 		</p>
 		<div class="code">
 			$ wget http://kenai.com/projects/base-hsdis/downloads/download/linux-hsdis-i386.so<br/>
@@ -71,45 +53,59 @@
 			$ cp linux-hsdis-i386.so /usr/lib/jvm/java-6-openjdk/jre/lib/i386/client/<br/>
 		</div>
 		<p>
-			Our first example is the WriterReader class.
+			Let's begin a crash course in memory barriers with the WriterReader class.
+			There are seemingly pointless for loops in the source code for all of our examples.  
+			Ignore these.  These are only used to trigger JIT compilation.
 		</p>
-		<span style="font-weight:bold; color:red">Extract Reader class, pull it down to Fence Elision section with a LoadLoad barrier quote</span>
 		<pre>
 	class WriterReader{
 	
-	  static volatile int shared = 0;
+	  static volatile int a = 0;
+	  static volatile int b = 0;
 	
 	  public static void main(String[] _){
-	    Thread writer = new Thread(){
-	      public void run(){
-	        for(int i = 0; i < 10000; i++)
-	          set(i);
-	      }
-	    };
 	    Thread reader = new Thread(){
 	      public void run(){
 	        for(int i = 0; i < 10000; i++)
-	          get();
+	          read();
+	      }
+	    };	  
+	    Thread writer = new Thread(){
+	      public void run(){
+	        for(int i = 0; i < 10000; i++)
+	          write(i);
 	      }
 	    };
-	    writer.start();
 	    reader.start(); 
+	    writer.start();
+	  }
+
+	  static void read(){
+	    int aLocal = a;
+	    int bLocal = b;
 	  }
 	
-	  static void set(int newValue){ shared = newValue; }
-	  
-	  static int get(){ return shared; }
+	  static void write(int newValue){ 
+	    a = newValue;
+	    b = newValue;
+	  }
+	
 	}
-		</pre>
+</pre>
 		<p>
-			The main method of this class creates two threads.  The writer thread writes to a static volatile variable.
-			The reader thread reads this variable.  
-			In each example you will notice seemingly pointless for loops in the source code.  
-			These should be ignored.  These are only used to trigger JIT compilation.
-			The following command give us a peek at the assembly instructions produced from this compilation.  
-			Notice how the CompileCommand option is used to filter these instructions down to just those for the static set method.
+			The main method of this class creates two threads.  The writer thread writes to two static volatile variables.
+			The reader thread reads these variables.  
+			Consider the point of view of the reader thread.
+			The reader thread should expect to observe a to be equal to b, or a to be greater than b, but it 
+			should never expect to observe b to be greater than a.  
+			Without the volatile modifier the reader could in fact observe b to be greater than a.  
+			That is, the reader thread could observe the write to b before the write to a. 
+			Using the keyword volatile prevents this problem because it established a <i>happens before</i> relationship between the write to a and the write to b.
+			A peek under the hood shows why.
+			This command allows us to capture the assembly instructions for the WriterReader.
+			The CompileCommand option is used to filter these instructions down to just those for the static TODO method.
 		</p>
-		<div class="code">		
+		<div class="code">
 			$ java -XX:+UnlockDiagnosticVMOptions -XX:PrintAssemblyOptions=hsdis-print-bytes -XX:CompileCommand=print,WriterReader.set WriterReader
 		</div>
 		<p>

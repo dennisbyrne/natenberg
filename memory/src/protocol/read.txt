@@ -1,0 +1,49 @@
+CompilerOracle: print WriterReader.read
+Compiled (c1)   5   nmethod WriterReader::read (9 bytes)
+ total in heap  [0x01baadc8,0x01baaef0] = 296
+ relocation     [0x01baae7c,0x01baae8c] = 16
+ main code      [0x01baae90,0x01baaec0] = 48
+ stub code      [0x01baaec0,0x01baaecf] = 15
+ constants      [0x01baaecf,0x01baaed0] = 1
+ scopes data    [0x01baaed0,0x01baaed4] = 4
+ scopes pcs     [0x01baaed4,0x01baaeec] = 24
+ dependencies   [0x01baaeec,0x01baaef0] = 4
+Loaded disassembler from hsdis-i386.so
+Decoding compiled method 0x01baadc8:
+Code:
+[Disassembling for mach='i386']
+[Entry Point]
+[Verified Entry Point]
+  0x01baae90: mov    %eax,-0x3000(%esp)  ;...89842400 d0ffff
+  0x01baae97: push   %ebp               ;...55
+  0x01baae98: mov    %esp,%ebp          ;...8bec
+  0x01baae9a: sub    $0x18,%esp         ;...83ec18
+  0x01baae9d: mov    $0x95ba53a0,%esi   ;...bea053ba 95
+                                        ;   {oop()}
+  0x01baaea2: mov    0x148(%esi),%edi   ;...8bbe4801 0000
+  0x01baaea8: mov    0x14c(%esi),%esi   ;...8bb64c01 0000
+  0x01baaeae: mov    %ebp,%esp          ;...8be5
+  0x01baaeb0: pop    %ebp               ;...5d
+  0x01baaeb1: test   %eax,0xb77dc100    ;...850500c1 7db7
+                                        ;   {poll_return}
+  0x01baaeb7: ret                       ;...c3
+  0x01baaeb8: nop                       ;...90
+  0x01baaeb9: nop                       ;...90
+  0x01baaeba: hlt                       ;...f4
+  0x01baaebb: hlt                       ;...f4
+  0x01baaebc: hlt                       ;...f4
+  0x01baaebd: hlt                       ;...f4
+  0x01baaebe: hlt                       ;...f4
+  0x01baaebf: hlt                       ;...f4
+[Exception Handler]
+[Stub Code]
+  0x01baaec0: jmp    0x01b6f400         ;...e93b45fc ff
+                                        ;   {no_reloc}
+  0x01baaec5: push   $0x1baaec5         ;...68c5aeba 01
+                                        ;   {section_word}
+  0x01baaeca: jmp    0x01b61a40         ;...e9716bfb ff
+                                        ;   {runtime_call}
+[Constants]
+  0x01baaecf: .byte 0x0                 ;...00
+OopMapSet contains 0 OopMaps
+

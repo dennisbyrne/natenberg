@@ -1,0 +1,45 @@
+CompilerOracle: print WriterReader.write
+Compiled (c1)   6   nmethod WriterReader::write (9 bytes)
+ total in heap  [0x03e8df08,0x03e8e030] = 296
+ relocation     [0x03e8dfbc,0x03e8dfcc] = 16
+ main code      [0x03e8dfd0,0x03e8e000] = 48
+ stub code      [0x03e8e000,0x03e8e00f] = 15
+ constants      [0x03e8e00f,0x03e8e010] = 1
+ scopes data    [0x03e8e010,0x03e8e014] = 4
+ scopes pcs     [0x03e8e014,0x03e8e02c] = 24
+ dependencies   [0x03e8e02c,0x03e8e030] = 4
+Loaded disassembler from hsdis-i386.so
+Decoding compiled method 0x03e8df08:
+Code:
+[Disassembling for mach='i386']
+[Entry Point]
+[Verified Entry Point]
+  0x03e8dfd0: mov    %eax,-0x3000(%esp)  ;...89842400 d0ffff
+  0x03e8dfd7: push   %ebp               ;...55
+  0x03e8dfd8: mov    %esp,%ebp          ;...8bec
+  0x03e8dfda: sub    $0x18,%esp         ;...83ec18
+  0x03e8dfdd: mov    $0x95ba53a0,%esi   ;...bea053ba 95
+                                        ;   {oop()}
+  0x03e8dfe2: mov    %ecx,0x148(%esi)   ;...898e4801 0000
+  0x03e8dfe8: mfence                    ;...0faef0
+  0x03e8dfeb: mov    %ecx,0x14c(%esi)   ;...898e4c01 0000
+  0x03e8dff1: mfence                    ;...0faef0
+  0x03e8dff4: mov    %ebp,%esp          ;...8be5
+  0x03e8dff6: pop    %ebp               ;...5d
+  0x03e8dff7: test   %eax,0xb77be100    ;...850500e1 7bb7
+                                        ;   {poll_return}
+  0x03e8dffd: ret                       ;...c3
+  0x03e8dffe: nop                       ;...90
+  0x03e8dfff: nop                       ;...90
+[Exception Handler]
+[Stub Code]
+  0x03e8e000: jmp    0x03e52400         ;...e9fb43fc ff
+                                        ;   {no_reloc}
+  0x03e8e005: push   $0x3e8e005         ;...6805e0e8 03
+                                        ;   {section_word}
+  0x03e8e00a: jmp    0x03e44a40         ;...e9316afb ff
+                                        ;   {runtime_call}
+[Constants]
+  0x03e8e00f: .byte 0x0                 ;...00
+OopMapSet contains 0 OopMaps
+

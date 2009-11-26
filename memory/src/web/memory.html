@@ -12,9 +12,9 @@
 		<h1>Memory Barriers and the JVM</h1>
 		<p>
 			Memory barriers are a set of processor instructions used to apply ordering limitations on memory operations.  		
-			This article covers the impact memory barriers have on the performance and determinism of any multi-threaded program.
+			This article explains the impact memory barriers have on the performance and determinism of any multi-threaded program.
 			We'll look at how the JVM uses memory barriers to implement volatile, synchronized and atomic conditionals.
-			This is not an article about mutual exclusion, parallelism or atomic operations per se.
+			This is not an article about mutual exclusion, parallelism or atomicity per se.
 			Memory barriers are used to achieve an equally important element of concurrent programming called visibility.
 		</p>
 		<h3>Memory Barriers Are Expensive</h3>
@@ -28,11 +28,11 @@
 			Buffered operations are said to be "in flight".
 			Buffers are often misunderstood as queues. They are not.  
 			In-flight operations are not necessarily performed in the order in which they are fed to the processor.
-			This is good when data is confined to the scope of one thread because it opens the door for many optimizations.  
+			This opens the door for many optimizations when data is confined to the scope of one thread, or when data is immutable and used by many threads.  
 		</p>
 		<p>
 			Combining these optimizations with symmetric multi-processing and shared mutable state is a nightmare.
-			Programs can behave non-deterministically when memory operations on shared mutable state are re-ordered.  
+			A program can behave non-deterministically when memory operations on shared mutable state are re-ordered.  
 			It is possible for a thread to write values that become visible to another thread in an order that is inconsistent 
 			with the order in which they were written.
 			A good program prevents this problem using memory barriers at the right times.
@@ -54,8 +54,8 @@
 		</div>
 		<p>
 			Let's begin a crash course in memory barriers with the WriterReader class.
-			There are seemingly pointless for loops in the source code for all of our examples.  
-			Ignore these.  These are only used to trigger JIT compilation.
+			The for loops in this source code should be ignored.
+			These are only used to trigger JIT compilation.
 		</p>
 		<pre>
 	class WriterReader{
@@ -100,47 +100,83 @@
 			should never expect to observe b to be greater than a.  
 			Without the volatile modifier the reader could in fact observe b to be greater than a.  
 			That is, the reader thread could observe the write to b before the write to a. 
-			Using the keyword volatile prevents this problem because it established a <i>happens before</i> relationship between the write to a and the write to b.
+			Using the keyword volatile prevents this problem because it establishes a <i>happens before</i> relationship between the write to a and the write to b.
 			A peek under the hood shows why.
-			This command allows us to capture the assembly instructions for the WriterReader.
+			The following command allows us to capture the assembly instructions for the WriterReader.
 			The CompileCommand option is used to filter these instructions down to just those for the static TODO method.
 		</p>
 		<div class="code">
-			$ java -XX:+UnlockDiagnosticVMOptions -XX:PrintAssemblyOptions=hsdis-print-bytes -XX:CompileCommand=print,WriterReader.set WriterReader
+			$ java -XX:+UnlockDiagnosticVMOptions -XX:PrintAssemblyOptions=hsdis-print-bytes -XX:CompileCommand=print,WriterReader.read WriterReader
 		</div>
 		<p>
-			The set method translates to the instructions found between push and pop.
-			These instructions were captured on a multi-processing Intel Xeon E5410.
+			The read method translates to the instructions found between push and pop.
+			These instructions were captured on a multi-processing <span style="font-weight:bold; color:red"> TODO: get a hold of a sparc or itanium box</span>.
 		</p>
-		<pre>
-  1: push   %ebp               ;...55
-  2: mov    %esp,%ebp          ;...8bec
-  3: sub    $0x18,%esp         ;...83ec18
-  4: mov    $0x95ba54d0,%esi   ;...bed054ba 95
-  5: mov    %ecx,0x148(%esi)   ;...898e4801 0000
-  <span style="font-weight:bold">6: mfence                    ;...0faef0</span>
-  7: mov    %ebp,%esp          ;...8be5
-  8: pop    %ebp               ;...5d
-		</pre>
-<span style="font-weight:bold; color:red"> TODO: Get one example of a non bidi fence<br/></span>
-<span style="font-weight:bold; color:red"> TODO: The whole article approaches the problem from the perspective of the storing thread<br/></span>			
-<span style="font-weight:bold; color:red"> TODO: Make sure readers understands this can and has changed across versions of the JVM</span>			
+<pre>
+<span style="font-weight:bold; color:red">     TODO non x86 assembly instructions for read/0 here.</span>
+</pre>	
 		<p>
 			This short stream of instructions tells a long story.
-			The write to the shared volatile variable is on line five.  The JVM must insure
-			this write operation appears to happen before all subsequent memory operations performed 
-			by the writer thread.
+			The read of a shared volatile variable is on line <span style="font-weight:bold; color:red">N</span>.  
+			The JVM must insure this read <i>happens before</i> the following read operation.
 			To honor this guarantee a memory barrier is created with an explicit fence instruction
-			on line six.   
-			The mfence instruction is a "full fence", or bidirectional fence.  A full fence forces the processor to 
-			serialize both pending read and pending write operations.
+			on line <span style="font-weight:bold; color:red">N+1</span>.
 		</p>
+		<p>
+			<span style="font-weight:bold; color:red">TODO: paragraph on the instruction itself.</span>
+			A memory barrier that enforces ordering limitations on reads <i>or</i> writes is said to be a unidirectional fence.
+			A memory barrier that enforces ordering limitations on reads <i>and</i> writes is said to be a bidirectional, or full fence.  
+			The <span style="font-weight:bold; color:red">unidirectional fence</span> is a unidirectional fence.
+		</p>
+		<p>
+			Consistency is a two way street.
+			How useful is it for the reader thread to send a memory barrier between both reads if the writer thread does not separate both writes with one as well?
+			In order for threads to communicate they must <i>all</i> obey the protocol; just like nodes on a network, or people on a team.
+			If one thread breaks formation than the efforts of all threads are rendered useless.
+			We should expect to see memory barriers in the assembly instructions for write method of the WriterReader.
+		</p>
+		<div class="code">
+			$ java -XX:+UnlockDiagnosticVMOptions -XX:PrintAssemblyOptions=hsdis-print-bytes -XX:CompileCommand=print,WriterReader.write WriterReader
+		</div>	
+<pre>
+<span style="font-weight:bold; color:red">     TODO non x86 assembly instructions for write/0 here.</span>
+</pre>
+		<p>
+			Here we can see both write operations being chased with explicit full fence instructions on lines <span style="font-weight:bold; color:red">X</span>
+			and <span style="font-weight:bold; color:red">Y</span>.
+			This insures each write operation <i>happens before</i> subsequent memory operations.
+		</p>
+		<p><span style="font-weight:bold; color:red">TODO: paragraph on the instruction itself.  This instruction is a "full fence", or bidirectional fence.  A full fence forces the processor to 
+			serialize both pending read and pending write operations.</span>
+		</p>			
 		<h3>Memory Barriers Are Hardware Specific</h3>
-		<p><span style="font-weight:bold; color:red">TODO ... replace the above with PowerPC example ... move x86 example to here. make sure reader knows this is not a comprehensive overview of membars</span></p>
+		<p>
+			This article does not aim to be a comprehensive overview of all memory barriers.
+			This would be a monumental task.
+			It is important though to appreciate the fact that these instructions and their symantics vary considerably across different hardware architectures.
+			Below is what the write method of WriterReader translates to on a multi-processing Intel Xeon E5410.
+			All remaining assembly instruction sequences in this article were captured on this hardware.
+		</p>
+<pre>
+  0x03e8dfd7: push   %ebp               ;...55
+  0x03e8dfd8: mov    %esp,%ebp          ;...8bec
+  0x03e8dfda: sub    $0x18,%esp         ;...83ec18
+  0x03e8dfdd: mov    $0x95ba53a0,%esi   ;...bea053ba 95
+                                        ;   {oop()}
+  0x03e8dfe2: mov    %ecx,0x148(%esi)   ;...898e4801 0000
+  0x03e8dfe8: mfence                    ;...0faef0
+  0x03e8dfeb: mov    %ecx,0x14c(%esi)   ;...898e4c01 0000
+  0x03e8dff1: mfence                    ;...0faef0
+  0x03e8dff4: mov    %ebp,%esp          ;...8be5
+  0x03e8dff6: pop    %ebp               ;...5d
+</pre>
+		<p>
+			As we saw before both write operations are chased with mfence, an explicit full fence instruction.
+		</p>
 		<h3>Memory Barriers Do Not Have To Be Explicit</h3>
 		<p>
 			Explicit fence instructions are not the only way to serialize memory operations. 
-			Let's switch gears with the Counter class to see an example.  
+			Let's switch gears to the Counter class to see an example.  
 		</p>
 		<pre>
 	class Counter{
@@ -157,13 +193,11 @@
 	}		
 		</pre>
 		<p>
-			The Counter class performs a classic read-modify-write operation.  The static counter field is not 
-			volatile because all three operations must be observed atomically.  For this reason the inc method
-			of the Counter class is synchronized.
-		</p>
-		<p>
-			We can compile the Counter class and observe the generated assembly instructions for the synchronized inc method with the following 
-			command lines. The Java memory model guarantees the same visibility semantics for exiting of synchronized regions as it does for
+			The Counter class performs a classic read-modify-write operation.  
+			The static counter field is not volatile because all three operations must be observed atomically.  
+			For this reason the inc method of the Counter class is synchronized.
+			We can compile the Counter class and observe the generated assembly instructions for the synchronized inc method with the following command. 
+			The Java memory model guarantees the same visibility semantics for exiting of synchronized regions as it does for
 			volatile memory operations, so we should expect to see another memory barrier.
 		</p>
 		<div class="code">
@@ -203,8 +237,8 @@
 		  To no surprise the number of instructions generated by synchronized is more than volatile.  The increment is found on line 18 but 
 		  at no point does the JVM send an explicit fence.  Instead, the JVM has killed two birds with one stone using a lock prefixed cmpxchg instruction 
 		  on lines 10 and 25.  The symantics of cmpxchg are beyond the scope of this article.  
-		  What's relevant is that 'lock cmpxchg' not only performs the write operation atomically but that all pending load and store operations are serialized.  
-		  The write operation will now become visible before all subsequent memory operations in the program order.
+		  What's relevant is that 'lock cmpxchg' not only performs the write operation atomically - it also flushes pending read and write operations.  
+		  The write operation will now become visible before all subsequent memory operations.
 		  If we refactor and run the Counter class to use java.util.concurrent.atomic.AtomicInteger we can observe this same trick.
 		</p>
 <pre>
@@ -256,52 +290,70 @@
 		<p>
 			The JVM is very good at eliminating unnecessary memory barriers.
 			Sometimes it gets lucky and the consistency guarantees of the hardware memory model are greater than or equal to those of the Java memory model.  
-			When this happens the JVM simply inserts a no op instead of an actual memory barrier.  For example, the memory consistency guarantees of an 
-			x86 are strong enough to eliminate the need for a memory barrier when reading a volatile variable.
-			The generated assembly instructions for the static get method of the WriterReader class demonstrate this.
+			When this happens the JVM simply inserts a no op instead of an actual memory barrier.  
+			For example, the consistency guarantees of the x86 memory model are strong enough to eliminate the need for a memory barrier when reading a volatile variable.
+			Remember the explicit unidirectional fence we saw for the read method of WriterReader on <span style="font-weight:bold; color:red">non x86</span>?
+			Well, the generated assembly instructions for the read method on an x86 have <i>no</i> fence.
 		</p>
 		<div class="code">
-			$ java -XX:+UnlockDiagnosticVMOptions -XX:PrintAssemblyOptions=hsdis-print-bytes -XX:CompileCommand=print,WriterReader.get WriterReader
+			$ java -XX:+UnlockDiagnosticVMOptions -XX:PrintAssemblyOptions=hsdis-print-bytes -XX:CompileCommand=print,WriterReader.read WriterReader
 		</div>
 <pre>
-  1: push   %ebp               ;...55
-  2: mov    %esp,%ebp          ;...8bec
-  3: sub    $0x18,%esp         ;...83ec18
-  4: mov    $0x95ba54d0,%eax   ;...b8d054ba 95
-  5: mov    0x148(%eax),%eax   ;...8b804801 0000
-  
+  0x01baae97: push   %ebp               ;...55
+  0x01baae98: mov    %esp,%ebp          ;...8bec
+  0x01baae9a: sub    $0x18,%esp         ;...83ec18
+  0x01baae9d: mov    $0x95ba53a0,%esi   ;...bea053ba 95
+                                        ;   {oop()}
+  0x01baaea2: mov    0x148(%esi),%edi   ;...8bbe4801 0000
   <span style="font-weight:bold">No Fence</span>
-  
-  6: mov    %ebp,%esp          ;...8be5
-  7: pop    %ebp               ;...5d
-</pre>	
+  0x01baaea8: mov    0x14c(%esi),%esi   ;...8bb64c01 0000
+  <span style="font-weight:bold">No Fence</span>
+  0x01baaeae: mov    %ebp,%esp          ;...8be5
+  0x01baaeb0: pop    %ebp               ;...5d
+</pre>
 		<p>
-			The volatile read operation on line five is <i>not</i> paired with an explicit fence.  In other words there is no performance penalty for a volatile 
-			read instruction on an x86.
+			Neither volatile read operations are paired with an explicit fence.  
+			In other words there is no performance penalty for a volatile read instruction on an x86.
+		</p>
+		<p>
+			Unidirectional fences are naturally less expensive than bidirectional fences.
+			The JVM will avoid a bidirectional fence when it knows a unidirectional fence is sufficient.
+			The first example in this article demonstrated this.  
+			We saw that the read operations in WriterReader were chased with an explicit unidirectional fence.
+			If the read operations in WriterReader were chased with an explicit bidirectional fence the program would be just as correct, but at a greater cost.
 		</p>
 		<p>
 			On a uni-processor system the JVM can insert a no op for <i>all</i> memory barriers because memory operations are already serialized.  
-			The following instructions were captured from a runtime compilation of the set method of the WriterReader class using a VMWare workstation 
+			The following instructions were captured from a runtime compilation of the write method of the WriterReader class using a VMWare workstation 
 			image in uni-processor mode.
+			Neither write operation is chased with a fence.
   		</p>
+		<div class="code">
+			$ java -XX:+UnlockDiagnosticVMOptions -XX:PrintAssemblyOptions=hsdis-print-bytes -XX:CompileCommand=print,WriterReader.write WriterReader
+		</div>  		
 <pre>
-  1: push   %ebp               ;...55
-  2: mov    %esp,%ebp          ;...8bec
-  3: sub    $0x18,%esp         ;...83ec18
-  4: mov    $0x95ba54d0,%esi   ;...bed054ba 95
-  5: mov    %ecx,0x148(%esi)   ;...898e4801 0000
-  
-  <span style="font-weight:bold">No Fence</span>
-  
-  6: mov    %ebp,%esp          ;...8be5
-  7: pop    %ebp               ;...5d		
-</pre> 		
+  0x03e8dfd7: push   %ebp               ;...55
+  0x03e8dfd8: mov    %esp,%ebp          ;...8bec
+  0x03e8dfda: sub    $0x18,%esp         ;...83ec18
+  0x03e8dfdd: mov    $0x95ba53a0,%esi   ;...bea053ba 95
+  0x03e8dfe2: mov    %ecx,0x148(%esi)   ;...898e4801 0000
+<span style="font-weight:bold">No Fence</span>
+  0x03e8dfeb: mov    %ecx,0x14c(%esi)   ;...898e4c01 0000
+<span style="font-weight:bold">No Fence</span>
+  0x03e8dff4: mov    %ebp,%esp          ;...8be5
+  0x03e8dff6: pop    %ebp               ;...5d
+</pre>		
+		<h3>Conclusion</h3>
 		<p>
-		Here we observe a volatile write on line five but the JVM does not chase it with a fence.
-		</p>	
-		<h3>Reference Materials</h3>
+			Memory barriers are a complex and expensive necessity for any multi-threaded program.
+			They come in many flavors.
+			Some are explicit, others are implicit.
+			Some are bidirectional, others are unidirectional.
+			The JVM uses this array of choices to honor the Java memory model in the most efficient way across all platforms.
+		</p>
+		<h3>Reference Material</h3>
 		<p>
-		
+			
 		</p>
 		<h3>About the Author </h3>
 		<p>
@@ -309,28 +361,5 @@
 			<a href="http://drwholdings.com/">DRW Trading</a>, a proprietary trading firm and liquidity provider.  
 			He is a writer, presenter and active member of the open source community.
 		</p>
-		<br/>
-		<br/>
-		<br/>
-		<br/>
-		<br/>
-		<br/>
-		<br/>
-		<br/>
-		<br/>
-		<br/>
-		<br/>
-		<br/>		
-		<br/>
-		
-<br/>
-<br/>
-<br/>
-<br/>
-<br/>
-<br/>
-<br/>
-<br/>
-<br/>
 	</body>
 </html>

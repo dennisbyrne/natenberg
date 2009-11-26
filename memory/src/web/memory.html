@@ -101,16 +101,17 @@
 			Without the volatile modifier the reader could in fact observe b to be greater than a.  
 			That is, the reader thread could observe the write to b before the write to a. 
 			Using the keyword volatile prevents this problem because it establishes a <i>happens before</i> relationship between the write to a and the write to b.
-			A peek under the hood shows why.
+			The compiler cannot re-order these write operations and it is obligated to forbid the processor from doing so.
+			A peek under the hood shows how.
 			The following command allows us to capture the assembly instructions for the WriterReader.
-			The CompileCommand option is used to filter these instructions down to just those for the static TODO method.
+			The CompileCommand option is used to filter these instructions down to just those for the static read method.
 		</p>
 		<div class="code">
 			$ java -XX:+UnlockDiagnosticVMOptions -XX:PrintAssemblyOptions=hsdis-print-bytes -XX:CompileCommand=print,WriterReader.read WriterReader
 		</div>
 		<p>
 			The read method translates to the instructions found between push and pop.
-			These instructions were captured on a multi-processing <span style="font-weight:bold; color:red"> TODO: get a hold of a sparc or itanium box</span>.
+			These instructions were captured on a multi-processing <span style="font-weight:bold; color:red"> TODO: get a hold of a itanium, or figure out how to build open jdk on powerpc</span>.
 		</p>
 <pre>
 <span style="font-weight:bold; color:red">     TODO non x86 assembly instructions for read/0 here.</span>

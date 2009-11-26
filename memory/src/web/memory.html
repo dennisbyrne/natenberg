@@ -58,49 +58,50 @@
 			These are only used to trigger JIT compilation.
 		</p>
 		<pre>
-	class WriterReader{
+   class WriterReader{
 	
-	  static volatile int a = 0;
-	  static volatile int b = 0;
+      static volatile int shared = 0;
+      static volatile boolean ready = false;
 	
-	  public static void main(String[] _){
-	    Thread reader = new Thread(){
-	      public void run(){
-	        for(int i = 0; i < 10000; i++)
-	          read();
-	      }
-	    };	  
-	    Thread writer = new Thread(){
-	      public void run(){
-	        for(int i = 0; i < 10000; i++)
-	          write(i);
-	      }
-	    };
-	    reader.start(); 
-	    writer.start();
-	  }
+      public static void main(String[] _){
+         Thread reader = new Thread(){
+            public void run(){
+               for(int i = 0; i < 10000; i++)
+                  read();
+            }
+         };
+         reader.start();
+	    
+         Thread writer = new Thread(){
+            public void run(){
+               for(int i = 0; i < 10000; i++)
+                  write();
+            }
+         };
+         writer.start();
+      }
 
-	  static void read(){
-	    int aLocal = a;
-	    int bLocal = b;
-	  }
+      static int read(){
+         return ready ? shared : -1;
+      }
 	
-	  static void write(int newValue){ 
-	    a = newValue;
-	    b = newValue;
-	  }
-	
-	}
+      static void write(){
+         shared = 42;
+         ready = true;
+      }
+
+   }
 </pre>
 		<p>
-			The main method of this class creates two threads.  The writer thread writes to two static volatile variables.
-			The reader thread reads these variables.  
+			The main method of this class creates two threads.  
+			The writer thread writes to the shared static volatile variable and then writes to the ready static volatile variable.
+			The reader thread reads the ready variable and then conditionally reads the shared variable.  
 			Consider the point of view of the reader thread.
-			The reader thread should expect to observe a to be equal to b, or a to be greater than b, but it 
-			should never expect to observe b to be greater than a.  
-			Without the volatile modifier the reader could in fact observe b to be greater than a.  
-			That is, the reader thread could observe the write to b before the write to a. 
-			Using the keyword volatile prevents this problem because it establishes a <i>happens before</i> relationship between the write to a and the write to b.
+			The reader thread should expect the read method to return -1 when ready is false and 42 when ready is true. 
+			The reader thread should never expect the read method to return zero, the original value of the shared variable.
+			Without the volatile modifier the reader could in fact observe zero for the value of shared.
+			That is, without the volatile modifier the reader thread could observe the write to ready before the write to shared. 
+			Using the keyword volatile prevents this problem because it establishes a <i>happens before</i> relationship between the write to ready and the write to shared.
 			The compiler cannot re-order these write operations and it is obligated to forbid the processor from doing so.
 			A peek under the hood shows how.
 			The following command allows us to capture the assembly instructions for the WriterReader.
@@ -122,19 +123,17 @@
 			The JVM must insure this read <i>happens before</i> the following read operation.
 			To honor this guarantee a memory barrier is created with an explicit fence instruction
 			on line <span style="font-weight:bold; color:red">N+1</span>.
-		</p>
-		<p>
-			<span style="font-weight:bold; color:red">TODO: paragraph on the instruction itself.</span>
+			<span style="font-weight:bold; color:red">TODO: info on the instruction itself.</span>
 			A memory barrier that enforces ordering limitations on reads <i>or</i> writes is said to be a unidirectional fence.
-			A memory barrier that enforces ordering limitations on reads <i>and</i> writes is said to be a bidirectional, or full fence.  
-			The <span style="font-weight:bold; color:red">unidirectional fence</span> is a unidirectional fence.
+			A memory barrier that enforces ordering limitations on reads <i>and</i> writes is said to be a bidirectional fence, or full fence.  
+			The <span style="font-weight:bold; color:red">TODO unidirectional fence instruction</span> is a unidirectional fence.
 		</p>
 		<p>
 			Consistency is a two way street.
 			How useful is it for the reader thread to send a memory barrier between both reads if the writer thread does not separate both writes with one as well?
 			In order for threads to communicate they must <i>all</i> obey the protocol; just like nodes on a network, or people on a team.
-			If one thread breaks formation than the efforts of all threads are rendered useless.
-			We should expect to see memory barriers in the assembly instructions for write method of the WriterReader.
+			If one thread breaks formation than the efforts of all other threads are rendered useless.
+			We should expect to see memory barriers in the assembly instructions for the write method of the WriterReader.
 		</p>
 		<div class="code">
 			$ java -XX:+UnlockDiagnosticVMOptions -XX:PrintAssemblyOptions=hsdis-print-bytes -XX:CompileCommand=print,WriterReader.write WriterReader
@@ -143,13 +142,13 @@
 <span style="font-weight:bold; color:red">     TODO non x86 assembly instructions for write/0 here.</span>
 </pre>
 		<p>
-			Here we can see both write operations being chased with explicit full fence instructions on lines <span style="font-weight:bold; color:red">X</span>
+			Here we can see both write operations are chased with explicit full fence instructions on lines <span style="font-weight:bold; color:red">X</span>
 			and <span style="font-weight:bold; color:red">Y</span>.
-			This insures each write operation <i>happens before</i> subsequent memory operations.
-		</p>
-		<p><span style="font-weight:bold; color:red">TODO: paragraph on the instruction itself.  This instruction is a "full fence", or bidirectional fence.  A full fence forces the processor to 
-			serialize both pending read and pending write operations.</span>
-		</p>			
+			<span style="font-weight:bold; color:red">TODO: info on the instruction itself.</span>
+			The <span style="font-weight:bold; color:red">TODO bidirectional fence instruction</span> is a "full fence", or bidirectional fence.  
+			A full fence forces the processor to serialize both pending read and pending write operations.
+			This completes both sides of the protocol because each write operation <i>happens before</i> subsequent memory operations.
+		</p>		
 		<h3>Memory Barriers Are Hardware Specific</h3>
 		<p>
 			This article does not aim to be a comprehensive overview of all memory barriers.
@@ -159,22 +158,25 @@
 			All remaining assembly instruction sequences in this article were captured on this hardware.
 		</p>
 <pre>
-  0x03e8dfd7: push   %ebp               ;...55
-  0x03e8dfd8: mov    %esp,%ebp          ;...8bec
-  0x03e8dfda: sub    $0x18,%esp         ;...83ec18
-  0x03e8dfdd: mov    $0x95ba53a0,%esi   ;...bea053ba 95
+  0x00f78017: push   %ebp               ;...55
+  0x00f78018: mov    %esp,%ebp          ;...8bec
+  0x00f7801a: sub    $0x18,%esp         ;...83ec18
+  0x00f7801d: mov    $0x95ba53c0,%esi   ;...bec053ba 95
                                         ;   {oop()}
-  0x03e8dfe2: mov    %ecx,0x148(%esi)   ;...898e4801 0000
-  0x03e8dfe8: mfence                    ;...0faef0
-  0x03e8dfeb: mov    %ecx,0x14c(%esi)   ;...898e4c01 0000
-  0x03e8dff1: mfence                    ;...0faef0
-  0x03e8dff4: mov    %ebp,%esp          ;...8be5
-  0x03e8dff6: pop    %ebp               ;...5d
+  0x00f78022: mov    $0x2a,%edi         ;...bf2a0000 00
+  0x00f78027: mov    %edi,0x148(%esi)   ;...89be4801 0000
+  0x00f7802d: mfence                    ;...0faef0
+  0x00f78030: mov    $0x1,%edi          ;...bf010000 00
+  0x00f78035: mov    %edi,%ebx          ;...8bdf
+  0x00f78037: mov    %bl,0x14c(%esi)    ;...889e4c01 0000
+  0x00f7803d: mfence                    ;...0faef0
+  0x00f78040: mov    %ebp,%esp          ;...8be5
+  0x00f78042: pop    %ebp               ;...5d
 </pre>
 		<p>
 			As we saw before both write operations are chased with mfence, an explicit full fence instruction.
 		</p>
-		<h3>Memory Barriers Do Not Have To Be Explicit</h3>
+		<h3>Memory Barriers Can Be Explicit or Implicit</h3>
 		<p>
 			Explicit fence instructions are not the only way to serialize memory operations. 
 			Let's switch gears to the Counter class to see an example.  
@@ -300,17 +302,20 @@
 			$ java -XX:+UnlockDiagnosticVMOptions -XX:PrintAssemblyOptions=hsdis-print-bytes -XX:CompileCommand=print,WriterReader.read WriterReader
 		</div>
 <pre>
-  0x01baae97: push   %ebp               ;...55
-  0x01baae98: mov    %esp,%ebp          ;...8bec
-  0x01baae9a: sub    $0x18,%esp         ;...83ec18
-  0x01baae9d: mov    $0x95ba53a0,%esi   ;...bea053ba 95
+  <span style="font-weight:bold; color:red">Put 'no fence lines'</span>
+  0x018a1d97: push   %ebp               ;...55
+  0x018a1d98: mov    %esp,%ebp          ;...8bec
+  0x018a1d9a: sub    $0x18,%esp         ;...83ec18
+  0x018a1d9d: mov    $0x95ba53e0,%eax   ;...b8e053ba 95
                                         ;   {oop()}
-  0x01baaea2: mov    0x148(%esi),%edi   ;...8bbe4801 0000
-  <span style="font-weight:bold">No Fence</span>
-  0x01baaea8: mov    0x14c(%esi),%esi   ;...8bb64c01 0000
-  <span style="font-weight:bold">No Fence</span>
-  0x01baaeae: mov    %ebp,%esp          ;...8be5
-  0x01baaeb0: pop    %ebp               ;...5d
+  0x018a1da2: movsbl 0x14c(%eax),%eax   ;...0fbe804c 010000
+  0x018a1da9: cmp    $0x0,%eax          ;...83f800
+  0x018a1dac: je     0x018a1dc7         ;...0f841500 0000
+  0x018a1db2: mov    $0x95ba53e0,%eax   ;...b8e053ba 95
+                                        ;   {oop()}
+  0x018a1db7: mov    0x148(%eax),%eax   ;...8b804801 0000
+  0x018a1dbd: mov    %ebp,%esp          ;...8be5
+  0x018a1dbf: pop    %ebp               ;...5d
 </pre>
 		<p>
 			Neither volatile read operations are paired with an explicit fence.  
@@ -333,16 +338,20 @@
 			$ java -XX:+UnlockDiagnosticVMOptions -XX:PrintAssemblyOptions=hsdis-print-bytes -XX:CompileCommand=print,WriterReader.write WriterReader
 		</div>  		
 <pre>
-  0x03e8dfd7: push   %ebp               ;...55
-  0x03e8dfd8: mov    %esp,%ebp          ;...8bec
-  0x03e8dfda: sub    $0x18,%esp         ;...83ec18
-  0x03e8dfdd: mov    $0x95ba53a0,%esi   ;...bea053ba 95
-  0x03e8dfe2: mov    %ecx,0x148(%esi)   ;...898e4801 0000
+  0x00f78017: push   %ebp               ;...55
+  0x00f78018: mov    %esp,%ebp          ;...8bec
+  0x00f7801a: sub    $0x18,%esp         ;...83ec18
+  0x00f7801d: mov    $0x95ba53c0,%esi   ;...bec053ba 95
+                                        ;   {oop()}
+  0x00f78022: mov    $0x2a,%edi         ;...bf2a0000 00
+  0x00f78027: mov    %edi,0x148(%esi)   ;...89be4801 0000
 <span style="font-weight:bold">No Fence</span>
-  0x03e8dfeb: mov    %ecx,0x14c(%esi)   ;...898e4c01 0000
+  0x00f78030: mov    $0x1,%edi          ;...bf010000 00
+  0x00f78035: mov    %edi,%ebx          ;...8bdf
+  0x00f78037: mov    %bl,0x14c(%esi)    ;...889e4c01 0000
 <span style="font-weight:bold">No Fence</span>
-  0x03e8dff4: mov    %ebp,%esp          ;...8be5
-  0x03e8dff6: pop    %ebp               ;...5d
+  0x00f78040: mov    %ebp,%esp          ;...8be5
+  0x00f78042: pop    %ebp               ;...5d
 </pre>		
 		<h3>Conclusion</h3>
 		<p>

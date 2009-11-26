@@ -1,7 +1,7 @@
 	class WriterReader{
 	
 	  static volatile int shared = 0;
-	  static volatile boolean initialized = false;
+	  static volatile boolean ready = false;
 	
 	  public static void main(String[] _){
 		Thread reader = new Thread(){
@@ -22,12 +22,12 @@
 	  }
 
 	  static int read(){
-		return initialized ? shared : -1;
+		return ready ? shared : -1;
 	  }
 	
 	  static void write(){
 		shared = 42;
-	    initialized = true;
+		ready = true;
 	  }
 	
 	}

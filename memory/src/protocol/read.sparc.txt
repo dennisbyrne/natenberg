@@ -1,0 +1,84 @@
+                                                                     
+                                                                     
+                                                                     
+                                             
+CompilerOracle: print WriterReader.read
+VM option 'PrintAssemblyOptions=hsdis-print-bytes'
+VM option 'CompileCommand=print,WriterReader.read'
+Loaded disassembler from hsdis-sparc.so
+Compiled (c2)   1   nmethod (2)  WriterReader::read (14 bytes)
+ total in heap  [0xfa8ecd88,0xfa8ecf2c] = 420
+ relocation     [0xfa8ece48,0xfa8ece54] = 12
+ main code      [0xfa8ece60,0xfa8ecea0] = 64
+ stub code      [0xfa8ecea0,0xfa8ecebc] = 28
+ scopes data    [0xfa8ecebc,0xfa8eced0] = 20
+ scopes pcs     [0xfa8eced0,0xfa8ecf20] = 80
+ dependencies   [0xfa8ecf20,0xfa8ecf24] = 4
+ oops           [0xfa8ecf24,0xfa8ecf2c] = 8
+Decoding compiled method 0xfa8ecd88:
+Code:
+[Disassembling for mach='sparc:v8plusb']
+[Entry Point]
+[Verified Entry Point]
+  0xfa8ece60: save  %sp, -72, %sp       ;...9de3bfb8
+                                        ;*synchronization entry
+                                        ; - WriterReader::read@-1 (line 25)
+  0xfa8ece64: sethi  %hi(0xb61f9000), %l1  ;...232d87e4
+                                        ;   {oop('WriterReader')}
+  0xfa8ece68: add  %l1, 0x3d8, %l1	! 'WriterReader'
+                                        ;...a20463d8
+                                        ;   {oop('WriterReader')}
+  0xfa8ece6c: ldub  [ %l1 + 0x154 ], %l0  ;...e00c6154
+                                        ;*getstatic ready
+                                        ; - WriterReader::read@0 (line 25)
+  0xfa8ece70: cmp  %l0, 0               ;...80a42000
+  0xfa8ece74: be,pn   %icc, 0xfa8ece8c  ;...02400006
+  0xfa8ece78: ld  [ %l1 + 0x150 ], %i0  ;...f0046150
+                                        ;*ireturn
+                                        ; - WriterReader::read@13 (line 25)
+  0xfa8ece7c: sethi  %hi(0xff3fc000), %l0  ;...213fcff0
+  0xfa8ece80: ld  [ %l0 ], %g0          ;...c0042000
+                                        ;   {poll_return}
+  0xfa8ece84: ret                       ;...81c7e008
+  0xfa8ece88: restore                   ;...81e80000
+  0xfa8ece8c: b  %icc, 0xfa8ece7c       ;...104ffffc
+  0xfa8ece90: mov  -1, %i0              ;...b0103fff
+  0xfa8ece94: illtrap  0                ;...00000000
+  0xfa8ece98: illtrap  0                ;...00000000
+  0xfa8ece9c: illtrap  0                ;...00000000
+[Exception Handler]
+[Stub Code]
+  0xfa8ecea0: sethi  %hi(0xfa8e5400), %g3  ;...073ea395
+  0xfa8ecea4: jmp  %g3 + 0xc0	! 0xfa8e54c0  ;...81c0e0c0
+  0xfa8ecea8: nop                       ;...01000000
+  0xfa8eceac: save  %sp, -96, %sp       ;...9de3bfa0
+  0xfa8eceb0: sethi  %hi(0xfa8bb000), %l0  ;...213ea2ec
+  0xfa8eceb4: jmp  %l0 + 0x3a0	! 0xfa8bb3a0  ;...81c423a0
+  0xfa8eceb8: restore                   ;...81e80000
+pc-bytecode offsets:
+PcDesc(pc=0xfa8ece5f offset=ffffffff):
+PcDesc(pc=0xfa8ece64 offset=4):
+   WriterReader::read  @-1  reexecute=false
+PcDesc(pc=0xfa8ece70 offset=10):
+   WriterReader::read  @0  reexecute=false
+PcDesc(pc=0xfa8ece7c offset=1c):
+   WriterReader::read  @13  reexecute=false
+PcDesc(pc=0xfa8ecebd offset=5d):
+OopMapSet contains 0 OopMaps
+
+------------------------------------------------------------------------
+static WriterReader.read()I
+  interpreter_invocation_count:   163805 
+  invocation_counter:               8835 
+  backedge_counter:                    1 
+
+0 getstatic 7 <ready> <Z> 
+3 ifeq 12
+  0   bci: 3    BranchData          taken(0) displacement(28)
+                                    not taken(160506)
+6 getstatic 8 <shared> <I> 
+9 goto 13
+  16  bci: 9    JumpData            taken(160506) displacement(12)
+12 iconst_m1
+13 ireturn
+------------------------------------------------------------------------

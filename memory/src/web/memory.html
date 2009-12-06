@@ -12,21 +12,21 @@
 		<h1>Memory Barriers and the JVM</h1>
 		<p>
 			Memory barriers are a set of processor instructions used to apply ordering limitations on memory operations.  		
-			This article explains the impact memory barriers have on the performance and determinism of a multi-threaded programs.
-			We'll look at how the JVM uses memory barriers to implement volatile, synchronized and atomic conditionals.
+			This article explains the impact memory barriers have on the determinism and performance of multi-threaded programs.
+			We'll look at how memory barriers relate to JVM concurrency primitives such as volatile, synchronized and atomic conditionals. 
+			It is assumed the reader has a solid understanding of these concepts and the Java memory model as a whole.
 			This is not an article about mutual exclusion, parallelism or atomicity per se.
 			Memory barriers are used to achieve an equally important element of concurrent programming called visibility.
 		</p>
-		<h3>Memory Barriers Are Expensive</h3>
+		<h3>What Are Memory Barriers?</h3>
 		<p>
 			The costs of memory latency have pushed processors to reorder and cache memory operations.
 			A trip to main memory costs hundreds of clock cycles on commodity hardware.
-			Processors use caching to decrease latency costs of memory operations by orders of magnitude.  
-			These caches are write-back, not write-through.
-			This means the value of a write operation does not immediately have to be written all the way out to main memory.
-			The processor instead places this operation in a buffer and is now obligated to perform this operation at a later time.
+			Processors use caching to decrease latency costs of memory operations by orders of magnitude.
+			These caches introduce a substantial visibility delay because the value of each write operation does not immediately "write through" to main memory.
+			The processor instead places this operation in a buffer and is now obligated to "write back" at a later time.
 			Buffered operations are said to be "in flight".
-			Buffers are often misunderstood as queues. They are not.  
+			Buffers are often misunderstood as queues. They are not.
 			In-flight operations are not necessarily performed in the order in which they are fed to the processor.
 			This opens the door for many optimizations when data is confined to the scope of one thread, or when data is immutable and used by many threads.  
 		</p>

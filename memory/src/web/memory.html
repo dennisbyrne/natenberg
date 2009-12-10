@@ -12,7 +12,7 @@
 		<h1>Memory Barriers and the JVM</h1>
 		<p>
 			Memory barriers, or fences, are a set of processor instructions used to apply ordering limitations on memory operations.  		
-			This article explains the impact memory barriers have on the determinism and performance of multi-threaded programs.
+			This article explains the impact memory barriers have on the determinism of multi-threaded programs.
 			We'll look at how memory barriers relate to JVM concurrency constructs such as volatile, synchronized and atomic conditionals. 
 			It is assumed the reader has a solid understanding of these concepts and the Java memory model as a whole.
 			This is not an article about mutual exclusion, parallelism or atomicity per se.
@@ -35,6 +35,7 @@
 			It is possible for a thread to write values that become visible to another thread in an order that is inconsistent 
 			with the order in which they were written.
 			A well placed memory barrier prevents this problem by forcing the processor to serialize pending memory operations.
+			The performance implications of flushing memory buffers are beyond the scope of this article.
 		</p>
 		<h3>Memory Barriers As Protocols</h3>
 		<p>
@@ -150,7 +151,7 @@
 		<p>
 			This article does not aim to be a comprehensive overview of all memory barriers.
 			This would be a monumental task.
-			But it is important though to appreciate the fact that these instructions and their performance vary considerably across different hardware architectures.
+			But it is important though to appreciate the fact that these instructions vary considerably across different hardware architectures.
 			Below is what the write method of WriterReader translates to on a multi-processing Intel Xeon E5410 and a SPARC workstation.
 			All remaining assembly instruction sequences in this article were captured on an Intel Xeon unless specified otherwise.
 		</p>

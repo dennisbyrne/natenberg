@@ -1,0 +1,134 @@
+CompilerOracle: print com/drw/membar/FirstThread.protocol
+done
+Compiled (c2)   1   nmethod (2)  com.drw.membar.FirstThread::protocol (48 bytes)
+ total in heap  [0x03f83308,0x03f83554] = 588
+ relocation     [0x03f833bc,0x03f833e8] = 44
+ main code      [0x03f83400,0x03f834e0] = 224
+ stub code      [0x03f834e0,0x03f834ef] = 15
+ constants      [0x03f834ef,0x03f834f0] = 1
+ scopes data    [0x03f834f0,0x03f83510] = 32
+ scopes pcs     [0x03f83510,0x03f8354c] = 60
+ dependencies   [0x03f8354c,0x03f83550] = 4
+ oops           [0x03f83550,0x03f83554] = 4
+Loaded disassembler from hsdis-i386.so
+Decoding compiled method 0x03f83308:
+Code:
+[Disassembling for mach='i386']
+[Entry Point]
+  0x03f83400: cmp    0x4(%ecx),%eax     ;...3b4104
+  0x03f83403: jne    0x03f60e20         ;...0f8517da fdff
+                                        ;   {runtime_call}
+  0x03f83409: xchg   %ax,%ax            ;...666690
+[Verified Entry Point]
+  0x03f8340c: push   %ebp               ;...55
+  0x03f8340d: sub    $0x8,%esp          ;...81ec0800 0000
+  0x03f83413: mov    $0x14c,%edi        ;...bf4c0100 00
+  0x03f83418: movb   $0x1,-0x505a72f0(%edi)  ;...c687108d a5af01
+                                        ;   {oop()}
+  0x03f8341f: mfence                    ;...0faef0
+  0x03f83422: mov    $0x148,%ebp        ;...bd480100 00
+  0x03f83427: mov    $0x14d,%edx        ;...ba4d0100 00
+  0x03f8342c: movsbl -0x505a72f0(%edx),%ebx  ;...0fbe9a10 8da5af
+                                        ;   {oop()}
+  0x03f83433: test   %ebx,%ebx          ;...85db
+  0x03f83435: jne    0x03f83460         ;...7529
+  0x03f83437: movl   $0x1,-0x505a72f0(%ebp)  ;...c785108d a5af01
+                                        ;...000000
+                                        ;   {oop()}
+  0x03f83441: movb   $0x0,-0x505a72f0(%edi)  ;...c687108d a5af00
+                                        ;   {oop()}
+  0x03f83448: mfence                    ;...0faef0
+  0x03f8344b: add    $0x8,%esp          ;...83c408
+  0x03f8344e: pop    %ebp               ;...5d
+  0x03f8344f: test   %eax,0xb78ec000    ;...850500c0 8eb7
+                                        ;   {poll_return}
+  0x03f83455: ret                       ;...c3
+  0x03f83456: nopw   0x0(%eax,%eax,1)   ;...66660f1f 840000
+                                        ;...000000
+  0x03f83460: mov    -0x505a72f0(%ebp),%ebx  ;...8b9d108d a5af
+                                        ; OopMap{off=102}
+                                        ;*ifeq
+                                        ; - com.drw.membar.FirstThread::protocol@13 (line 19)
+                                        ;   {oop()}
+  0x03f83466: test   %edi,0xb78ec000    ;...853d00c0 8eb7
+                                        ;   {poll}
+  0x03f8346c: test   %ebx,%ebx          ;...85db
+  0x03f8346e: jne    0x03f8347d         ;...750d
+  0x03f83470: movsbl -0x505a72f0(%edx),%ecx  ;...0fbe8a10 8da5af
+                                        ;   {oop()}
+  0x03f83477: test   %ecx,%ecx          ;...85c9
+  0x03f83479: jne    0x03f83460         ;...75e5
+  0x03f8347b: jmp    0x03f83437         ;...ebba
+  0x03f8347d: movb   $0x0,-0x505a72f0(%edi)  ;...c687108d a5af00
+                                        ;   {oop()}
+  0x03f83484: mfence                    ;...0faef0
+  0x03f83487: mov    -0x505a72f0(%ebp),%ecx  ;...8b8d108d a5af
+                                        ;   {oop()}
+  0x03f8348d: test   %ecx,%ecx          ;...85c9
+  0x03f8348f: je     0x03f834b0         ;...741f
+  0x03f83491: nopw   0x0(%eax,%eax,1)   ;...6666660f 1f8400
+                                        ;...00000000
+  0x03f8349c: xchg   %ax,%ax            ;...66666690
+                                        ; OopMap{off=160}
+                                        ;*goto
+                                        ; - com.drw.membar.FirstThread::protocol@26 (line 21)
+  0x03f834a0: test   %edi,0xb78ec000    ;...853d00c0 8eb7
+                                        ;   {poll}
+  0x03f834a6: mov    -0x505a72f0(%ebp),%ecx  ;...8b8d108d a5af
+                                        ;   {oop()}
+  0x03f834ac: test   %ecx,%ecx          ;...85c9
+  0x03f834ae: jne    0x03f834a0         ;...75f0
+  0x03f834b0: movb   $0x1,-0x505a72f0(%edi)  ;...c687108d a5af01
+                                        ;   {oop()}
+  0x03f834b7: mfence                    ;...0faef0
+                                        ; OopMap{off=186}
+                                        ;*goto
+                                        ; - com.drw.membar.FirstThread::protocol@33 (line 22)
+  0x03f834ba: test   %edi,0xb78ec000    ;...853d00c0 8eb7
+                                        ;   {poll}
+  0x03f834c0: jmp    0x03f8342c         ;...e967ffff ff
+  0x03f834c5: hlt                       ;...f4
+  0x03f834c6: hlt                       ;...f4
+  0x03f834c7: hlt                       ;...f4
+  0x03f834c8: hlt                       ;...f4
+  0x03f834c9: hlt                       ;...f4
+  0x03f834ca: hlt                       ;...f4
+  0x03f834cb: hlt                       ;...f4
+  0x03f834cc: hlt                       ;...f4
+  0x03f834cd: hlt                       ;...f4
+  0x03f834ce: hlt                       ;...f4
+  0x03f834cf: hlt                       ;...f4
+  0x03f834d0: hlt                       ;...f4
+  0x03f834d1: hlt                       ;...f4
+  0x03f834d2: hlt                       ;...f4
+  0x03f834d3: hlt                       ;...f4
+  0x03f834d4: hlt                       ;...f4
+  0x03f834d5: hlt                       ;...f4
+  0x03f834d6: hlt                       ;...f4
+  0x03f834d7: hlt                       ;...f4
+  0x03f834d8: hlt                       ;...f4
+  0x03f834d9: hlt                       ;...f4
+  0x03f834da: hlt                       ;...f4
+  0x03f834db: hlt                       ;...f4
+  0x03f834dc: hlt                       ;...f4
+  0x03f834dd: hlt                       ;...f4
+  0x03f834de: hlt                       ;...f4
+  0x03f834df: hlt                       ;...f4
+[Exception Handler]
+[Stub Code]
+  0x03f834e0: jmp    0x03f82fe0         ;...e9fbfaff ff
+                                        ;   {no_reloc}
+  0x03f834e5: push   $0x3f834e5         ;...68e534f8 03
+                                        ;   {section_word}
+  0x03f834ea: jmp    0x03f61b40         ;...e951e6fd ff
+                                        ;   {runtime_call}
+[Constants]
+  0x03f834ef: .byte 0x0                 ;...00
+OopMapSet contains 3 OopMaps
+
+#0 
+OopMap{off=102}
+#1 
+OopMap{off=160}
+#2 
+OopMap{off=186}

@@ -380,7 +380,7 @@ The WriterReader.write method on SPARC.
 			Often it gets lucky and the consistency guarantees of the hardware memory model are greater than or equal to those of the Java memory model.  
 			When this happens the JVM simply inserts a no op instead of an actual memory barrier.  
 			For example, the consistency guarantees of the x86 and SPARC memory models are strong enough to eliminate the need for a memory barrier when reading a volatile variable.
-			Remember the explicit unidirectional memory barrier we saw for the read method of WriterReader on <span style="font-weight:bold; color:red">non x86</span>?
+			Remember the explicit unidirectional memory barrier we saw for the read method of WriterReader on Itanium?
 			Well, the generated assembly instructions for the read method on an x86 and SPARC have <i>no</i> memory barrier.
 		</p>
 		<div class="code">
@@ -491,6 +491,7 @@ The WriterReader.write method on SPARC.
 		<ul>
 			<li><a href="http://www.amazon.com/Java-Concurrency-Practice-Brian-Goetz/dp/0321349601" target="new">Java Concurrency in Practice</a> by <a href="http://www.briangoetz.com/" target="new">Brian Goetz</a></li>
 			<li><a href="http://g.oswego.edu/dl/jmm/cookbook.html" target="new">JSR-133 Cookbook</a> by Doug Lea</li>
+			<li><a href="http://en.wikipedia.org/wiki/Dekker%27s_algorithm" target="new">Dekker's Algorithm</a></li>
 		</ul>
 		<h3>About the Author </h3>
 		<p>

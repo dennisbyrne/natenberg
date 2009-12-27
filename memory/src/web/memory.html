@@ -14,11 +14,11 @@
 			Memory barriers, or fences, are a set of processor instructions used to apply ordering limitations on memory operations.  		
 			This article explains the impact memory barriers have on the determinism of multi-threaded programs.
 			We'll look at how memory barriers relate to JVM concurrency constructs such as volatile, synchronized and atomic conditionals. 
-			It is assumed the reader has a solid understanding of these concepts and the Java memory model as a whole.
+			It is assumed the reader has a solid understanding of these concepts and the Java memory model.
 			This is not an article about mutual exclusion, parallelism or atomicity per se.
 			Memory barriers are used to achieve an equally important element of concurrent programming called visibility.
 		</p>
-		<h3>What Are Memory Barriers?</h3>
+		<h3>Why Are Memory Barriers Important?</h3>
 		<p>
 			The cost of memory latency has pushed processors to reorder and cache memory operations.
 			A trip to main memory costs hundreds of clock cycles on commodity hardware.
@@ -32,8 +32,7 @@
 		<p>
 			Combining these optimizations with symmetric multi-processing and shared mutable state is a nightmare.
 			A program can behave non-deterministically when memory operations on shared mutable state are re-ordered.  
-			It is possible for a thread to write values that become visible to another thread in an order that is inconsistent 
-			with the order in which they were written.
+			It is possible for a thread to write values that become visible to another thread in ways that are inconsistent with the order in which they were written.
 			A well placed memory barrier prevents this problem by forcing the processor to serialize pending memory operations.
 			The performance implications of memory barriers are beyond the scope of this article.
 		</p>
@@ -96,14 +95,14 @@ intentSecond = false;
 			Which parts are relevant? 
 			Each thread attempts to enter the critical section on the first line of code by signaling an intent to do so.
 			If a thread observes a conflict on line three (both threads have signaled intent) the conflict is resolved by turn taking.
-			Only one thread can ever access the critical section at a given point in time.		
+			Only one thread can access the critical section at a given point in time.		
 		</p>
 		<p>
 			Hardware optimizations can break this code without memory barriers.
 			Consider the two successive read operations on lines three and four.
-			Each thread checks to see if the other has signaled an intent to enter the critical section <i>and then</i> each thread checks to see who's turn it is.
+			Each thread checks to see if the other has signaled an intent to enter the critical section <i>and then</i> checks to see who's turn it is.
 			Consider the two successive write operations on lines 12 and 13.
-			Each thread gives the other it's "turn" <i>and then</i> each thread withdraws intent to enter the critical section.
+			Each thread gives the other it's "turn" <i>and then</i> withdraws it's intent to enter the critical section.
 			A reading thread should never expect to observe the other thread's write to the turn variable after the other thread's withdrawal of intent.
 			This would be a disaster.
 			Without the volatile modifier on these variables this indeed can happen.
@@ -112,51 +111,42 @@ intentSecond = false;
 			The compiler cannot re-order these write operations and if necessary it must forbid the processor from doing so.
 			A peek under the hood shows how.
 		</p>
-		<p>
-			The two successive load operations on lines three and four translate to the assembly instructions below.
-			These instructions were captured on multi-processing Itanium hardware <span style="color:red">TODO Which JDK?</span>. 
-			This requires the latest OpenJDK release or a new version of HotSpot, update 14 or above.
-			A disassembler plugin is also required. 
-			The Kenai project <a href="http://kenai.com/projects/base-hsdis/downloads" target="new">has binaries</a> for Solaris, Linux and BSD.
-			The <a href="http://hg.openjdk.java.net/jdk7/hotspot/hotspot/file/tip/src/share/tools/hsdis/" target="new">hsdis</a> plugin is an alternative that can be built from source for Windows.			
-		</p>
+		<table>
+			<tr>
+				<td valign="top">
+					<p>
+						The first of the two successive read operations on line three is captured in the assembly instructions below.
+						This stream was captured on multi-processing Itanium 2 hardware running <span style="color:red">TODO: JDK Version</span>. 
+					</p>
+				</td>
+				<td>
+					<div style="border: 1px solid black; padding: 10px">
+					The PrintAssembly HotSpot option is a diagnostic flag for the JVM that allows us to capture the generated assembly instructions of the JIT compiler.
+					This requires the latest OpenJDK release or a new version of HotSpot, update 14 or above.
+					A disassembler plugin is also required. 
+					The Kenai project has binaries for Solaris, Linux and BSD.
+					The hsdis plugin is an alternative that can be built from source for Windows.
+					</div>					
+				</td>
+			</tr>
+		</table>
 <pre>
-49  0x2000000001de819c:             adds r37=597,r36;;  ;...84112554
-<b>50  0x2000000001de81a0: [MMI]       ld1.acq r38=[r37];;  ;...0b30014a a010</b>
-51  0x2000000001de81a6:             nop.m 0x0     ;...00000002 00c0
-52  0x2000000001de81ac:             sxt1 r38=r38;;  ;...00513004
-53  0x2000000001de81b0: [MIB]       cmp4.eq p0,p6=0,r38  ;...1100004c 8639
-54  0x2000000001de81b6:             nop.i 0x0     ;...00000002 0003
-55  0x2000000001de81bc:       (p06) br.cond.dpnt.many 0x2000000001de8220;;
-
-...
-
-78  0x2000000001de8220: [MMI]       adds r38=592,r36  ;...09304149 0421
-79  0x2000000001de8226:             nop.m 0x0     ;...00000002 0000
-80  0x2000000001de822c:             nop.i 0x0;;   ;...00040000
-<b>81  0x2000000001de8230: [MMI]       ld4.acq r41=[r38]  ;...0948014c b010</b>
-82  0x2000000001de8236:             nop.m 0x0     ;...00000002 0000
-83  0x2000000001de823c:             nop.i 0x0;;   ;...00040000
-84                                                ; OopMap{gr38=Derived_oop_gr36 gr37=Derived_oop_gr36 gr36=Oop off=288}
-85                                                ;*ifeq
-86                                                ; - com.drw.membar.FirstThread::protocol@13
-87  0x2000000001de8240: [MMI]       ld8 r31=[r5]  ;...09f8000a 1810
-88                                                ;   {poll}
-89  0x2000000001de8246:             nop.m 0x0     ;...00000002 0000
-90  0x2000000001de824c:             nop.i 0x0;;   ;...00040000
-91  0x2000000001de8250: [MIB]       cmp4.eq p6,p0=0,r41  ;...11300052 8039
-92  0x2000000001de8256:             nop.i 0x0     ;...00000002 0003
-93  0x2000000001de825c:       (p06) br.cond.dptk.many 0x2000000001de8310;;
+1  0x2000000001de819c:      adds r37=597,r36;;  ;...84112554
+<b>2  0x2000000001de81a0:      ld1.acq r38=[r37];;  ;...0b30014a a010</b>
+3  0x2000000001de81a6:      nop.m 0x0     ;...00000002 00c0
+4  0x2000000001de81ac:      sxt1 r38=r38;;  ;...00513004
+5  0x2000000001de81b0:      cmp4.eq p0,p6=0,r38  ;...1100004c 8639
+6  0x2000000001de81b6:      nop.i 0x0     ;...00000002 0003
+7  0x2000000001de81bc:      br.cond.dpnt.many 0x2000000001de8220;;
 </pre>	
 		<p>
 			This short stream of instructions tells a long story.
-			The reads of both volatile variables are on lines 50 and 81.  
-			The Java memory model guarantees the JVM will deliver both reads to the processor in program order - 
+			The first volatile read is on line two.  
+			The Java memory model guarantees the JVM will deliver this read to the processor before the second read, in "program order" - 
 			but this alone would not be enough because the processor is still free to perform these operations out of order.
-			To uphold the consistency guarantees of the Java memory model the JVM annotates the read operations with a memory barrier via ld.acq, or "load acquire".
-			The ld.acq instruction is an ordered read instruction for the Itanium instruction set.
-			By annotating the first read on line 50 with ld.acq the compiler ensures that the read operation on line 50 will complete before the subsequent load operation.
-			Notice this affects loads, not stores.
+			To uphold the consistency guarantees of the Java memory model the JVM annotates the first read operation with ld.acq, or "load acquire".
+			By using ld.acq the compiler ensures the read operation on line two will complete before the subsequent read operation.
+			Notice this affects reads, not writes.
 			A memory barrier that enforces ordering limitations on reads <i>or</i> writes is said to be unidirectional.
 			A memory barrier that enforces ordering limitations on reads <i>and</i> writes is said to be bidirectional, or, a full fence.  
 			Using ld.acq is an example of a unidirectional memory barrier.
@@ -172,32 +162,33 @@ intentSecond = false;
 			$ java -XX:+UnlockDiagnosticVMOptions -XX:PrintAssemblyOptions=hsdis-print-bytes -XX:CompileCommand=print,WriterReader.write WriterReader
 		</div-->	
 <pre>
-57  0x2000000001de81c0: [MMI]       adds r37=592,r36;;  ;...0b284149 0421
-58<b>  0x2000000001de81c6:             st4.rel [r37]=r39  ;...00389560 2380</b>
-59  0x2000000001de81cc:             adds r36=596,r36;;  ;...84112544
-60<b>  0x2000000001de81d0: [MMI]       st1.rel [r36]=r0  ;...09000048 a011</b>
-61<b>  0x2000000001de81d6:             mf            ;...00000044 0000</b>
-62  0x2000000001de81dc:             nop.i 0x0;;   ;...00040000
-63  0x2000000001de81e0: [MII]       mov r12=r33   ;...00600042 0021
-64  0x2000000001de81e6:             mov.ret b0=r35,0x2000000001de81e0
-65                                                ;...00181580 0300
-66  0x2000000001de81ec:             mov.i ar.pfs=r34  ;...00aa0220
-67  0x2000000001de81f0: [MMI]       mov r6=r32    ;...09300040 0021
+ 1  0x2000000001de81c0:      adds r37=592,r36;;  ;...0b284149 0421
+ 2  0x2000000001de81c6:      st4.rel [r37]=r39  ;...00389560 2380
+ 3  0x2000000001de81cc:      adds r36=596,r36;;  ;...84112544
+ 4<b>  0x2000000001de81d0:      st1.rel [r36]=r0  ;...09000048 a011</b>
+ 5<b>  0x2000000001de81d6:      mf            ;...00000044 0000</b>
+ 6  0x2000000001de81dc:      nop.i 0x0;;   ;...00040000
+ 7  0x2000000001de81e0:      mov r12=r33   ;...00600042 0021
+ 8  0x2000000001de81e6:      mov.ret b0=r35,0x2000000001de81e0
+ 9  0x2000000001de81ec:      mov.i ar.pfs=r34  ;...00aa0220
+10  0x2000000001de81f0:      mov r6=r32    ;...09300040 0021
 </pre>
 		<p>
-			Here we can see both write operations are annotated with explicit memory barriers on lines 58 and 60.
-			The st.rel, or "store release", instruction is an ordered write instruction for the Itanium instruction set.
-			The st.rel annotation on line 50 ensures the first write will be visible before the second write operation.
-			The st.rel barrier is unidirectional like ld.acq.
+			Here we can see the second write operation annotated with explicit memory barrier on line four.
+			By using st.rel, or "store release", on line four the compiler ensures the first write on line two will be visible before the second write operation.
 			This completes both sides of the protocol because the first write operation <i>happens before</i> subsequent memory operations.
-		</p>		
+		</p>
+		<p>
+			The st.rel barrier is unidirectional - just like ld.acq.  On line five however the compiler emits a bidirectional memory barrier.
+			The mf instruction, or "memory fence", is a full fence for the Itanium 2 instruction set.
+			It is unclear to the author as to why a compiler would chase a unidirectional barrier with this instruction.
+		</p>
 		<h3>Memory Barriers Are Hardware Specific</h3>
 		<p>
 			This article does not aim to be a comprehensive overview of all memory barriers.
 			This would be a monumental task.
 			But it is important though to appreciate the fact that these instructions vary considerably across different hardware architectures.
-			<span style="color:red">TODO replace WriterReader with Dekkers</span>. 
-			Below is what the write method of WriterReader translates to on a multi-processing Intel Xeon E5410 and a SPARC workstation.
+			Below is what the successive writes translate to on a multi-processing Intel Xeon E5410 and a SPARC workstation.
 			All remaining assembly instruction sequences in this article were captured on an Intel Xeon unless specified otherwise.
 		</p>
 <table>
@@ -212,7 +203,21 @@ A write followed by a write to shared memory on SPARC.
 <tr>
 <td valign="top">
 <pre>
-   <span style="color:red">TODO: get x86 data</span>
+ 1  0x03f8340c: push   %ebp               ;...55
+ 2  0x03f8340d: sub    $0x8,%esp          ;...81ec0800 0000
+ 3  0x03f83413: mov    $0x14c,%edi        ;...bf4c0100 00
+ 4  0x03f83418: movb   $0x1,-0x505a72f0(%edi)  ;...c687108d a5af01
+ 5  0x03f8341f: mfence                    ;...0faef0
+ 6  0x03f83422: mov    $0x148,%ebp        ;...bd480100 00
+ 7  0x03f83427: mov    $0x14d,%edx        ;...ba4d0100 00
+ 8  0x03f8342c: movsbl -0x505a72f0(%edx),%ebx  ;...0fbe9a10 8da5af
+ 9  0x03f83433: test   %ebx,%ebx          ;...85db
+10  0x03f83435: jne    0x03f83460         ;...7529
+11  0x03f83437: movl   $0x1,-0x505a72f0(%ebp)  ;...c785108d a5af01
+12  0x03f83441: movb   $0x0,-0x505a72f0(%edi)  ;...c687108d a5af00
+<b>13  0x03f83448: mfence                    ;...0faef0</b>
+14  0x03f8344b: add    $0x8,%esp          ;...83c408
+15  0x03f8344e: pop    %ebp               ;...5d
 </pre>
 </td>
 <td>
@@ -223,7 +228,11 @@ A write followed by a write to shared memory on SPARC.
 </tr>
 </table>
 		<p>
-			<span style="color:red">TODO: paragraph discussing above instructions</span>.  
+			Here we see both writes on lines 12 and 13 on the x86 Xeon.  
+			The second write is chased with an mfence instruction, an explicit bidirectional memory barrier.
+			<span style="color:red">TODO: discuss SPARC structions</span>.
+			The JVM does not bother placing a memory barrier between these writes because it can trust x86 and SPARC hardware not to re-order writes, unlike Itanium, PowerPC or Alpha.
+			Avoiding memory barriers this way is discussed in a later section.
 		</p>
 		<h3>Memory Barriers Can Be Explicit or Implicit</h3>
 		<p>
@@ -360,7 +369,21 @@ A write followed by a write to shared memory on SPARC.
 <tr>
 <td valign="top"> 		
 <pre>
-   <span style="color:red">TODO: get x86 data</span>
+ 1  0x03f83422: mov    $0x148,%ebp        ;...bd480100 00
+<b> 2  0x03f83427: mov    $0x14d,%edx        ;...ba4d0100 00</b>
+ 3  0x03f8342c: movsbl -0x505a72f0(%edx),%ebx  ;...0fbe9a10 8da5af
+ 4  0x03f83433: test   %ebx,%ebx          ;...85db
+ 5  0x03f83435: jne    0x03f83460         ;...7529
+ 6  0x03f83437: movl   $0x1,-0x505a72f0(%ebp)  ;...c785108d a5af01
+ 7  0x03f83441: movb   $0x0,-0x505a72f0(%edi)  ;...c687108d a5af00
+ 8  0x03f83448: mfence                    ;...0faef0
+ 9  0x03f8344b: add    $0x8,%esp          ;...83c408
+10  0x03f8344e: pop    %ebp               ;...5d
+11  0x03f8344f: test   %eax,0xb78ec000    ;...850500c0 8eb7
+12  0x03f83455: ret                       ;...c3
+13  0x03f83456: nopw   0x0(%eax,%eax,1)   ;...66660f1f 840000
+<b>14  0x03f83460: mov    -0x505a72f0(%ebp),%ebx  ;...8b9d108d a5af</b>
+15  0x03f83466: test   %edi,0xb78ec000    ;...853d00c0 8eb7
 </pre>
 </td>
 <td>
@@ -389,25 +412,45 @@ A write followed by a write to shared memory on SPARC.
 			Neither write operation is chased with a memory barrier.
   		</p>
 <pre>
-   <span style="color:red">TODO: get x86 data</span>
+ 1  0x03f8340c: push   %ebp               ;...55
+ 2  0x03f8340d: sub    $0x8,%esp          ;...81ec0800 0000
+ 3  0x03f83413: mov    $0x14c,%edi        ;...bf4c0100 00
+ 4  0x03f83418: movb   $0x1,-0x505a72f0(%edi)  ;...c687108d a5af01
+ 5  0x03f83422: mov    $0x148,%ebp        ;...bd480100 00
+ 6  0x03f83427: mov    $0x14d,%edx        ;...ba4d0100 00
+ 7  0x03f8342c: movsbl -0x505a72f0(%edx),%ebx  ;...0fbe9a10 8da5af
+ 8  0x03f83433: test   %ebx,%ebx          ;...85db
+ 9  0x03f83435: jne    0x03f83460         ;...7529
+10  0x03f83437: movl   $0x1,-0x505a72f0(%ebp)  ;...c785108d a5af01
+11  0x03f83441: movb   $0x0,-0x505a72f0(%edi)  ;...c687108d a5af00
+
+<b>No Memory Barrier</b>
+
+12  0x03f8344b: add    $0x8,%esp          ;...83c408
+13  0x03f8344e: pop    %ebp               ;...5d
 </pre>
 		<h3>Conclusion</h3>
 		<p>
-			Memory barriers are a complex and expensive necessity for a multi-threaded programs.
+			Modern hardware is not sequentially consistent.
+			Memory barriers are consequently a necessity for a multi-threaded programs.
 			They come in many flavors.
 			Some are explicit, others are implicit.
 			Some are bidirectional, others are unidirectional.
 			The JVM uses this array of choices to efficiently honor the Java memory model across all platforms.
+			I hope this article has helped the reader understand a little more about how their code behaves under the hood.
 		</p>
 		<h3>Acknowlegements</h3>
 		<p>
 			Thanks to Christian Thalinger of Sun Microsystems for access to a SPARC workstation. 
-		</p>		
+		</p>
 		<h3>Reference Material</h3>
 		<ul>
 			<li><a href="http://www.amazon.com/Java-Concurrency-Practice-Brian-Goetz/dp/0321349601" target="new">Java Concurrency in Practice</a> by <a href="http://www.briangoetz.com/" target="new">Brian Goetz</a></li>
 			<li><a href="http://g.oswego.edu/dl/jmm/cookbook.html" target="new">JSR-133 Cookbook</a> by Doug Lea</li>
 			<li><a href="http://en.wikipedia.org/wiki/Dekker%27s_algorithm" target="new">Dekker's Algorithm</a></li>
+			<li><a href="http://wikis.sun.com/display/HotSpotInternals/PrintAssembly" target="new">Using PrintAssembly</a></li>
+			<li><a href="http://kenai.com/projects/base-hsdis/downloads" target="new">The Kenai Project</a></li>
+			<li><a href="http://hg.openjdk.java.net/jdk7/hotspot/hotspot/file/tip/src/share/tools/hsdis/" target="new">The hsdis plugin</a></li>
 		</ul>
 		<h3>About the Author </h3>
 		<p>

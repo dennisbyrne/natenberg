@@ -20,7 +20,7 @@
 		</p>
 		<h3>What Are Memory Barriers?</h3>
 		<p>
-			The costs of memory latency have pushed processors to reorder and cache memory operations.
+			The cost of memory latency has pushed processors to reorder and cache memory operations.
 			A trip to main memory costs hundreds of clock cycles on commodity hardware.
 			Processors use caching to decrease latency costs of memory operations by orders of magnitude.
 			These caches introduce a substantial visibility delay because the value of each write operation does not immediately "write through" to main memory.
@@ -41,20 +41,9 @@
 		<p>
 			Memory barriers are not directly exposed by the JVM; 
 			instead they are inserted into the instruction sequence by the JVM in order to uphold the semantics of language level concurrency primitives.
-			Let's look at the source code and assembly instructions of some simple Java programs to see how. 
-			This requires the latest OpenJDK release or a new version of HotSpot, update 14 or above.
-			A disassembler plugin is also required. The Kenai project <a href="http://kenai.com/projects/base-hsdis/downloads" target="new">has binaries</a>
-			for Solaris, Linux and BSD.  The <a href="http://hg.openjdk.java.net/jdk7/hotspot/hotspot/file/tip/src/share/tools/hsdis/" target="new">hsdis</a>
-			plugin is an alternative that can be built from source for Windows.
-		</p>
-		<!--div class="code">
-		The following works for Linux.
-			$ wget http://kenai.com/projects/base-hsdis/downloads/download/linux-hsdis-i386.so<br/>
-			$ cp linux-hsdis-i386.so /usr/lib/jvm/java-6-openjdk/jre/lib/i386/server/<br/>
-			$ cp linux-hsdis-i386.so /usr/lib/jvm/java-6-openjdk/jre/lib/i386/client/<br/>
-		</div-->
-		<p>
+			We'll look at the source code and assembly instructions of some simple Java programs to see how. 
 			Let's begin a crash course in memory barriers with the Dekker's algorithm.
+			This algorithm uses three volatile variables to coordinate access to a shared resource between two threads.
 			Try not to focus on the finer details of this algorithm.
 		</p>
 		<table>
@@ -104,34 +93,32 @@ intentSecond = false;
 			</tr>
 		</table>
 		<p>
-			Which parts are relevant to this discussion? 
-			This algorithm uses three volatile variables to coordinate access to a shared resource between two threads.
+			Which parts are relevant? 
 			Each thread attempts to enter the critical section on the first line of code by signaling an intent to do so.
 			If a thread observes a conflict on line three (both threads have signaled intent) the conflict is resolved by turn taking.
 			Only one thread can ever access the critical section at a given point in time.		
 		</p>
 		<p>
 			Hardware optimizations can break this code without memory barriers.
-			Consider two small blocks of code above.
-			Lines three and four represent two successive read operations.
-			Each thread checks to see if the other has signaled an intent to enter the critical section
-			<i>and then</i> each thread checks to see who's turn it is.
-			Lines 12 and 13 represent two successive write operations.
+			Consider the two successive read operations on lines three and four.
+			Each thread checks to see if the other has signaled an intent to enter the critical section <i>and then</i> each thread checks to see who's turn it is.
+			Consider the two successive write operations on lines 12 and 13.
 			Each thread gives the other it's "turn" <i>and then</i> each thread withdraws intent to enter the critical section.
-			Consider the point of view of a reading thread.
-			A reading thread should never expect to observe the other thread's write to the turn variable before the other thread's withdrawal of intent.
+			A reading thread should never expect to observe the other thread's write to the turn variable after the other thread's withdrawal of intent.
+			This would be a disaster.
 			Without the volatile modifier on these variables this indeed can happen.
 			For example, without the volatile modifier the second thread could observe the first thread's write to intentFirst (last line) before the first thread's write to turn (second to last line). 
 			The keyword volatile prevents this problem because it establishes a <i>happens before</i> relationship between the write to the turn variable and the write to intentFirst.
 			The compiler cannot re-order these write operations and if necessary it must forbid the processor from doing so.
 			A peek under the hood shows how.
 		</p>
-		<!--div class="code">
-			$ java -XX:+UnlockDiagnosticVMOptions -XX:PrintAssemblyOptions=hsdis-print-bytes -XX:CompileCommand=print,WriterReader.read WriterReader
-		</div-->
 		<p>
-			The two successive load operations on lines three and four translate to the instructions below.
-			These instructions were captured on multi-processing Itanium hardware. 
+			The two successive load operations on lines three and four translate to the assembly instructions below.
+			These instructions were captured on multi-processing Itanium hardware <span style="color:red">TODO Which JDK?</span>. 
+			This requires the latest OpenJDK release or a new version of HotSpot, update 14 or above.
+			A disassembler plugin is also required. 
+			The Kenai project <a href="http://kenai.com/projects/base-hsdis/downloads" target="new">has binaries</a> for Solaris, Linux and BSD.
+			The <a href="http://hg.openjdk.java.net/jdk7/hotspot/hotspot/file/tip/src/share/tools/hsdis/" target="new">hsdis</a> plugin is an alternative that can be built from source for Windows.			
 		</p>
 <pre>
 49  0x2000000001de819c:             adds r37=597,r36;;  ;...84112554
@@ -166,13 +153,13 @@ intentSecond = false;
 			The reads of both volatile variables are on lines 50 and 81.  
 			The Java memory model guarantees the JVM will deliver both reads to the processor in program order - 
 			but this alone would not be enough because the processor is still free to perform these operations out of order.
-			To uphold the consistency guarantees of the Java memory model the JVM creates a memory barrier via an explicit ld.acq instruction, or "load acquire".
+			To uphold the consistency guarantees of the Java memory model the JVM annotates the read operations with a memory barrier via ld.acq, or "load acquire".
 			The ld.acq instruction is an ordered read instruction for the Itanium instruction set.
-			<span style="color:red">TODO More background on the instruction itself</span>.
-			Notice that this instruction affects loads, not stores.
+			By annotating the first read on line 50 with ld.acq the compiler ensures that the read operation on line 50 will complete before the subsequent load operation.
+			Notice this affects loads, not stores.
 			A memory barrier that enforces ordering limitations on reads <i>or</i> writes is said to be unidirectional.
 			A memory barrier that enforces ordering limitations on reads <i>and</i> writes is said to be bidirectional, or, a full fence.  
-			The ld.acq instruction is a unidirectional memory barrier.
+			Using ld.acq is an example of a unidirectional memory barrier.
 		</p>
 		<p>
 			Consistency is a two way street.
@@ -198,11 +185,11 @@ intentSecond = false;
 67  0x2000000001de81f0: [MMI]       mov r6=r32    ;...09300040 0021
 </pre>
 		<p>
-			Here we can see both write operations are paired with explicit memory barriers on lines 58 and 60.
+			Here we can see both write operations are annotated with explicit memory barriers on lines 58 and 60.
 			The st.rel, or "store release", instruction is an ordered write instruction for the Itanium instruction set.
-			<span style="color:red">TODO More background on the instruction itself</span>. 
-			Like the ld.acq instruction it is a unidirectional memory barrier.
-			This completes both sides of the protocol because each write operation <i>happens before</i> subsequent memory operations.
+			The st.rel annotation on line 50 ensures the first write will be visible before the second write operation.
+			The st.rel barrier is unidirectional like ld.acq.
+			This completes both sides of the protocol because the first write operation <i>happens before</i> subsequent memory operations.
 		</p>		
 		<h3>Memory Barriers Are Hardware Specific</h3>
 		<p>
@@ -216,10 +203,10 @@ intentSecond = false;
 <table>
 <tr>
 <td>
-The WriterReader.write method on x86.
+A write followed by a write to shared memory on x86.
 </td>
 <td>
-The WriterReader.write method on SPARC.
+A write followed by a write to shared memory on SPARC.
 </td>
 </tr>
 <tr>
@@ -236,7 +223,7 @@ The WriterReader.write method on SPARC.
 </tr>
 </table>
 		<p>
-			On the x86 the JVM chases both write operations with an mfence instruction, an explicit bidirectional memory barrier.  
+			<span style="color:red">TODO: paragraph discussing above instructions</span>.  
 		</p>
 		<h3>Memory Barriers Can Be Explicit or Implicit</h3>
 		<p>
@@ -360,17 +347,14 @@ The WriterReader.write method on SPARC.
 			Remember the explicit unidirectional memory barrier we saw for the read method of WriterReader on Itanium?
 			Well, the generated assembly instructions for the read method on an x86 and SPARC have <i>no</i> memory barrier.
 		</p>
-		<div class="code">
-			$ java -XX:+UnlockDiagnosticVMOptions -XX:PrintAssemblyOptions=hsdis-print-bytes -XX:CompileCommand=print,WriterReader.read WriterReader
-		</div>
 <br/>
 <table>
 <tr>
 <td>
-&nbsp;&nbsp;WriterReader.read on x86
+&nbsp;&nbsp;A read followed by a read of shared memory on x86
 </td>
 <td>
-&nbsp;&nbsp;WriterReader.read on SPARC
+&nbsp;&nbsp;A read followed by a read of shared memory on SPARC
 </td>
 </tr>
 <tr>
@@ -395,18 +379,15 @@ The WriterReader.write method on SPARC.
 			Unidirectional memory barriers are naturally less expensive than bidirectional ones.
 			The JVM will avoid a bidirectional memory barrier when it knows a unidirectional one is sufficient.
 			The first example in this article demonstrated this.  
-			We saw that the read operations in WriterReader were chased with an explicit unidirectional memory barrier.
-			If the read operations in WriterReader were chased with an explicit bidirectional memory barrier the program would be just as correct, but at a greater cost.
+			We saw that the successive read operations on Itanium were chased with an annotated with a unidirectional memory barrier.
+			If the read operations had been annotated with an explicit bidirectional memory barrier the program would still be correct, but at a greater latency cost.
 		</p>
 		<p>
 			On a uni-processor system the JVM can insert a no op for <i>all</i> memory barriers because memory operations are already serialized.  
-			The following instructions were captured from a runtime compilation of the write method of the WriterReader class using a VMWare workstation 
-			image in uni-processor mode.
+			The following instruction stream was captured from a runtime compilation of two successive writes in Dekker's algorithm.
+			The program was running in a VMWare workstation image in uni-processor mode on x86 hardware.
 			Neither write operation is chased with a memory barrier.
   		</p>
-		<div class="code">
-			$ java -XX:+UnlockDiagnosticVMOptions -XX:PrintAssemblyOptions=hsdis-print-bytes -XX:CompileCommand=print,WriterReader.write WriterReader
-		</div> 
 <pre>
    <span style="color:red">TODO: get x86 data</span>
 </pre>

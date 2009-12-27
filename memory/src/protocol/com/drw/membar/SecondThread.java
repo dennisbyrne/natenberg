@@ -14,13 +14,13 @@ public class SecondThread extends Thread {
 	
 	private void protocol(){
 		intentSecond = true;
-		
+
 		while (intentFirst)
-			if (turn != 1) {
-				intentSecond = false;
-				while (turn != 1) {}
-				intentSecond = true;
-			}
+		  if (turn != 1) {
+		    intentSecond = false;
+		    while (turn != 1) {}
+		    intentSecond = true;
+		  }
 
 		criticalSection();
 

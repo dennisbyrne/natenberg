@@ -13,19 +13,20 @@ public class FirstThread extends Thread{
 	}
 	
 	private void protocol(){
-		intentFirst = true;
+		     intentFirst = true;
+		 
+		     while (intentSecond)
+		     	if (turn != 0) {
+		     		intentFirst = false;
+		     		while (turn != 0) {}
+		     		intentFirst = true;
+		     	}
+		 
+		    criticalSection();
+		
+		    turn = 1;
+		    intentFirst = false;
 
-	    while (intentSecond)
-	    	if (turn != 0) {
-	    		intentFirst = false;
-	    		while (turn != 0) {}
-	    		intentFirst = true;
-	    	}
-
-	    criticalSection();
-
-	    turn = 1;
-	    intentFirst = false;
 	}
 
 }

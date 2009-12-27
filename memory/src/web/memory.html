@@ -225,45 +225,18 @@ The WriterReader.write method on SPARC.
 <tr>
 <td valign="top">
 <pre>
-
-  0x00f78017: push   %ebp               ;...55
-  0x00f78018: mov    %esp,%ebp          ;...8bec
-  0x00f7801a: sub    $0x18,%esp         ;...83ec18
-  0x00f7801d: mov    $0x95ba53c0,%esi   ;...bec053ba 95
-  0x00f78022: mov    $0x2a,%edi         ;...bf2a0000 00
-  0x00f78027: mov    %edi,0x148(%esi)   ;...89be4801 0000
-  <span style="font-weight:bold">0x00f7802d: mfence                    ;...0faef0</span>
-  0x00f78030: mov    $0x1,%edi          ;...bf010000 00
-  0x00f78035: mov    %edi,%ebx          ;...8bdf
-  0x00f78037: mov    %bl,0x14c(%esi)    ;...889e4c01 0000
-  <span style="font-weight:bold">0x00f7803d: mfence                    ;...0faef0</span>
-  0x00f78040: mov    %ebp,%esp          ;...8be5
-  0x00f78042: pop    %ebp               ;...5d
+   <span style="color:red">TODO: get x86 data</span>
 </pre>
 </td>
 <td>
 <pre>
-
-  0xfa8ecea0: save  %sp, -72, %sp       ;...9de3bfb8
-  0xfa8ecea4: sethi  %hi(0xb61f9000), %l1  ;...232d87e4
-  0xfa8ecea8: add  %l1, 0x3d8, %l1	! 'WriterReader'
-  0xfa8eceac: mov  0x2a, %l0            ;...a010202a
-  0xfa8eceb0: st  %l0, [ %l1 + 0x150 ]  ;...e0246150
-  0xfa8eceb4: mov  1, %l2               ;...a4102001
-  0xfa8eceb8: stb  %l2, [ %l1 + 0x154 ]  ;...e42c6154
-  <span style="font-weight:bold">0xfa8ecebc: membar  #StoreLoad        ;...8143e002</span>
-  0xfa8ecec0: sethi  %hi(0xff3fc000), %l0  ;...213fcff0
-  0xfa8ecec4: ld  [ %l0 ], %g0          ;...c0042000
-                                        ;   {poll_return}  
-  0xfa8ecec8: ret                       ;...81c7e008
-  0xfa8ececc: restore                   ;...81e80000
+	<span style="color:red">TODO: get SPARC data</span>
 </pre>
 </td>
 </tr>
 </table>
 		<p>
 			On the x86 the JVM chases both write operations with an mfence instruction, an explicit bidirectional memory barrier.  
-			On the SPARC the JVM shows a little more trust with a single membar instruction.
 		</p>
 		<h3>Memory Barriers Can Be Explicit or Implicit</h3>
 		<p>
@@ -403,38 +376,12 @@ The WriterReader.write method on SPARC.
 <tr>
 <td valign="top"> 		
 <pre>
-
-  0x018a1d97: push   %ebp               ;...55
-  0x018a1d98: mov    %esp,%ebp          ;...8bec
-  0x018a1d9a: sub    $0x18,%esp         ;...83ec18
-  0x018a1d9d: mov    $0x95ba53e0,%eax   ;...b8e053ba 95
-                                        ;   {oop()}
-  0x018a1da2: movsbl 0x14c(%eax),%eax   ;...0fbe804c 010000
-  0x018a1da9: cmp    $0x0,%eax          ;...83f800
-  0x018a1dac: je     0x018a1dc7         ;...0f841500 0000
-  0x018a1db2: mov    $0x95ba53e0,%eax   ;...b8e053ba 95
-                                        ;   {oop()}
-  0x018a1db7: mov    0x148(%eax),%eax   ;...8b804801 0000
-  0x018a1dbd: mov    %ebp,%esp          ;...8be5
-  0x018a1dbf: pop    %ebp               ;...5d
+   <span style="color:red">TODO: get x86 data</span>
 </pre>
 </td>
 <td>
 <pre>
-
-  0xfa8ece60: save  %sp, -72, %sp       ;...9de3bfb8
-  0xfa8ece64: sethi  %hi(0xb61f9000), %l1  ;...232d87e4
-  0xfa8ece68: add  %l1, 0x3d8, %l1	! 'WriterReader'
-  0xfa8ece6c: ldub  [ %l1 + 0x154 ], %l0  ;...e00c6154
-  0xfa8ece70: cmp  %l0, 0               ;...80a42000
-  0xfa8ece74: be,pn   %icc, 0xfa8ece8c  ;...02400006
-  0xfa8ece78: ld  [ %l1 + 0x150 ], %i0  ;...f0046150
-  0xfa8ece7c: sethi  %hi(0xff3fc000), %l0  ;...213fcff0
-  0xfa8ece80: ld  [ %l0 ], %g0          ;...c0042000
-  0xfa8ece84: ret                       ;...81c7e008
-  0xfa8ece88: restore                   ;...81e80000
-  0xfa8ece8c: b  %icc, 0xfa8ece7c       ;...104ffffc
-  0xfa8ece90: mov  -1, %i0              ;...b0103fff
+   <span style="color:red">TODO: get SPARC data</span>
 </pre>
 </td>
 </tr>
@@ -461,23 +408,7 @@ The WriterReader.write method on SPARC.
 			$ java -XX:+UnlockDiagnosticVMOptions -XX:PrintAssemblyOptions=hsdis-print-bytes -XX:CompileCommand=print,WriterReader.write WriterReader
 		</div> 
 <pre>
-  0x00f78017: push   %ebp               ;...55
-  0x00f78018: mov    %esp,%ebp          ;...8bec
-  0x00f7801a: sub    $0x18,%esp         ;...83ec18
-  0x00f7801d: mov    $0x95ba53c0,%esi   ;...bec053ba 95
-  0x00f78022: mov    $0x2a,%edi         ;...bf2a0000 00
-  0x00f78027: mov    %edi,0x148(%esi)   ;...89be4801 0000
-  
-<span style="font-weight:bold">  No Memory Barrier</span>
-
-  0x00f78030: mov    $0x1,%edi          ;...bf010000 00
-  0x00f78035: mov    %edi,%ebx          ;...8bdf
-  0x00f78037: mov    %bl,0x14c(%esi)    ;...889e4c01 0000
-
-<span style="font-weight:bold">  No Memory Barrier</span>
-
-  0x00f78040: mov    %ebp,%esp          ;...8be5
-  0x00f78042: pop    %ebp               ;...5d
+   <span style="color:red">TODO: get x86 data</span>
 </pre>
 		<h3>Conclusion</h3>
 		<p>

@@ -43,7 +43,13 @@
 			We'll look at the source code and assembly instructions of some simple Java programs to see how. 
 			Let's begin a crash course in memory barriers with the Dekker's algorithm.
 			This algorithm uses three volatile variables to coordinate access to a shared resource between two threads.
+		</p>
+		<p>
 			Try not to focus on the finer details of this algorithm.
+			Which parts are relevant? 
+			Each thread attempts to enter the critical section on the first line of code by signaling an intent to do so.
+			If a thread observes a conflict on line three (both threads have signaled intent) the conflict is resolved by turn taking.
+			Only one thread can access the critical section at a given point in time.				
 		</p>
 		<table>
 			<tr>
@@ -92,13 +98,7 @@ intentSecond = false;
 			</tr>
 		</table>
 		<p>
-			Which parts are relevant? 
-			Each thread attempts to enter the critical section on the first line of code by signaling an intent to do so.
-			If a thread observes a conflict on line three (both threads have signaled intent) the conflict is resolved by turn taking.
-			Only one thread can access the critical section at a given point in time.		
-		</p>
-		<p>
-			Hardware optimizations can break this code without memory barriers.
+			Hardware optimizations can break this code without memory barriers, even if the compiler were to emit all memory operations as they appear to the programmer.
 			Consider the two successive read operations on lines three and four.
 			Each thread checks to see if the other has signaled an intent to enter the critical section <i>and then</i> checks to see who's turn it is.
 			Consider the two successive write operations on lines 12 and 13.
@@ -107,8 +107,8 @@ intentSecond = false;
 			This would be a disaster.
 			Without the volatile modifier on these variables this indeed can happen.
 			For example, without the volatile modifier the second thread could observe the first thread's write to intentFirst (last line) before the first thread's write to turn (second to last line). 
-			The keyword volatile prevents this problem because it establishes a <i>happens before</i> relationship between the write to the turn variable and the write to intentFirst.
-			The compiler cannot re-order these write operations and if necessary it must forbid the processor from doing so.
+			The keyword volatile prevents this problem because it establishes a <i>happens before</i> relationship between the write to the turn variable and the write to the intentFirst variable.
+			The compiler cannot re-order these write operations and if necessary it must forbid the processor from doing so with memory barriers.
 			A peek under the hood shows how.
 		</p>
 		<table>
@@ -144,8 +144,11 @@ intentSecond = false;
 			The first volatile read is on line two.  
 			The Java memory model guarantees the JVM will deliver this read to the processor before the second read, in "program order" - 
 			but this alone would not be enough because the processor is still free to perform these operations out of order.
-			To uphold the consistency guarantees of the Java memory model the JVM annotates the first read operation with ld.acq, or "load acquire".
+			To uphold the consistency guarantees of the Java memory model the JVM annotates the first read operation with a variant of ld.acq, or "load acquire".
 			By using ld.acq the compiler ensures the read operation on line two will complete before the subsequent read operation.
+			Problem solved.
+		</p>
+		<p>
 			Notice this affects reads, not writes.
 			A memory barrier that enforces ordering limitations on reads <i>or</i> writes is said to be unidirectional.
 			A memory barrier that enforces ordering limitations on reads <i>and</i> writes is said to be bidirectional, or, a full fence.  
@@ -156,7 +159,7 @@ intentSecond = false;
 			How useful is it for a reading thread to insert a memory barrier between both reads if the other thread does not separate both writes with one as well?
 			In order for threads to communicate they must <i>all</i> obey the protocol; just like nodes on a network, or people on a team.
 			If one thread breaks formation than the efforts of all other threads are rendered useless.
-			We should expect to see memory barriers in the assembly instructions for last two lines of code, a write followed by a write.
+			We should expect to see a memory barrier between in the assembly instructions for the last two lines of Dekker's algorithm, a write followed by a write.
 		</p>
 		<!--div class="code">
 			$ java -XX:+UnlockDiagnosticVMOptions -XX:PrintAssemblyOptions=hsdis-print-bytes -XX:CompileCommand=print,WriterReader.write WriterReader
@@ -175,13 +178,13 @@ intentSecond = false;
 </pre>
 		<p>
 			Here we can see the second write operation annotated with explicit memory barrier on line four.
-			By using st.rel, or "store release", on line four the compiler ensures the first write on line two will be visible before the second write operation.
-			This completes both sides of the protocol because the first write operation <i>happens before</i> subsequent memory operations.
+			By using a variant of st.rel, or "store release", the compiler ensures the first write operation will be visible before the second write operation.
+			This completes both sides of the protocol because the first write operation <i>happens before</i> the second write operation.
 		</p>
 		<p>
 			The st.rel barrier is unidirectional - just like ld.acq.  On line five however the compiler emits a bidirectional memory barrier.
 			The mf instruction, or "memory fence", is a full fence for the Itanium 2 instruction set.
-			It is unclear to the author as to why a compiler would chase a unidirectional barrier with this instruction.
+			This seems redundant to the author.
 		</p>
 		<h3>Memory Barriers Are Hardware Specific</h3>
 		<p>
@@ -228,10 +231,11 @@ A write followed by a write to shared memory on SPARC.
 </tr>
 </table>
 		<p>
-			Here we see both writes on lines 12 and 13 on the x86 Xeon.  
+			Here we see both writes on lines 11 and 12 on the x86 Xeon.  
 			The second write is chased with an mfence instruction, an explicit bidirectional memory barrier.
 			<span style="color:red">TODO: discuss SPARC structions</span>.
-			The JVM does not bother placing a memory barrier between these writes because it can trust x86 and SPARC hardware not to re-order writes, unlike Itanium, PowerPC or Alpha.
+			The JVM does not bother placing a memory barrier between these writes on either platform because it can trust x86 and SPARC hardware not to re-order writes.
+			This is not true for Itanium, PowerPC or Alpha.
 			Avoiding memory barriers this way is discussed in a later section.
 		</p>
 		<h3>Memory Barriers Can Be Explicit or Implicit</h3>
@@ -245,7 +249,7 @@ A write followed by a write to shared memory on SPARC.
         static int counter = 0;
 	
         public static void main(String[] _){
-            for(int i = 0; i < 100000; i++)
+            for(int i = 0; i &lt; 100000; i++)
                 inc();
         }
 	
@@ -310,7 +314,7 @@ A write followed by a write to shared memory on SPARC.
         static AtomicInteger counter = new AtomicInteger(0);
 	
         public static void main(String[] args){
-            for(int i = 0; i < 1000000; i++)
+            for(int i = 0; i &lt; 1000000; i++)
                 counter.incrementAndGet(); 
         }
 	
@@ -353,17 +357,13 @@ A write followed by a write to shared memory on SPARC.
 			Often it gets lucky and the consistency guarantees of the hardware memory model are greater than or equal to those of the Java memory model.  
 			When this happens the JVM simply inserts a no op instead of an actual memory barrier.  
 			For example, the consistency guarantees of the x86 and SPARC memory models are strong enough to eliminate the need for a memory barrier when reading a volatile variable.
-			Remember the explicit unidirectional memory barrier we saw for the read method of WriterReader on Itanium?
-			Well, the generated assembly instructions for the read method on an x86 and SPARC have <i>no</i> memory barrier.
+			Remember the explicit unidirectional memory barrier used to separate both read operations on Itanium?
+			Well, the generated assembly instructions for the successive reads in Dekker's algorithm on an x86 have <i>no</i> memory barrier.
 		</p>
-<br/>
 <table>
 <tr>
 <td>
-&nbsp;&nbsp;A read followed by a read of shared memory on x86
-</td>
-<td>
-&nbsp;&nbsp;A read followed by a read of shared memory on SPARC
+A read followed by a read of shared memory on x86
 </td>
 </tr>
 <tr>
@@ -386,16 +386,12 @@ A write followed by a write to shared memory on SPARC.
 15  0x03f83466: test   %edi,0xb78ec000    ;...853d00c0 8eb7
 </pre>
 </td>
-<td>
-<pre>
-   <span style="color:red">TODO: get SPARC data</span>
-</pre>
-</td>
 </tr>
 </table>	
 		<p>
-			On both architectures the volatile read operations are not paired with a memory barrier.
-			In other words the only performance penalty for a volatile read on an x86 or SPARC is a minor loss of code motion optimization opportunities -
+			The volatile read operations are found on lines two and twelve.
+			Neither are not paired with a memory barrier.
+			In other words the only performance penalty for a volatile read on an x86 (or on SPARC for that matter) is a minor loss of code motion optimization opportunities -
 			the instruction itself is no different than an ordinary read.
 		</p>
 		<p>
@@ -437,7 +433,7 @@ A write followed by a write to shared memory on SPARC.
 			Some are explicit, others are implicit.
 			Some are bidirectional, others are unidirectional.
 			The JVM uses this array of choices to efficiently honor the Java memory model across all platforms.
-			I hope this article has helped the reader understand a little more about how their code behaves under the hood.
+			I hope this article helps experienced JVM developers become a little more knowlegdeable about how their code behaves under the hood.
 		</p>
 		<h3>Acknowlegements</h3>
 		<p>
@@ -445,12 +441,14 @@ A write followed by a write to shared memory on SPARC.
 		</p>
 		<h3>Reference Material</h3>
 		<ul>
+			<li><a href="http://www.intel.com/products/processor/manuals/" target="new">Intel 64 and IA-32 Architectures Software Developer's Manuals</a></li>
+			<li><a href="http://www.csee.umbc.edu/help/architecture/aig.pdf" target="new">IA-64 Application Instruction Set Architecture Guide</a></li>
 			<li><a href="http://www.amazon.com/Java-Concurrency-Practice-Brian-Goetz/dp/0321349601" target="new">Java Concurrency in Practice</a> by <a href="http://www.briangoetz.com/" target="new">Brian Goetz</a></li>
 			<li><a href="http://g.oswego.edu/dl/jmm/cookbook.html" target="new">JSR-133 Cookbook</a> by Doug Lea</li>
-			<li><a href="http://en.wikipedia.org/wiki/Dekker%27s_algorithm" target="new">Dekker's Algorithm</a></li>
-			<li><a href="http://wikis.sun.com/display/HotSpotInternals/PrintAssembly" target="new">Using PrintAssembly</a></li>
-			<li><a href="http://kenai.com/projects/base-hsdis/downloads" target="new">The Kenai Project</a></li>
-			<li><a href="http://hg.openjdk.java.net/jdk7/hotspot/hotspot/file/tip/src/share/tools/hsdis/" target="new">The hsdis plugin</a></li>
+			<li>Mutual exclusion with <a href="http://en.wikipedia.org/wiki/Dekker%27s_algorithm" target="new">Dekker's Algorithm</a></li>
+			<li>Examining generated code with <a href="http://wikis.sun.com/display/HotSpotInternals/PrintAssembly" target="new">PrintAssembly</a></li>
+			<li><a href="http://kenai.com/projects/base-hsdis/downloads" target="new">The Kenai Project</a> - a disassembler plugin</li>
+			<li><a href="http://hg.openjdk.java.net/jdk7/hotspot/hotspot/file/tip/src/share/tools/hsdis/" target="new">hsdis</a> - a disassembler plugin</li>
 		</ul>
 		<h3>About the Author </h3>
 		<p>

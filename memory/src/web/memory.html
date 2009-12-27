@@ -370,8 +370,8 @@ A read followed by a read of shared memory on x86
 <td valign="top"> 		
 <pre>
  1  0x03f83422: mov    $0x148,%ebp        ;...bd480100 00
-<b> 2  0x03f83427: mov    $0x14d,%edx        ;...ba4d0100 00</b>
- 3  0x03f8342c: movsbl -0x505a72f0(%edx),%ebx  ;...0fbe9a10 8da5af
+ 2  0x03f83427: mov    $0x14d,%edx        ;...ba4d0100 00
+<b> 3  0x03f8342c: movsbl -0x505a72f0(%edx),%ebx  ;...0fbe9a10 8da5af</b>
  4  0x03f83433: test   %ebx,%ebx          ;...85db
  5  0x03f83435: jne    0x03f83460         ;...7529
  6  0x03f83437: movl   $0x1,-0x505a72f0(%ebp)  ;...c785108d a5af01
@@ -389,7 +389,7 @@ A read followed by a read of shared memory on x86
 </tr>
 </table>	
 		<p>
-			The volatile read operations are found on lines two and twelve.
+			The volatile read operations are found on lines three and fourteen.
 			Neither are not paired with a memory barrier.
 			In other words the only performance penalty for a volatile read on an x86 (or on SPARC for that matter) is a minor loss of code motion optimization opportunities -
 			the instruction itself is no different than an ordinary read.

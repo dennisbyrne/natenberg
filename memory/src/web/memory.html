@@ -54,13 +54,8 @@
 			$ cp linux-hsdis-i386.so /usr/lib/jvm/java-6-openjdk/jre/lib/i386/client/<br/>
 		</div-->
 		<p>
-			Let's begin a crash course in memory barriers with the Dekker's algorithm, 
-			a protocol used to coordinate access to a shared resource by two threads.
+			Let's begin a crash course in memory barriers with the Dekker's algorithm.
 			Try not to focus on the finer details of this algorithm.
-			Just observe that both threads communicate via three volatile variables.  
-			Each thread attempts to enter the critical section on the first line of code by signaling an intent to do so.
-			If a thread observes a conflict on line three (both threads have signaled intent) the conflict is resolved by turn taking.
-			Only one thread can ever access the critical section at a time.		
 		</p>
 		<table>
 			<tr>
@@ -94,11 +89,11 @@
 intentSecond = true;
 
 while (intentFirst)
-	if (turn != 1) {
-		intentSecond = false;
-		while (turn != 1) {}
-		intentSecond = true;
-	}
+  if (turn != 1) {
+    intentSecond = false;
+    while (turn != 1) {}
+    intentSecond = true;
+  }
 
 criticalSection();
 
@@ -109,18 +104,24 @@ intentSecond = false;
 			</tr>
 		</table>
 		<p>
-			Why are memory barriers important to Dekker's algorithm?
-			Because compiler and hardware optimizations will break this code without them.
+			Which parts are relevant to this discussion? 
+			This algorithm uses three volatile variables to coordinate access to a shared resource between two threads.
+			Each thread attempts to enter the critical section on the first line of code by signaling an intent to do so.
+			If a thread observes a conflict on line three (both threads have signaled intent) the conflict is resolved by turn taking.
+			Only one thread can ever access the critical section at a given point in time.		
+		</p>
+		<p>
+			Hardware optimizations can break this code without memory barriers.
 			Consider two small blocks of code above.
-			Lines three and four represent two successive load operations.
+			Lines three and four represent two successive read operations.
 			Each thread checks to see if the other has signaled an intent to enter the critical section
 			<i>and then</i> each thread checks to see who's turn it is.
 			Lines 12 and 13 represent two successive write operations.
-			Each thread gives the other it's "turn" <i>and then</i> on each thread withdraws intent to enter the critical section.
+			Each thread gives the other it's "turn" <i>and then</i> each thread withdraws intent to enter the critical section.
 			Consider the point of view of a reading thread.
-			A reading thread should never expect to observe the other threads write to the turn variable before the other thread's withdrawal of intent.
+			A reading thread should never expect to observe the other thread's write to the turn variable before the other thread's withdrawal of intent.
 			Without the volatile modifier on these variables this indeed can happen.
-			For example, without the volatile modifier the second thread could observe the write to intentFirst (last line) before the write to turn (second to last line). 
+			For example, without the volatile modifier the second thread could observe the first thread's write to intentFirst (last line) before the first thread's write to turn (second to last line). 
 			The keyword volatile prevents this problem because it establishes a <i>happens before</i> relationship between the write to the turn variable and the write to intentFirst.
 			The compiler cannot re-order these write operations and if necessary it must forbid the processor from doing so.
 			A peek under the hood shows how.
@@ -134,7 +135,7 @@ intentSecond = false;
 		</p>
 <pre>
 49  0x2000000001de819c:             adds r37=597,r36;;  ;...84112554
-50  <b>0x2000000001de81a0: [MMI]       ld1.acq r38=[r37];;  ;...0b30014a a010</b>
+<b>50  0x2000000001de81a0: [MMI]       ld1.acq r38=[r37];;  ;...0b30014a a010</b>
 51  0x2000000001de81a6:             nop.m 0x0     ;...00000002 00c0
 52  0x2000000001de81ac:             sxt1 r38=r38;;  ;...00513004
 53  0x2000000001de81b0: [MIB]       cmp4.eq p0,p6=0,r38  ;...1100004c 8639
@@ -146,7 +147,7 @@ intentSecond = false;
 78  0x2000000001de8220: [MMI]       adds r38=592,r36  ;...09304149 0421
 79  0x2000000001de8226:             nop.m 0x0     ;...00000002 0000
 80  0x2000000001de822c:             nop.i 0x0;;   ;...00040000
-81  <b>0x2000000001de8230: [MMI]       ld4.acq r41=[r38]  ;...0948014c b010</b>
+<b>81  0x2000000001de8230: [MMI]       ld4.acq r41=[r38]  ;...0948014c b010</b>
 82  0x2000000001de8236:             nop.m 0x0     ;...00000002 0000
 83  0x2000000001de823c:             nop.i 0x0;;   ;...00040000
 84                                                ; OopMap{gr38=Derived_oop_gr36 gr37=Derived_oop_gr36 gr36=Oop off=288}
@@ -165,19 +166,20 @@ intentSecond = false;
 			The reads of both volatile variables are on lines 50 and 81.  
 			The Java memory model guarantees the JVM will deliver both reads to the processor in program order - 
 			but this alone would not be enough because the processor is still free to perform these operations out of order.
-			To uphold the consistency guarantees of the Java memory model the JVM creates a memory barrier via an explicit ld.acq instruction.
-			The ld.acq, or "load acquire", instruction is an ordered load instruction for the Itanium instruction set.</span>
-			Notice that this instruction affects loads, not stores.  
+			To uphold the consistency guarantees of the Java memory model the JVM creates a memory barrier via an explicit ld.acq instruction, or "load acquire".
+			The ld.acq instruction is an ordered read instruction for the Itanium instruction set.
+			<span style="color:red">TODO More background on the instruction itself</span>.
+			Notice that this instruction affects loads, not stores.
 			A memory barrier that enforces ordering limitations on reads <i>or</i> writes is said to be unidirectional.
 			A memory barrier that enforces ordering limitations on reads <i>and</i> writes is said to be bidirectional, or, a full fence.  
 			The ld.acq instruction is a unidirectional memory barrier.
 		</p>
 		<p>
 			Consistency is a two way street.
-			How useful is it for the reader thread to insert a memory barrier between both reads if the writer thread does not separate both writes with one as well?
+			How useful is it for a reading thread to insert a memory barrier between both reads if the other thread does not separate both writes with one as well?
 			In order for threads to communicate they must <i>all</i> obey the protocol; just like nodes on a network, or people on a team.
 			If one thread breaks formation than the efforts of all other threads are rendered useless.
-			We should expect to see memory barriers in the assembly instructions for the write method of the WriterReader.
+			We should expect to see memory barriers in the assembly instructions for last two lines of code, a write followed by a write.
 		</p>
 		<!--div class="code">
 			$ java -XX:+UnlockDiagnosticVMOptions -XX:PrintAssemblyOptions=hsdis-print-bytes -XX:CompileCommand=print,WriterReader.write WriterReader
@@ -197,7 +199,8 @@ intentSecond = false;
 </pre>
 		<p>
 			Here we can see both write operations are paired with explicit memory barriers on lines 58 and 60.
-			The st.rel, or "store release", instruction is an ordered store instruction for the Itanium instruction set.
+			The st.rel, or "store release", instruction is an ordered write instruction for the Itanium instruction set.
+			<span style="color:red">TODO More background on the instruction itself</span>. 
 			Like the ld.acq instruction it is a unidirectional memory barrier.
 			This completes both sides of the protocol because each write operation <i>happens before</i> subsequent memory operations.
 		</p>		
@@ -206,6 +209,7 @@ intentSecond = false;
 			This article does not aim to be a comprehensive overview of all memory barriers.
 			This would be a monumental task.
 			But it is important though to appreciate the fact that these instructions vary considerably across different hardware architectures.
+			<span style="color:red">TODO replace WriterReader with Dekkers</span>. 
 			Below is what the write method of WriterReader translates to on a multi-processing Intel Xeon E5410 and a SPARC workstation.
 			All remaining assembly instruction sequences in this article were captured on an Intel Xeon unless specified otherwise.
 		</p>

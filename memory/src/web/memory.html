@@ -47,7 +47,7 @@
 		<p>
 			Try not to focus on the finer details of this algorithm.
 			Which parts are relevant? 
-			Each thread attempts to enter the critical section on the first line of code by signaling an intent to do so.
+			Each thread attempts to enter the critical section on the first line of code by signaling intent to do so.
 			If a thread observes a conflict on line three (both threads have signaled intent) the conflict is resolved by turn taking.
 			Only one thread can access the critical section at a given point in time.				
 		</p>
@@ -100,9 +100,9 @@ intentSecond = false;
 		<p>
 			Hardware optimizations can break this code without memory barriers, even if the compiler were to emit all memory operations as they appear to the programmer.
 			Consider the two successive read operations on lines three and four.
-			Each thread checks to see if the other has signaled an intent to enter the critical section <i>and then</i> checks to see who's turn it is.
+			Each thread checks to see if the other has signaled an intent to enter the critical section <i>and then</i> checks to see whose turn it is.
 			Consider the two successive write operations on lines 12 and 13.
-			Each thread gives the other it's "turn" <i>and then</i> withdraws it's intent to enter the critical section.
+			Each thread gives the other its "turn" <i>and then</i> withdraws its intent to enter the critical section.
 			A reading thread should never expect to observe the other thread's write to the turn variable after the other thread's withdrawal of intent.
 			This would be a disaster.
 			Without the volatile modifier on these variables this indeed can happen.
@@ -233,7 +233,7 @@ A write followed by a write to shared memory on SPARC.
 		<p>
 			Here we see both writes on lines 11 and 12 on the x86 Xeon.  
 			The second write is chased with an mfence instruction, an explicit bidirectional memory barrier.
-			<span style="color:red">TODO: discuss SPARC structions</span>.
+			<span style="color:red">TODO: discuss SPARC instructions</span>.
 			The JVM does not bother placing a memory barrier between these writes on either platform because it can trust x86 and SPARC hardware not to re-order writes.
 			This is not true for Itanium, PowerPC or Alpha.
 			Avoiding memory barriers this way is discussed in a later section.
@@ -433,7 +433,7 @@ A read followed by a read of shared memory on x86
 			Some are explicit, others are implicit.
 			Some are bidirectional, others are unidirectional.
 			The JVM uses this array of choices to efficiently honor the Java memory model across all platforms.
-			I hope this article helps experienced JVM developers become a little more knowlegdeable about how their code behaves under the hood.
+			I hope this article helps experienced JVM developers become a little more knowledgeable about how their code behaves under the hood.
 		</p>
 		<h3>Acknowlegements</h3>
 		<p>

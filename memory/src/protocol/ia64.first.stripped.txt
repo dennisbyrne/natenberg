@@ -1,0 +1,149 @@
+CompilerOracle: print com/drw/membar/FirstThread.protocol
+done
+Compiled (c2)   1   nmethod com.drw.membar.FirstThread::protocol (35 bytes)
+ total in heap  [0x2000000001de7cd0,0x2000000001de8080] = 944
+ relocation     [0x2000000001de7e08,0x2000000001de7e20] = 24
+ main code      [0x2000000001de7e20,0x2000000001de7fe0] = 448
+ stub code      [0x2000000001de7fe0,0x2000000001de8020] = 64
+ scopes data    [0x2000000001de8020,0x2000000001de8038] = 24
+ scopes pcs     [0x2000000001de8038,0x2000000001de8068] = 48
+ dependencies   [0x2000000001de8068,0x2000000001de8070] = 8
+ oops           [0x2000000001de8070,0x2000000001de8080] = 16
+Loaded disassembler from hsdis-ia64.so
+Decoding compiled method 0x2000000001de7cd0:
+Code:
+[Disassembling for mach='ia64-elf64']
+[Entry Point]
+  0x2000000001de7e20: [MLX]       adds r2=8,r32  ;...04102040 00e1
+                                                ;   {runtime_call}
+  0x2000000001de7e26:             movl r3=0x2000000001d3fda0
+                                                ;...01000000 2060
+                                                ;...0062ee67
+  0x2000000001de7e30: [MMI]       cmp.eq p6,p7=r32,r0;;
+                                                ;...0b308000 07f8
+  0x2000000001de7e36:       (p07) ld8 r30=[r2]  ;...e1010830 20c0
+  0x2000000001de7e3c:             mov b6=r3;;   ;...07000830
+  0x2000000001de7e40: [MIB] (p07) cmp.eq p0,p6=r30,r27
+                                                ;...f1007836 0638
+  0x2000000001de7e46:             nop.i 0x0     ;...00000002 0003
+  0x2000000001de7e4c:       (p06) br.cond.spnt.many b6;;
+                                                ;...01800068
+[Verified Entry Point]
+  0x2000000001de7e50: [MMI]       alloc r34=ar.pfs,12,12,0;;
+                                                ;...0b103118 8005
+  0x2000000001de7e56:             mov r32=r6    ;...00021800 4260
+  0x2000000001de7e5c:             mov r35=b0;;  ;...00c40004
+  0x2000000001de7e60: [MII]       mov.m r6=ar.bsp  ;...03300022 2204
+  0x2000000001de7e66:             mov r33=r12;;  ;...10023000 4280
+  0x2000000001de7e6c:             adds r12=-32,r12;;  ;...8cfc6601
+  0x2000000001de7e70: [MLX]       nop.m 0x0     ;...05000000 0100
+                                                ;   {oop()}
+  0x2000000001de7e76:             movl r36=0x20000000060740a0;;
+                                                ;...06000000 2080
+                                                ;...04e20462
+  0x2000000001de7e80: [MMI]       adds r37=596,r36;;  ;...0b285149 0421
+  0x2000000001de7e86:             adds r39=1,r0  ;...700a0000 4200
+  0x2000000001de7e8c:             nop.i 0x0;;   ;...00040000
+  0x2000000001de7e90: [MMI]       st1.rel [r37]=r39;;  ;...0a009c4a a011
+  0x2000000001de7e96:             mf            ;...00000044 00a0
+  0x2000000001de7e9c:             adds r37=597,r36  ;...84112554
+  0x2000000001de7ea0: [MII]       adds r38=596,r36  ;...01305149 0421
+  0x2000000001de7ea6:             adds r40=592,r36  ;...80829208 4200
+  0x2000000001de7eac:             nop.i 0x0;;   ;...00040000
+  0x2000000001de7eb0: [MMI]       ld1.acq r41=[r37];;  ;...0b48014a a010
+  0x2000000001de7eb6:             nop.m 0x0     ;...00000002 0020
+  0x2000000001de7ebc:             sxt1 r41=r41;;  ;...00514805
+  0x2000000001de7ec0: [MIB]       cmp4.eq p0,p6=0,r41  ;...11000052 8639
+  0x2000000001de7ec6:             nop.i 0x0     ;...00000002 0003
+  0x2000000001de7ecc:       (p06) br.cond.dpnt.many 0x2000000001de7f20;;
+                                                ;...43000068
+  0x2000000001de7ed0: [MMI]       st4.rel [r40]=r39;;  ;...0a009c50 b011
+  0x2000000001de7ed6:             st1.rel [r38]=r0  ;...00009840 2300
+  0x2000000001de7edc:             nop.i 0x0     ;...00040000
+  0x2000000001de7ee0: [MMI]       mf;;          ;...0a000000 2200
+  0x2000000001de7ee6:             mov r12=r33   ;...c0008400 4200
+  0x2000000001de7eec:             mov.ret b0=r35,0x2000000001de7ee0
+                                                ;...07002a30
+  0x2000000001de7ef0: [MII]       mov r6=r32    ;...01300040 0021
+  0x2000000001de7ef6:             mov.i ar.pfs=r34  ;...00100155 0000
+  0x2000000001de7efc:             nop.i 0x0;;   ;...00040000
+  0x2000000001de7f00: [MMI]       ld8 r31=[r5]  ;...09f8000a 1810
+                                                ;   {poll_return}
+  0x2000000001de7f06:             nop.m 0x0     ;...00000002 0000
+  0x2000000001de7f0c:             nop.i 0x0;;   ;...00040000
+  0x2000000001de7f10: [MIB]       nop.m 0x0     ;...11000000 0100
+  0x2000000001de7f16:             nop.i 0x0     ;...00000002 0080
+  0x2000000001de7f1c:             br.ret.sptk.many b0;;
+                                                ;...00840008
+  0x2000000001de7f20: [MMI]       adds r41=592,r36  ;...09484149 0421
+  0x2000000001de7f26:             nop.m 0x0     ;...00000002 0000
+  0x2000000001de7f2c:             nop.i 0x0;;   ;...00040000
+  0x2000000001de7f30: [MMI]       ld4.acq r43=[r41]  ;...09580152 b010
+  0x2000000001de7f36:             nop.m 0x0     ;...00000002 0000
+  0x2000000001de7f3c:             nop.i 0x0;;   ;...00040000
+                                                ; OopMap{gr40=Derived_oop_gr36 gr41=Derived_oop_gr36 gr38=Derived_oop_gr36 gr37=Derived_oop_gr36 gr36=Oop off=288}
+                                                ;*ifeq
+                                                ; - com.drw.membar.FirstThread::protocol@13 (line 19)
+  0x2000000001de7f40: [MMI]       ld8 r31=[r5]  ;...09f8000a 1810
+                                                ;   {poll}
+  0x2000000001de7f46:             nop.m 0x0     ;...00000002 0000
+  0x2000000001de7f4c:             nop.i 0x0;;   ;...00040000
+  0x2000000001de7f50: [MIB]       cmp4.eq p6,p0=0,r43  ;...11300056 8039
+  0x2000000001de7f56:             nop.i 0x0     ;...00000002 0003
+  0x2000000001de7f5c:       (p06) br.cond.dpnt.many 0x2000000001de7fa0;;
+                                                ;...43000058
+  0x2000000001de7f60: [MMI]       adds r41=596,r36;;  ;...0a485149 0421
+  0x2000000001de7f66:             st1.rel [r41]=r0  ;...0000a440 2300
+  0x2000000001de7f6c:             nop.i 0x0     ;...00040000
+  0x2000000001de7f70: [MMI]       mf            ;...09000000 2200
+  0x2000000001de7f76:             nop.m 0x0     ;...00000002 0000
+  0x2000000001de7f7c:             nop.i 0x0;;   ;...00040000
+                                                ; OopMap{gr40=Derived_oop_gr36 gr38=Derived_oop_gr36 gr37=Derived_oop_gr36 gr36=Oop off=352}
+                                                ;*goto
+                                                ; - com.drw.membar.FirstThread::protocol@20 (line 20)
+  0x2000000001de7f80: [MMI]       ld8 r31=[r5]  ;...09f8000a 1810
+                                                ;   {poll}
+  0x2000000001de7f86:             nop.m 0x0     ;...00000002 0000
+  0x2000000001de7f8c:             nop.i 0x0;;   ;...00040000
+  0x2000000001de7f90: [MIB]       nop.m 0x0     ;...11000000 0100
+  0x2000000001de7f96:             nop.i 0x0     ;...00000002 0000
+  0x2000000001de7f9c:             br.cond.dptk.many 0x2000000001de7eb0;;
+                                                ;...4affff28
+  0x2000000001de7fa0: [MMI]       adds r42=597,r36;;  ;...0b505549 0421
+  0x2000000001de7fa6:             ld1.acq r42=[r42]  ;...a002a840 2100
+  0x2000000001de7fac:             nop.i 0x0;;   ;...00040000
+  0x2000000001de7fb0: [MII]       nop.m 0x0     ;...02000000 0100
+  0x2000000001de7fb6:             sxt1 r42=r42;;  ;...a002a828 0000
+  0x2000000001de7fbc:             cmp4.eq p0,p6=0,r42  ;...e6195000
+  0x2000000001de7fc0: [MIB]       nop.m 0x0     ;...11000000 0100
+  0x2000000001de7fc6:             nop.i 0x0     ;...00000002 0003
+  0x2000000001de7fcc:       (p06) br.cond.dptk.many 0x2000000001de7f30;;
+                                                ;...4affff78
+  0x2000000001de7fd0: [MIB]       nop.m 0x0     ;...11000000 0100
+  0x2000000001de7fd6:             nop.i 0x0     ;...00000002 0000
+  0x2000000001de7fdc:             br.cond.dptk.many 0x2000000001de7ed0;;
+                                                ;...4affff08
+[Exception Handler]
+[Stub Code]
+  0x2000000001de7fe0: [MLX]       nop.m 0x0     ;...05000000 01c0
+                                                ;   {no_reloc}
+  0x2000000001de7fe6:             movl r30=0x2000000001d40fa0;;
+                                                ;...01000000 20c0
+                                                ;...03827e60
+  0x2000000001de7ff0: [MIB]       nop.m 0x0     ;...11000000 0100
+  0x2000000001de7ff6:             mov b7=r30    ;...70f00480 0300
+  0x2000000001de7ffc:             br.many b7;;  ;...00800078
+  0x2000000001de8000: [MLX]       nop.m 0x0     ;...05000000 01c0
+                                                ;   {runtime_call}
+  0x2000000001de8006:             movl r30=0x2000000001d3f1c0;;
+                                                ;...01000000 20c0
+                                                ;...03648e67
+  0x2000000001de8010: [MIB]       nop.m 0x0     ;...11000000 0100
+  0x2000000001de8016:             mov b7=r30    ;...70f00480 0300
+  0x2000000001de801c:             br.many b7;;  ;...00800078
+OopMapSet contains 2 OopMaps
+
+#0 
+OopMap{gr40=Derived_oop_gr36 gr41=Derived_oop_gr36 gr38=Derived_oop_gr36 gr37=Derived_oop_gr36 gr36=Oop off=288}
+#1 
+OopMap{gr40=Derived_oop_gr36 gr38=Derived_oop_gr36 gr37=Derived_oop_gr36 gr36=Oop off=352}

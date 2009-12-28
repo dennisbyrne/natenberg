@@ -41,7 +41,7 @@
 			Memory barriers are not directly exposed by the JVM; 
 			instead they are inserted into the instruction sequence by the JVM in order to uphold the semantics of language level concurrency primitives.
 			We'll look at the source code and assembly instructions of some simple Java programs to see how. 
-			Let's begin a crash course in memory barriers with the Dekker's algorithm.
+			Let's begin a crash course in memory barriers with Dekker's algorithm.
 			This algorithm uses three volatile variables to coordinate access to a shared resource between two threads.
 		</p>
 		<p>
@@ -67,9 +67,9 @@
  2
  3    while (intentSecond)
  4    	if (turn != 0) {
- 5    		intentFirst = false;
- 6    		while (turn != 0) {}
- 7    		intentFirst = true;
+ 5    	  intentFirst = false;
+ 6    	  while (turn != 0) {}
+ 7    	  intentFirst = true;
  8    	}
  9
 10    criticalSection();
@@ -82,8 +82,8 @@
 <pre>
 intentSecond = true;
 
-while (intentFirst)
-  if (turn != 1) {
+while (intentFirst)       // volatile read
+  if (turn != 1) {        // volatile read
     intentSecond = false;
     while (turn != 1) {}
     intentSecond = true;
@@ -91,8 +91,8 @@ while (intentFirst)
 
 criticalSection();
 
-turn = 0;
-intentSecond = false;
+turn = 0;                 // volatile write
+intentSecond = false;     // volatile write
 </pre>				
 				</td>
 			</tr>
@@ -234,7 +234,7 @@ A write followed by a write to shared memory on SPARC.
 			Here we see both writes on lines 11 and 12 on the x86 Xeon.  
 			The second write is chased with an mfence instruction, an explicit bidirectional memory barrier.
 			<span style="color:red">TODO: discuss SPARC instructions</span>.
-			The JVM does not bother placing a memory barrier between these writes on either platform because it can trust x86 and SPARC hardware not to re-order writes.
+			The JVM does not bother placing a memory barrier between the write operations on either platform because it can trust x86 and SPARC hardware not to re-order writes.
 			This is not true for Itanium, PowerPC or Alpha.
 			Avoiding memory barriers this way is discussed in a later section.
 		</p>
@@ -390,7 +390,7 @@ A read followed by a read of shared memory on x86
 </table>	
 		<p>
 			The volatile read operations are found on lines three and fourteen.
-			Neither are not paired with a memory barrier.
+			Neither are paired with a memory barrier.
 			In other words the only performance penalty for a volatile read on an x86 (or on SPARC for that matter) is a minor loss of code motion optimization opportunities -
 			the instruction itself is no different than an ordinary read.
 		</p>
@@ -405,7 +405,6 @@ A read followed by a read of shared memory on x86
 			On a uni-processor system the JVM can insert a no op for <i>all</i> memory barriers because memory operations are already serialized.  
 			The following instruction stream was captured from a runtime compilation of two successive writes in Dekker's algorithm.
 			The program was running in a VMWare workstation image in uni-processor mode on x86 hardware.
-			Neither write operation is chased with a memory barrier.
   		</p>
 <pre>
  1  0x03f8340c: push   %ebp               ;...55
@@ -419,12 +418,12 @@ A read followed by a read of shared memory on x86
  9  0x03f83435: jne    0x03f83460         ;...7529
 10  0x03f83437: movl   $0x1,-0x505a72f0(%ebp)  ;...c785108d a5af01
 11  0x03f83441: movb   $0x0,-0x505a72f0(%edi)  ;...c687108d a5af00
-
-<b>No Memory Barrier</b>
-
 12  0x03f8344b: add    $0x8,%esp          ;...83c408
 13  0x03f8344e: pop    %ebp               ;...5d
 </pre>
+		<p>
+			Neither write operation (lines 10 and 11) is chased with a memory barrier.		
+		</p>
 		<h3>Conclusion</h3>
 		<p>
 			Modern hardware is not sequentially consistent.

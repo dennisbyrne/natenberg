@@ -1,0 +1,84 @@
+CompilerOracle: print com/drw/membar/SecondThread.protocol
+done
+Compiled (c2)   2   nmethod (2)  com.drw.membar.SecondThread::protocol (36 bytes)
+ total in heap  [0x029bd388,0x029bd540] = 440
+ relocation     [0x029bd43c,0x029bd460] = 36
+ main code      [0x029bd460,0x029bd4e0] = 128
+ stub code      [0x029bd4e0,0x029bd4ef] = 15
+ constants      [0x029bd4ef,0x029bd4f0] = 1
+ scopes data    [0x029bd4f0,0x029bd508] = 24
+ scopes pcs     [0x029bd508,0x029bd538] = 48
+ dependencies   [0x029bd538,0x029bd53c] = 4
+ oops           [0x029bd53c,0x029bd540] = 4
+Loaded disassembler from hsdis-i386.so
+Decoding compiled method 0x029bd388:
+Code:
+[Disassembling for mach='i386']
+[Entry Point]
+  0x029bd460: cmp    0x4(%ecx),%eax     ;...3b4104
+  0x029bd463: jne    0x0299ae20         ;...0f85b7d9 fdff
+                                        ;   {runtime_call}
+  0x029bd469: xchg   %ax,%ax            ;...666690
+[Verified Entry Point]
+  0x029bd46c: push   %ebp               ;...55
+  0x029bd46d: sub    $0x8,%esp          ;...81ec0800 0000
+  0x029bd473: mov    $0x14d,%ebx        ;...bb4d0100 00
+  0x029bd478: movb   $0x1,-0x506372f0(%ebx)  ;...c683108d 9caf01
+                                        ;   {oop()}
+  0x029bd47f: mov    $0x148,%ecx        ;...b9480100 00
+  0x029bd484: mov    $0x14c,%edi        ;...bf4c0100 00
+  0x029bd489: movsbl -0x506372f0(%edi),%eax  ;...0fbe8710 8d9caf
+                                        ;   {oop()}
+  0x029bd490: test   %eax,%eax          ;...85c0
+  0x029bd492: jne    0x029bd4b0         ;...751c
+  0x029bd494: movl   $0x0,-0x506372f0(%ecx)  ;...c781108d 9caf00
+                                        ;...000000
+                                        ;   {oop()}
+  0x029bd49e: movb   $0x0,-0x506372f0(%ebx)  ;...c683108d 9caf00
+                                        ;   {oop()}
+  0x029bd4a5: add    $0x8,%esp          ;...83c408
+  0x029bd4a8: pop    %ebp               ;...5d
+  0x029bd4a9: test   %eax,0xb785a000    ;...850500a0 85b7
+                                        ;   {poll_return}
+  0x029bd4af: ret                       ;...c3
+  0x029bd4b0: mov    -0x506372f0(%ecx),%ebp  ;...8ba9108d 9caf
+                                        ; OopMap{off=86}
+                                        ;*if_icmpeq
+                                        ; - com.drw.membar.SecondThread::protocol@14 (line 19)
+                                        ;   {oop()}
+  0x029bd4b6: test   %edi,0xb785a000    ;...853d00a0 85b7
+                                        ;   {poll}
+  0x029bd4bc: cmp    $0x1,%ebp          ;...83fd01
+  0x029bd4bf: jne    0x029bd4ce         ;...750d
+  0x029bd4c1: movsbl -0x506372f0(%edi),%edx  ;...0fbe9710 8d9caf
+                                        ;   {oop()}
+  0x029bd4c8: test   %edx,%edx          ;...85d2
+  0x029bd4ca: jne    0x029bd4b0         ;...75e4
+  0x029bd4cc: jmp    0x029bd494         ;...ebc6
+  0x029bd4ce: movb   $0x0,-0x506372f0(%ebx)  ;...c683108d 9caf00
+                                        ; OopMap{off=117}
+                                        ;*goto
+                                        ; - com.drw.membar.SecondThread::protocol@21 (line 20)
+                                        ;   {oop()}
+  0x029bd4d5: test   %edi,0xb785a000    ;...853d00a0 85b7
+                                        ;   {poll}
+  0x029bd4db: jmp    0x029bd489         ;...ebac
+  0x029bd4dd: hlt                       ;...f4
+  0x029bd4de: hlt                       ;...f4
+  0x029bd4df: hlt                       ;...f4
+[Exception Handler]
+[Stub Code]
+  0x029bd4e0: jmp    0x029bcfe0         ;...e9fbfaff ff
+                                        ;   {no_reloc}
+  0x029bd4e5: push   $0x29bd4e5         ;...68e5d49b 02
+                                        ;   {section_word}
+  0x029bd4ea: jmp    0x0299bb40         ;...e951e6fd ff
+                                        ;   {runtime_call}
+[Constants]
+  0x029bd4ef: .byte 0x0                 ;...00
+OopMapSet contains 2 OopMaps
+
+#0 
+OopMap{off=86}
+#1 
+OopMap{off=117}

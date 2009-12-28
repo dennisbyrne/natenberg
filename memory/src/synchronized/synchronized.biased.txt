@@ -1,0 +1,156 @@
+CompilerOracle: print Counter.inc
+Compiled (c1)   5   nmethod Counter::inc (9 bytes)
+ total in heap  [0x0571bc08,0x0571bea8] = 672
+ relocation     [0x0571bcbc,0x0571bcec] = 48
+ main code      [0x0571bcf0,0x0571be30] = 320
+ stub code      [0x0571be30,0x0571be6f] = 63
+ constants      [0x0571be6f,0x0571be70] = 1
+ scopes data    [0x0571be70,0x0571be7c] = 12
+ scopes pcs     [0x0571be7c,0x0571bea0] = 36
+ dependencies   [0x0571bea0,0x0571bea4] = 4
+ oops           [0x0571bea4,0x0571bea8] = 4
+Loaded disassembler from hsdis-i386.so
+Decoding compiled method 0x0571bc08:
+Code:
+[Disassembling for mach='i386']
+[Entry Point]
+[Verified Entry Point]
+  0x0571bcf0: mov    %eax,-0x3000(%esp)  ;...89842400 d0ffff
+  0x0571bcf7: push   %ebp               ;...55
+  0x0571bcf8: mov    %esp,%ebp          ;...8bec
+  0x0571bcfa: sub    $0x28,%esp         ;...83ec28
+  0x0571bcfd: mov    $0x95ba53e8,%esi   ;...bee853ba 95
+                                        ;   {oop()}
+  0x0571bd02: lea    0x10(%esp),%edi    ;...8d7c2410
+  0x0571bd06: mov    %esi,0x4(%edi)     ;...897704
+  0x0571bd09: mov    (%esi),%eax        ;...8b06
+  0x0571bd0b: mov    %eax,%ebx          ;...8bd8
+  0x0571bd0d: and    $0x7,%ebx          ;...83e307
+  0x0571bd10: cmp    $0x5,%ebx          ;...83fb05
+  0x0571bd13: jne    0x0571bd9f         ;...0f858600 0000
+  0x0571bd19: mov    %eax,(%edi)        ;...8907
+  0x0571bd1b: mov    %esp,%ebx          ;...8bdc
+  0x0571bd1d: shr    $0xc,%ebx          ;...c1eb0c
+  0x0571bd20: mov    0x1058760(,%ebx,4),%ebx  ;...8b1c9d60 870501
+                                        ;   {external_word}
+  0x0571bd27: xor    %ebx,%eax          ;...33c3
+  0x0571bd29: mov    0x4(%esi),%ebx     ;...8b5e04
+  0x0571bd2c: xor    0x64(%ebx),%eax    ;...334364
+  0x0571bd2f: and    $0xffffff87,%eax   ;...83e087
+  0x0571bd32: je     0x0571bdbf         ;...0f848700 0000
+  0x0571bd38: test   $0x7,%eax          ;...a9070000 00
+  0x0571bd3d: jne    0x0571bd94         ;...0f855100 0000
+  0x0571bd43: test   $0x180,%eax        ;...a9800100 00
+  0x0571bd48: jne    0x0571bd72         ;...0f852400 0000
+  0x0571bd4e: mov    (%edi),%eax        ;...8b07
+  0x0571bd50: and    $0x1ff,%eax        ;...81e0ff01 0000
+  0x0571bd56: mov    %esp,%ebx          ;...8bdc
+  0x0571bd58: shr    $0xc,%ebx          ;...c1eb0c
+  0x0571bd5b: mov    0x1058760(,%ebx,4),%ebx  ;...8b1c9d60 870501
+                                        ;   {external_word}
+  0x0571bd62: or     %eax,%ebx          ;...0bd8
+  0x0571bd64: cmpxchg %ebx,(%esi)       ;...0fb11e
+  0x0571bd67: jne    0x0571be03         ;...0f859600 0000
+  0x0571bd6d: jmp    0x0571bdbf         ;...e94d0000 00
+  0x0571bd72: mov    %esp,%ebx          ;...8bdc
+  0x0571bd74: shr    $0xc,%ebx          ;...c1eb0c
+  0x0571bd77: mov    0x1058760(,%ebx,4),%ebx  ;...8b1c9d60 870501
+                                        ;   {external_word}
+  0x0571bd7e: mov    0x4(%esi),%eax     ;...8b4604
+  0x0571bd81: or     0x64(%eax),%ebx    ;...0b5864
+  0x0571bd84: mov    (%edi),%eax        ;...8b07
+  0x0571bd86: cmpxchg %ebx,(%esi)       ;...0fb11e
+  0x0571bd89: jne    0x0571be03         ;...0f857400 0000
+  0x0571bd8f: jmp    0x0571bdbf         ;...e92b0000 00
+  0x0571bd94: mov    (%edi),%eax        ;...8b07
+  0x0571bd96: mov    0x4(%esi),%ebx     ;...8b5e04
+  0x0571bd99: mov    0x64(%ebx),%ebx    ;...8b5b64
+  0x0571bd9c: cmpxchg %ebx,(%esi)       ;...0fb11e
+  0x0571bd9f: mov    (%esi),%eax        ;...8b06
+  0x0571bda1: or     $0x1,%eax          ;...83c801
+  0x0571bda4: mov    %eax,(%edi)        ;...8907
+  0x0571bda6: cmpxchg %edi,(%esi)       ;...0fb13e
+  0x0571bda9: je     0x0571bdbf         ;...0f841000 0000
+  0x0571bdaf: sub    %esp,%eax          ;...2bc4
+  0x0571bdb1: and    $0xfffff003,%eax   ;...81e003f0 ffff
+  0x0571bdb7: mov    %eax,(%edi)        ;...8907
+  0x0571bdb9: jne    0x0571be03         ;...0f854400 0000
+  0x0571bdbf: mov    $0x95ba5298,%eax   ;...b89852ba 95
+                                        ;   {oop()}
+  0x0571bdc4: mov    0x148(%eax),%esi   ;...8bb04801 0000
+  0x0571bdca: inc    %esi               ;...46
+  0x0571bdcb: mov    %esi,0x148(%eax)   ;...89b04801 0000
+  0x0571bdd1: lea    0x10(%esp),%eax    ;...8d442410
+  0x0571bdd5: mov    0x4(%eax),%edi     ;...8b7804
+  0x0571bdd8: mov    (%edi),%esi        ;...8b37
+  0x0571bdda: and    $0x7,%esi          ;...83e607
+  0x0571bddd: cmp    $0x5,%esi          ;...83fe05
+  0x0571bde0: je     0x0571bdf9         ;...0f841300 0000
+  0x0571bde6: mov    (%eax),%esi        ;...8b30
+  0x0571bde8: test   %esi,%esi          ;...85f6
+  0x0571bdea: je     0x0571bdf9         ;...0f840900 0000
+  0x0571bdf0: cmpxchg %esi,(%edi)       ;...0fb137
+  0x0571bdf3: jne    0x0571be11         ;...0f851800 0000
+  0x0571bdf9: mov    %ebp,%esp          ;...8be5
+  0x0571bdfb: pop    %ebp               ;...5d
+  0x0571bdfc: test   %eax,0xb7718100    ;...85050081 71b7
+                                        ;   {poll_return}
+  0x0571be02: ret                       ;...c3
+  0x0571be03: mov    %esi,0x4(%esp)     ;...89742404
+  0x0571be07: mov    %edi,(%esp)        ;...893c24
+  0x0571be0a: call   0x05717c90         ;...e881beff ff
+                                        ; OopMap{esi=Oop [20]=Oop off=287}
+                                        ;*synchronization entry
+                                        ; - Counter::inc@-1 (line 10)
+                                        ;   {runtime_call}
+  0x0571be0f: jmp    0x0571bdbf         ;...ebae
+  0x0571be11: lea    0x10(%esp),%eax    ;...8d442410
+  0x0571be15: mov    %eax,(%esp)        ;...890424
+  0x0571be18: call   0x05717e90         ;...e873c0ff ff
+                                        ;   {runtime_call}
+  0x0571be1d: jmp    0x0571bdf9         ;...ebda
+  0x0571be1f: nop                       ;...90
+  0x0571be20: nop                       ;...90
+  0x0571be21: hlt                       ;...f4
+  0x0571be22: hlt                       ;...f4
+  0x0571be23: hlt                       ;...f4
+  0x0571be24: hlt                       ;...f4
+  0x0571be25: hlt                       ;...f4
+  0x0571be26: hlt                       ;...f4
+  0x0571be27: hlt                       ;...f4
+  0x0571be28: hlt                       ;...f4
+  0x0571be29: hlt                       ;...f4
+  0x0571be2a: hlt                       ;...f4
+  0x0571be2b: hlt                       ;...f4
+  0x0571be2c: hlt                       ;...f4
+  0x0571be2d: hlt                       ;...f4
+  0x0571be2e: hlt                       ;...f4
+  0x0571be2f: hlt                       ;...f4
+[Exception Handler]
+[Stub Code]
+  0x0571be30: mov    %eax,0x8(%esp)     ;...89442408
+                                        ;   {no_reloc}
+  0x0571be34: lea    0x10(%esp),%eax    ;...8d442410
+  0x0571be38: mov    0x4(%eax),%ebx     ;...8b5804
+  0x0571be3b: mov    (%ebx),%ecx        ;...8b0b
+  0x0571be3d: and    $0x7,%ecx          ;...83e107
+  0x0571be40: cmp    $0x5,%ecx          ;...83f905
+  0x0571be43: je     0x0571be5c         ;...0f841300 0000
+  0x0571be49: mov    (%eax),%ecx        ;...8b08
+  0x0571be4b: test   %ecx,%ecx          ;...85c9
+  0x0571be4d: je     0x0571be5c         ;...0f840900 0000
+  0x0571be53: cmpxchg %ecx,(%ebx)       ;...0fb10b
+  0x0571be56: jne    0x0571be5c         ;...0f850000 0000
+  0x0571be5c: mov    0x8(%esp),%eax     ;...8b442408
+  0x0571be60: jmp    0x056e0400         ;...e99b45fc ff
+                                        ;   {runtime_call}
+  0x0571be65: push   $0x571be65         ;...6865be71 05
+                                        ;   {section_word}
+  0x0571be6a: jmp    0x056d2a40         ;...e9d16bfb ff
+                                        ;   {runtime_call}
+[Constants]
+  0x0571be6f: .byte 0x0                 ;...00
+OopMapSet contains 1 OopMaps
+
+#0 
+OopMap{esi=Oop [20]=Oop off=287}

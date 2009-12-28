@@ -1,0 +1,129 @@
+CompilerOracle: print com/drw/membar/FirstThread.protocol
+Compiled (c2)   1   nmethod (2)  com.drw.membar.FirstThread::protocol (48 bytes)
+ total in heap  [0x017b4648,0x017b4874] = 556
+ relocation     [0x017b46fc,0x017b4728] = 44
+ main code      [0x017b4740,0x017b4800] = 192
+ stub code      [0x017b4800,0x017b480f] = 15
+ constants      [0x017b480f,0x017b4810] = 1
+ scopes data    [0x017b4810,0x017b4830] = 32
+ scopes pcs     [0x017b4830,0x017b486c] = 60
+ dependencies   [0x017b486c,0x017b4870] = 4
+ oops           [0x017b4870,0x017b4874] = 4
+Loaded disassembler from hsdis-i386.so
+Decoding compiled method 0x017b4648:
+Code:
+[Disassembling for mach='i386']
+[Entry Point]
+  0x017b4740: cmp    0x4(%ecx),%eax     ;...3b4104
+  0x017b4743: jne    0x01790e20         ;...0f85d7c6 fdff
+                                        ;   {runtime_call}
+  0x017b4749: xchg   %ax,%ax            ;...666690
+[Verified Entry Point]
+  0x017b474c: push   %ebp               ;...55
+  0x017b474d: sub    $0x8,%esp          ;...81ec0800 0000
+  0x017b4753: mov    $0x14c,%edi        ;...bf4c0100 00
+  0x017b4758: movb   $0x1,-0x507572f0(%edi)  ;...c687108d 8aaf01
+                                        ;   {oop()}
+  0x017b475f: mov    $0x148,%ebp        ;...bd480100 00
+  0x017b4764: mov    $0x14d,%edx        ;...ba4d0100 00
+  0x017b4769: movsbl -0x507572f0(%edx),%ebx  ;...0fbe9a10 8d8aaf
+                                        ;   {oop()}
+  0x017b4770: test   %ebx,%ebx          ;...85db
+  0x017b4772: jne    0x017b4790         ;...751c
+  0x017b4774: movl   $0x1,-0x507572f0(%ebp)  ;...c785108d 8aaf01
+                                        ;...000000
+                                        ;   {oop()}
+  0x017b477e: movb   $0x0,-0x507572f0(%edi)  ;...c687108d 8aaf00
+                                        ;   {oop()}
+  0x017b4785: add    $0x8,%esp          ;...83c408
+  0x017b4788: pop    %ebp               ;...5d
+  0x017b4789: test   %eax,0xb773a000    ;...850500a0 73b7
+                                        ;   {poll_return}
+  0x017b478f: ret                       ;...c3
+  0x017b4790: mov    -0x507572f0(%ebp),%ebx  ;...8b9d108d 8aaf
+                                        ; OopMap{off=86}
+                                        ;*ifeq
+                                        ; - com.drw.membar.FirstThread::protocol@13 (line 19)
+                                        ;   {oop()}
+  0x017b4796: test   %edi,0xb773a000    ;...853d00a0 73b7
+                                        ;   {poll}
+  0x017b479c: test   %ebx,%ebx          ;...85db
+  0x017b479e: jne    0x017b47ad         ;...750d
+  0x017b47a0: movsbl -0x507572f0(%edx),%ecx  ;...0fbe8a10 8d8aaf
+                                        ;   {oop()}
+  0x017b47a7: test   %ecx,%ecx          ;...85c9
+  0x017b47a9: jne    0x017b4790         ;...75e5
+  0x017b47ab: jmp    0x017b4774         ;...ebc7
+  0x017b47ad: movb   $0x0,-0x507572f0(%edi)  ;...c687108d 8aaf00
+                                        ;   {oop()}
+  0x017b47b4: mov    -0x507572f0(%ebp),%ecx  ;...8b8d108d 8aaf
+                                        ;   {oop()}
+  0x017b47ba: test   %ecx,%ecx          ;...85c9
+  0x017b47bc: je     0x017b47d0         ;...7412
+  0x017b47be: xchg   %ax,%ax            ;...6690
+                                        ; OopMap{off=128}
+                                        ;*goto
+                                        ; - com.drw.membar.FirstThread::protocol@26 (line 21)
+  0x017b47c0: test   %edi,0xb773a000    ;...853d00a0 73b7
+                                        ;   {poll}
+  0x017b47c6: mov    -0x507572f0(%ebp),%ecx  ;...8b8d108d 8aaf
+                                        ;   {oop()}
+  0x017b47cc: test   %ecx,%ecx          ;...85c9
+  0x017b47ce: jne    0x017b47c0         ;...75f0
+  0x017b47d0: movb   $0x1,-0x507572f0(%edi)  ;...c687108d 8aaf01
+                                        ; OopMap{off=151}
+                                        ;*goto
+                                        ; - com.drw.membar.FirstThread::protocol@33 (line 22)
+                                        ;   {oop()}
+  0x017b47d7: test   %edi,0xb773a000    ;...853d00a0 73b7
+                                        ;   {poll}
+  0x017b47dd: jmp    0x017b4769         ;...e987ffff ff
+  0x017b47e2: hlt                       ;...f4
+  0x017b47e3: hlt                       ;...f4
+  0x017b47e4: hlt                       ;...f4
+  0x017b47e5: hlt                       ;...f4
+  0x017b47e6: hlt                       ;...f4
+  0x017b47e7: hlt                       ;...f4
+  0x017b47e8: hlt                       ;...f4
+  0x017b47e9: hlt                       ;...f4
+  0x017b47ea: hlt                       ;...f4
+  0x017b47eb: hlt                       ;...f4
+  0x017b47ec: hlt                       ;...f4
+  0x017b47ed: hlt                       ;...f4
+  0x017b47ee: hlt                       ;...f4
+  0x017b47ef: hlt                       ;...f4
+  0x017b47f0: hlt                       ;...f4
+  0x017b47f1: hlt                       ;...f4
+  0x017b47f2: hlt                       ;...f4
+  0x017b47f3: hlt                       ;...f4
+  0x017b47f4: hlt                       ;...f4
+  0x017b47f5: hlt                       ;...f4
+  0x017b47f6: hlt                       ;...f4
+  0x017b47f7: hlt                       ;...f4
+  0x017b47f8: hlt                       ;...f4
+  0x017b47f9: hlt                       ;...f4
+  0x017b47fa: hlt                       ;...f4
+  0x017b47fb: hlt                       ;...f4
+  0x017b47fc: hlt                       ;...f4
+  0x017b47fd: hlt                       ;...f4
+  0x017b47fe: hlt                       ;...f4
+  0x017b47ff: hlt                       ;...f4
+[Exception Handler]
+[Stub Code]
+  0x017b4800: jmp    0x017b2fe0         ;...e9dbe7ff ff
+                                        ;   {no_reloc}
+  0x017b4805: push   $0x17b4805         ;...6805487b 01
+                                        ;   {section_word}
+  0x017b480a: jmp    0x01791b40         ;...e931d3fd ff
+                                        ;   {runtime_call}
+[Constants]
+  0x017b480f: .byte 0x0                 ;...00
+OopMapSet contains 3 OopMaps
+
+#0 
+OopMap{off=86}
+#1 
+OopMap{off=128}
+#2 
+OopMap{off=151}
+done

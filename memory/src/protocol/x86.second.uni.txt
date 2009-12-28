@@ -1,0 +1,127 @@
+CompilerOracle: print com/drw/membar/SecondThread.protocol
+done
+Compiled (c2)   2   nmethod (2)  com.drw.membar.SecondThread::protocol (50 bytes)
+ total in heap  [0x045fb888,0x045fbab8] = 560
+ relocation     [0x045fb93c,0x045fb968] = 44
+ main code      [0x045fb980,0x045fba40] = 192
+ stub code      [0x045fba40,0x045fba4f] = 15
+ constants      [0x045fba4f,0x045fba50] = 1
+ scopes data    [0x045fba50,0x045fba74] = 36
+ scopes pcs     [0x045fba74,0x045fbab0] = 60
+ dependencies   [0x045fbab0,0x045fbab4] = 4
+ oops           [0x045fbab4,0x045fbab8] = 4
+Loaded disassembler from hsdis-i386.so
+Decoding compiled method 0x045fb888:
+Code:
+[Disassembling for mach='i386']
+[Entry Point]
+  0x045fb980: cmp    0x4(%ecx),%eax     ;...3b4104
+  0x045fb983: jne    0x045d7e20         ;...0f8597c4 fdff
+                                        ;   {runtime_call}
+  0x045fb989: xchg   %ax,%ax            ;...666690
+[Verified Entry Point]
+  0x045fb98c: push   %ebp               ;...55
+  0x045fb98d: sub    $0x8,%esp          ;...81ec0800 0000
+  0x045fb993: mov    $0x14d,%edi        ;...bf4d0100 00
+  0x045fb998: movb   $0x1,-0x507372f0(%edi)  ;...c687108d 8caf01
+                                        ;   {oop()}
+  0x045fb99f: mov    $0x148,%ebp        ;...bd480100 00
+  0x045fb9a4: mov    $0x14c,%edx        ;...ba4c0100 00
+  0x045fb9a9: movsbl -0x507372f0(%edx),%ebx  ;...0fbe9a10 8d8caf
+                                        ;   {oop()}
+  0x045fb9b0: test   %ebx,%ebx          ;...85db
+  0x045fb9b2: jne    0x045fb9d0         ;...751c
+  0x045fb9b4: movl   $0x0,-0x507372f0(%ebp)  ;...c785108d 8caf00
+                                        ;...000000
+                                        ;   {oop()}
+  0x045fb9be: movb   $0x0,-0x507372f0(%edi)  ;...c687108d 8caf00
+                                        ;   {oop()}
+  0x045fb9c5: add    $0x8,%esp          ;...83c408
+  0x045fb9c8: pop    %ebp               ;...5d
+  0x045fb9c9: test   %eax,0xb775e000    ;...850500e0 75b7
+                                        ;   {poll_return}
+  0x045fb9cf: ret                       ;...c3
+  0x045fb9d0: mov    -0x507372f0(%ebp),%ebx  ;...8b9d108d 8caf
+                                        ; OopMap{off=86}
+                                        ;*if_icmpeq
+                                        ; - com.drw.membar.SecondThread::protocol@14 (line 19)
+                                        ;   {oop()}
+  0x045fb9d6: test   %edi,0xb775e000    ;...853d00e0 75b7
+                                        ;   {poll}
+  0x045fb9dc: cmp    $0x1,%ebx          ;...83fb01
+  0x045fb9df: jne    0x045fb9ee         ;...750d
+  0x045fb9e1: movsbl -0x507372f0(%edx),%ecx  ;...0fbe8a10 8d8caf
+                                        ;   {oop()}
+  0x045fb9e8: test   %ecx,%ecx          ;...85c9
+  0x045fb9ea: jne    0x045fb9d0         ;...75e4
+  0x045fb9ec: jmp    0x045fb9b4         ;...ebc6
+  0x045fb9ee: movb   $0x0,-0x507372f0(%edi)  ;...c687108d 8caf00
+                                        ;   {oop()}
+  0x045fb9f5: mov    -0x507372f0(%ebp),%ecx  ;...8b8d108d 8caf
+                                        ;   {oop()}
+  0x045fb9fb: cmp    $0x1,%ecx          ;...83f901
+  0x045fb9fe: je     0x045fba11         ;...7411
+                                        ; OopMap{off=128}
+                                        ;*goto
+                                        ; - com.drw.membar.SecondThread::protocol@28 (line 21)
+  0x045fba00: test   %edi,0xb775e000    ;...853d00e0 75b7
+                                        ;   {poll}
+  0x045fba06: mov    -0x507372f0(%ebp),%ecx  ;...8b8d108d 8caf
+                                        ;   {oop()}
+  0x045fba0c: cmp    $0x1,%ecx          ;...83f901
+  0x045fba0f: jne    0x045fba00         ;...75ef
+  0x045fba11: movb   $0x1,-0x507372f0(%edi)  ;...c687108d 8caf01
+                                        ; OopMap{off=152}
+                                        ;*goto
+                                        ; - com.drw.membar.SecondThread::protocol@35 (line 22)
+                                        ;   {oop()}
+  0x045fba18: test   %edi,0xb775e000    ;...853d00e0 75b7
+                                        ;   {poll}
+  0x045fba1e: jmp    0x045fb9a9         ;...e986ffff ff
+  0x045fba23: hlt                       ;...f4
+  0x045fba24: hlt                       ;...f4
+  0x045fba25: hlt                       ;...f4
+  0x045fba26: hlt                       ;...f4
+  0x045fba27: hlt                       ;...f4
+  0x045fba28: hlt                       ;...f4
+  0x045fba29: hlt                       ;...f4
+  0x045fba2a: hlt                       ;...f4
+  0x045fba2b: hlt                       ;...f4
+  0x045fba2c: hlt                       ;...f4
+  0x045fba2d: hlt                       ;...f4
+  0x045fba2e: hlt                       ;...f4
+  0x045fba2f: hlt                       ;...f4
+  0x045fba30: hlt                       ;...f4
+  0x045fba31: hlt                       ;...f4
+  0x045fba32: hlt                       ;...f4
+  0x045fba33: hlt                       ;...f4
+  0x045fba34: hlt                       ;...f4
+  0x045fba35: hlt                       ;...f4
+  0x045fba36: hlt                       ;...f4
+  0x045fba37: hlt                       ;...f4
+  0x045fba38: hlt                       ;...f4
+  0x045fba39: hlt                       ;...f4
+  0x045fba3a: hlt                       ;...f4
+  0x045fba3b: hlt                       ;...f4
+  0x045fba3c: hlt                       ;...f4
+  0x045fba3d: hlt                       ;...f4
+  0x045fba3e: hlt                       ;...f4
+  0x045fba3f: hlt                       ;...f4
+[Exception Handler]
+[Stub Code]
+  0x045fba40: jmp    0x045f9fe0         ;...e99be5ff ff
+                                        ;   {no_reloc}
+  0x045fba45: push   $0x45fba45         ;...6845ba5f 04
+                                        ;   {section_word}
+  0x045fba4a: jmp    0x045d8b40         ;...e9f1d0fd ff
+                                        ;   {runtime_call}
+[Constants]
+  0x045fba4f: .byte 0x0                 ;...00
+OopMapSet contains 3 OopMaps
+
+#0 
+OopMap{off=86}
+#1 
+OopMap{off=128}
+#2 
+OopMap{off=152}

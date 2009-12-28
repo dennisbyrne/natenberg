@@ -422,7 +422,7 @@ A read followed by a read of shared memory on x86
 13  0x017b4788: pop    %ebp               ;...5d
 </pre>
 		<p>
-			Neither write operation (lines 10 and 11) are chased with barriers.  
+			Neither write operation (lines 10 and 11) is chased with a barrier.  
 			The JVM makes similar optimizations for atomic conditionals.
 			Here is an instruction stream captured from the runtime compilation of AtomicInteger.incrementAndGet on the same VMWare image.
 		</p>

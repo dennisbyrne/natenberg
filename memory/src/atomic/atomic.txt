@@ -1,0 +1,83 @@
+CompilerOracle: print *AtomicInteger.incrementAndGet
+Compiled (c1)   6   nmethod java.util.concurrent.atomic.AtomicInteger::incrementAndGet (23 bytes)
+ total in heap  [0x02445108,0x0244529c] = 404
+ relocation     [0x024451bc,0x024451d4] = 24
+ main code      [0x024451e0,0x02445250] = 112
+ stub code      [0x02445250,0x0244525f] = 15
+ constants      [0x0244525f,0x02445260] = 1
+ scopes data    [0x02445260,0x02445270] = 16
+ scopes pcs     [0x02445270,0x02445294] = 36
+ dependencies   [0x02445294,0x02445298] = 4
+ oops           [0x02445298,0x0244529c] = 4
+Loaded disassembler from hsdis-i386.so
+Decoding compiled method 0x02445108:
+Code:
+[Disassembling for mach='i386']
+[Entry Point]
+  0x024451e0: nop                       ;...90
+  0x024451e1: nop                       ;...90
+  0x024451e2: nop                       ;...90
+  0x024451e3: nop                       ;...90
+  0x024451e4: nop                       ;...90
+  0x024451e5: nop                       ;...90
+  0x024451e6: nop                       ;...90
+  0x024451e7: cmp    0x4(%ecx),%eax     ;...3b4104
+  0x024451ea: jne    0x023fad10         ;...0f85205b fbff
+                                        ;   {runtime_call}
+[Verified Entry Point]
+  0x024451f0: mov    %eax,-0x3000(%esp)  ;...89842400 d0ffff
+  0x024451f7: push   %ebp               ;...55
+  0x024451f8: mov    %esp,%ebp          ;...8bec
+  0x024451fa: sub    $0x38,%esp         ;...83ec38
+  0x024451fd: jmp    0x0244520a         ;...e9080000 00
+  0x02445202: xchg   %ax,%ax            ;...6690
+                                        ; OopMap{ecx=Oop off=36}
+                                        ;*goto
+                                        ; - java.util.concurrent.atomic.AtomicInteger::incrementAndGet@20 (line 208)
+  0x02445204: test   %eax,0xb771e100    ;...850500e1 71b7
+                                        ;   {poll}
+  0x0244520a: mov    0x8(%ecx),%eax     ;...8b4108
+  0x0244520d: mov    %eax,%esi          ;...8bf0
+  0x0244520f: inc    %esi               ;...46
+  0x02445210: mov    $0x9a3f03d0,%edi   ;...bfd0033f 9a
+                                        ;   {oop()}
+  0x02445215: mov    0x160(%edi),%edi   ;...8bbf6001 0000
+  0x0244521b: mov    %ecx,%edi          ;...8bf9
+  0x0244521d: add    $0x8,%edi          ;...83c708
+  0x02445220: lock cmpxchg %esi,(%edi)  ;...f00fb137
+  0x02445224: mov    $0x1,%eax          ;...b8010000 00
+  0x02445229: je     0x02445234         ;...0f840500 0000
+  0x0244522f: mov    $0x0,%eax          ;...b8000000 00
+  0x02445234: cmp    $0x0,%eax          ;...83f800
+  0x02445237: je     0x02445204         ;...74cb
+  0x02445239: mov    %esi,%eax          ;...8bc6
+  0x0244523b: mov    %ebp,%esp          ;...8be5
+  0x0244523d: pop    %ebp               ;...5d
+  0x0244523e: test   %eax,0xb771e100    ;...850500e1 71b7
+                                        ;   {poll_return}
+  0x02445244: ret                       ;...c3
+  0x02445245: nop                       ;...90
+  0x02445246: nop                       ;...90
+  0x02445247: hlt                       ;...f4
+  0x02445248: hlt                       ;...f4
+  0x02445249: hlt                       ;...f4
+  0x0244524a: hlt                       ;...f4
+  0x0244524b: hlt                       ;...f4
+  0x0244524c: hlt                       ;...f4
+  0x0244524d: hlt                       ;...f4
+  0x0244524e: hlt                       ;...f4
+  0x0244524f: hlt                       ;...f4
+[Exception Handler]
+[Stub Code]
+  0x02445250: jmp    0x02409400         ;...e9ab41fc ff
+                                        ;   {no_reloc}
+  0x02445255: push   $0x2445255         ;...68555244 02
+                                        ;   {section_word}
+  0x0244525a: jmp    0x023fba40         ;...e9e167fb ff
+                                        ;   {runtime_call}
+[Constants]
+  0x0244525f: .byte 0x0                 ;...00
+OopMapSet contains 1 OopMaps
+
+#0 
+OopMap{ecx=Oop off=36}

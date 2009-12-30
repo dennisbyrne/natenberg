@@ -54,15 +54,9 @@
 		<table>
 			<tr>
 				<td>
-					Code run by the first thread:
-				</td>
-				<td style="padding-left:40px">
-					Code run by the second thread:
-				</td>				
-			</tr>
-			<tr>
-				<td>
 <pre>
+      // code run by the first thread
+      
  1    intentFirst = true;
  2
  3    while (intentSecond)
@@ -80,6 +74,8 @@
 				</td>
 				<td style="padding-left:40px">
 <pre>
+// code run by the second thread
+
 intentSecond = true;
 
 while (intentFirst)       // volatile read

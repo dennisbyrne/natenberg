@@ -94,24 +94,24 @@ intentSecond = false;     // volatile write
 			</tr>
 		</table>
 		<p>
-			Hardware optimizations can break this code without memory barriers, even if the compiler were to emit all memory operations as they appear to the programmer.
-			Consider the two successive read operations on lines three and four.
+			Hardware optimizations can break this code without memory barriers, even if the compiler were to emit all memory operations in the order they appear to be in from the programmer's point of view.
+			Consider the two consecutive volatile read operations on lines three and four.
 			Each thread checks to see if the other has signaled an intent to enter the critical section <i>and then</i> checks to see whose turn it is.
-			Consider the two successive write operations on lines 12 and 13.
+			Consider the two consecutive volatile write operations on lines 12 and 13.
 			Each thread gives the other its "turn" <i>and then</i> withdraws its intent to enter the critical section.
 			A reading thread should never expect to observe the other thread's write to the turn variable after the other thread's withdrawal of intent.
 			This would be a disaster.
 			Without the volatile modifier on these variables this indeed can happen.
 			For example, without the volatile modifier the second thread could observe the first thread's write to intentFirst (last line) before the first thread's write to turn (second to last line). 
 			The keyword volatile prevents this problem because it establishes a <i>happens before</i> relationship between the write to the turn variable and the write to the intentFirst variable.
-			The compiler cannot re-order these write operations and if necessary it must forbid the processor from doing so with memory barriers.
+			The compiler cannot re-order these write operations and if necessary it must forbid the processor from doing so with a memory barrier.
 			A peek under the hood shows how.
 		</p>
 		<table>
 			<tr>
 				<td valign="top">
 					<p>
-						The first of the two successive read operations on line three is captured in the assembly instructions below.
+						The first of the two consecutive read operations on line three is captured in the assembly instructions below.
 						This stream was captured on multi-processing Itanium 2 hardware running JDK 1.6 with update 17. 
 					</p>
 				</td>
@@ -120,7 +120,7 @@ intentSecond = false;     // volatile write
 					The PrintAssembly HotSpot option is a diagnostic flag for the JVM that allows us to capture the generated assembly instructions of the JIT compiler.
 					This requires the latest OpenJDK release or a new version of HotSpot, update 14 or above.
 					A disassembler plugin is also required. 
-					The Kenai project has binaries for Solaris, Linux and BSD.
+					The Kenai project has plugin binaries for Solaris, Linux and BSD.
 					The hsdis plugin is an alternative that can be built from source for Windows.
 					</div>					
 				</td>
@@ -155,7 +155,7 @@ intentSecond = false;     // volatile write
 			How useful is it for a reading thread to insert a memory barrier between both reads if the other thread does not separate both writes with one as well?
 			In order for threads to communicate they must <i>all</i> obey the protocol; just like nodes on a network, or people on a team.
 			If one thread breaks formation than the efforts of all other threads are rendered useless.
-			We should expect to see a memory barrier between in the assembly instructions for the last two lines of Dekker's algorithm, a write followed by a write.
+			We should expect to see a memory barrier between in the assembly instructions for the last two lines of Dekker's algorithm, a volatile write followed by a volatile write.
 		</p>
 		<!--div class="code">
 			$ java -XX:+UnlockDiagnosticVMOptions -XX:PrintAssemblyOptions=hsdis-print-bytes -XX:CompileCommand=print,WriterReader.write WriterReader
@@ -187,7 +187,7 @@ intentSecond = false;     // volatile write
 			This article does not aim to be a comprehensive overview of all memory barriers.
 			This would be a monumental task.
 			But it is important though to appreciate the fact that these instructions vary considerably across different hardware architectures.
-			Below is what the successive writes translate to on a multi-processing Intel Xeon E5410 and a SPARC workstation.
+			Below is what the consecutive volatile writes translate to on a multi-processing Intel Xeon E5410 and a SPARC workstation.
 			All remaining assembly instruction sequences in this article were captured on an Intel Xeon unless specified otherwise.
 		</p>
 <table>
@@ -227,7 +227,7 @@ A write followed by a write to shared memory on SPARC.
 </tr>
 </table>
 		<p>
-			Here we see both writes on lines 11 and 12 on the x86 Xeon.  
+			Here we see both volatile writes on lines 11 and 12 on the x86 Xeon.  
 			The second write is chased with an mfence instruction, an explicit bidirectional memory barrier.
 			<span style="color:red">TODO: discuss SPARC instructions</span>.
 			The JVM does not bother placing a memory barrier between the write operations on either platform because it can trust x86 and SPARC hardware not to re-order writes.
@@ -354,7 +354,7 @@ A write followed by a write to shared memory on SPARC.
 			When this happens the JVM simply inserts a no op instead of an actual memory barrier.  
 			For example, the consistency guarantees of the x86 and SPARC memory models are strong enough to eliminate the need for a memory barrier when reading a volatile variable.
 			Remember the explicit unidirectional memory barrier used to separate both read operations on Itanium?
-			Well, the generated assembly instructions for the successive reads in Dekker's algorithm on an x86 have <i>no</i> memory barrier.
+			Well, the generated assembly instructions for the consecutive volatile reads in Dekker's algorithm on an x86 have <i>no</i> memory barrier.
 		</p>
 <table>
 <tr>
@@ -394,12 +394,12 @@ A read followed by a read of shared memory on x86
 			Unidirectional memory barriers are naturally less expensive than bidirectional ones.
 			The JVM will avoid a bidirectional memory barrier when it knows a unidirectional one is sufficient.
 			The first example in this article demonstrated this.  
-			We saw that the successive read operations on Itanium were chased with an annotated with a unidirectional memory barrier.
+			We saw the first of two consecutive volatile read operations on Itanium were annotated with a unidirectional memory barrier.
 			If the read operations had been annotated with an explicit bidirectional memory barrier the program would still be correct, but at a greater latency cost.
 		</p>
 		<p>
 			On a uni-processor system the JVM can insert a no op for <i>all</i> memory barriers because memory operations are already serialized.  
-			The following instruction stream was captured from a runtime compilation of two successive writes in Dekker's algorithm.
+			The following instruction stream was captured from a runtime compilation of two consecutive volatile writes in Dekker's algorithm.
 			The program was running in a VMWare workstation image in uni-processor mode on x86 hardware.
   		</p>
 <pre>
@@ -451,7 +451,7 @@ A read followed by a read of shared memory on x86
 			Previously we saw the compiler give this instruction to the processor with a lock prefix.
 			In the absence of SMP the JVM has chosen to avoid this cost.
 		</p>
-		<h3>Conclusion</h3>
+		<h3>Closing</h3>
 		<p>
 			Modern hardware is not sequentially consistent.
 			Memory barriers are consequently a necessity for a multi-threaded programs.
@@ -460,12 +460,10 @@ A read followed by a read of shared memory on x86
 			Some are bidirectional, others are unidirectional.
 			The JVM uses this array of choices to efficiently honor the Java memory model across all platforms.
 			I hope this article helps experienced JVM developers become a little more knowledgeable about how their code behaves under the hood.
+			I'd like to thank Brian Goetz of Sun Microsystems for reviewing the technical content of this article and for pedagogical advice.
+			I'd also like to thank Christian Thalinger of Sun Microsystems for access to a SPARC workstation.
 		</p>
-		<h3>Acknowlegements</h3>
-		<p>
-			Thanks to Christian Thalinger of Sun Microsystems for access to a SPARC workstation. 
-		</p>
-		<h3>Reference Material</h3>
+		<h3>Reference</h3>
 		<ul>
 			<li><a href="http://www.intel.com/products/processor/manuals/" target="new">Intel 64 and IA-32 Architectures Software Developer's Manuals</a></li>
 			<li><a href="http://www.csee.umbc.edu/help/architecture/aig.pdf" target="new">IA-64 Application Instruction Set Architecture Guide</a></li>

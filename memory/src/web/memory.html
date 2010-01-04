@@ -187,18 +187,10 @@ intentSecond = false;     // volatile write
 			This article does not aim to be a comprehensive overview of all memory barriers.
 			This would be a monumental task.
 			But it is important though to appreciate the fact that these instructions vary considerably across different hardware architectures.
-			Below is what the consecutive volatile writes translate to on a multi-processing Intel Xeon E5410 and a SPARC workstation.
+			Below is what the consecutive volatile writes translate to on multi-processing Intel Xeon hardware.
 			All remaining assembly instruction sequences in this article were captured on an Intel Xeon unless specified otherwise.
 		</p>
 <table>
-<tr>
-<td>
-A write followed by a write to shared memory on x86.
-</td>
-<td>
-A write followed by a write to shared memory on SPARC.
-</td>
-</tr>
 <tr>
 <td valign="top">
 <pre>
@@ -220,19 +212,36 @@ A write followed by a write to shared memory on SPARC.
 </pre>
 </td>
 <td>
-<pre>
-	<span style="color:red">TODO: get SPARC data</span>
-</pre>
 </td>
 </tr>
 </table>
 		<p>
 			Here we see both volatile writes on lines 11 and 12 on the x86 Xeon.  
 			The second write is chased with an mfence instruction, an explicit bidirectional memory barrier.
-			<span style="color:red">TODO: discuss SPARC instructions</span>.
-			The JVM does not bother placing a memory barrier between the write operations on either platform because it can trust x86 and SPARC hardware not to re-order writes.
+		</p>
+		<p>
+			And now the consecutive volatile writes on SPARC.
+		</p>
+<pre>
+ 1 0xfb8ecc84: ldub  [ %l1 + 0x155 ], %l3  ;...e60c6155
+ 2 0xfb8ecc88: cmp  %l3, 0               ;...80a4e000
+ 3 0xfb8ecc8c: bne,pn   %icc, 0xfb8eccb0  ;...12400009
+ 4 0xfb8ecc90: nop                       ;...01000000
+ 5 0xfb8ecc94: st  %l0, [ %l1 + 0x150 ]  ;...e0246150
+ 6 0xfb8ecc98: clrb  [ %l1 + 0x154 ]     ;...c02c6154
+<b> 7 0xfb8ecc9c: membar  #StoreLoad        ;...8143e002</b>
+ 8 0xfb8ecca0: sethi  %hi(0xff3fc000), %l0  ;...213fcff0
+ 9 0xfb8ecca4: ld  [ %l0 ], %g0          ;...c0042000
+10 0xfb8ecca8: ret                       ;...81c7e008
+11 0xfb8eccac: restore                   ;...81e80000
+</pre>
+		<p>
+			Here we see the both volatile writes on lines five and six.
+			The second write is chased with an membar instruction, an explicit bidirectional memory barrier.
+			Notice that on both x86 and SPARC the JVM makes both write operations visible, but the memory barrier comes after the second write operation rather than before it.
+			The JVM is leveraging the fact that both x86 and SPARC hardware do not re-order writes - a consistency guarantee of both hardware memory models.
 			This is not true for Itanium, PowerPC or Alpha.
-			Avoiding memory barriers this way is discussed in a later section.
+			Avoiding unnecessary memory barriers is discussed more in a later section.
 		</p>
 		<h3>Memory Barriers Can Be Explicit or Implicit</h3>
 		<p>

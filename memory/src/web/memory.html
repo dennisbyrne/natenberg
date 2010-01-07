@@ -100,7 +100,7 @@ intentSecond = false;     // volatile write
 			Each thread gives the other its "turn" <i>and then</i> withdraws its intent to enter the critical section.
 			A reading thread should never expect to observe the other thread's write to the turn variable after the other thread's withdrawal of intent.
 			This would be a disaster.
-			Without the volatile modifier on these variables this indeed can happen.
+			But without the volatile modifier on these variables this indeed can happen!
 			For example, without the volatile modifier the second thread could observe the first thread's write to intentFirst (last line) before the first thread's write to turn (second to last line). 
 			The keyword volatile prevents this problem because it establishes a <i>happens before</i> relationship between the write to the turn variable and the write to the intentFirst variable.
 			The compiler cannot re-order these write operations and if necessary it must forbid the processor from doing so with a memory barrier.
@@ -112,6 +112,9 @@ intentSecond = false;     // volatile write
 					<p>
 						The first of the two consecutive read operations on line three is captured in the assembly instructions below.
 						This stream was captured on multi-processing Itanium 2 hardware running JDK 1.6 with update 17. 
+						All of the instruction streams in this article are sequenced by line number on left hand side.
+						Relevant read operations, write operations and memory barrier instructions are in bold.
+						The reader is advised to avoid getting caught up in the semantics of each and every instruction.
 					</p>
 				</td>
 				<td>

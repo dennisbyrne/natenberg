@@ -33,8 +33,7 @@
 			Combining these optimizations with symmetric multi-processing and shared mutable state is a nightmare.
 			A program can behave non-deterministically when memory operations on shared mutable state are re-ordered.  
 			It is possible for a thread to write values that become visible to another thread in ways that are inconsistent with the order in which they were written.
-			A well placed memory barrier prevents this problem by forcing the processor to serialize pending memory operations.
-			The performance implications of memory barriers are beyond the scope of this article.
+			A properly placed memory barrier prevents this problem by forcing the processor to serialize pending memory operations.
 		</p>
 		<h3>Memory Barriers As Protocols</h3>
 		<p>
@@ -238,10 +237,19 @@ intentSecond = false;     // volatile write
 		<p>
 			Here we see the both volatile writes on lines five and six.
 			The second write is chased with an membar instruction, an explicit bidirectional memory barrier.
-			Notice that on both x86 and SPARC the JVM makes both write operations visible, but the memory barrier comes after the second write operation rather than before it.
-			The JVM is leveraging the fact that both x86 and SPARC hardware do not re-order writes - a consistency guarantee of both hardware memory models.
-			This is not true for Itanium, PowerPC or Alpha.
-			Avoiding unnecessary memory barriers is discussed more in a later section.
+		</p>
+		<p>	
+			There is one important difference between the instruction streams for x86 and SPARC and the instruction stream for Itanium.
+			The JVM chased the consecutive write operations with a memory barrier on x86 and SPARC,
+			but it did not place a memory barrier <i>between</i> the two write operations.
+			On the other hand the instruction stream for Itanium has a memory barrier between both writes.
+			Why does the JVM behave differently across hardware architectures?
+			Because a hardware architecture has a memory model and each memory model has a set of consistency guarantees.
+			Some memory models, like that of x86 or SPARC, have a very strong set of consistency guarantees.
+			Other memory models, like that of Itanium, PowerPC or Alpha, have a much more relaxed set of guarantees.
+			For example x86 and SPARC do not re-order consecutive write operations - so no memory barrier is needed.
+			Itanium, PowerPC and Alpha will re-order consecutive write operations - so the JVM has to place a memory barrier between them.
+			The JVM uses memory barriers to bridge the gaps between the Java memory model and the memory model of the hardware it runs on.
 		</p>
 		<h3>Implicit Memory Barriers</h3>
 		<p>
@@ -406,8 +414,11 @@ A read followed by a read of shared memory on x86
 			We saw the first of two consecutive volatile read operations on Itanium were annotated with a unidirectional memory barrier.
 			If the read operations had been annotated with an explicit bidirectional memory barrier the program would still be correct, but at a greater latency cost.
 		</p>
+<h3>Dynamic Compilation</h3>
 		<p>
-			On a uni-processor system the JVM can insert a no op for <i>all</i> memory barriers because memory operations are already serialized.  
+			Everything a static compiler knows at build time is known by a dynamic compiler at runtime, and more.
+			More information means more opportunities to optimize.
+			For example let's look at how the JVM treats memory barriers when running on a single processor.
 			The following instruction stream was captured from a runtime compilation of two consecutive volatile writes in Dekker's algorithm.
 			The program was running in a VMWare workstation image in uni-processor mode on x86 hardware.
   		</p>
@@ -427,6 +438,7 @@ A read followed by a read of shared memory on x86
 13  0x017b4788: pop    %ebp               ;...5d
 </pre>
 		<p>
+			On a uni-processor system the JVM inserts a no op for <i>all</i> memory barriers because memory operations are already serialized.  
 			Neither write operation (lines 10 and 11) is chased with a barrier.  
 			The JVM makes similar optimizations for atomic conditionals.
 			Here is an instruction stream captured from the runtime compilation of AtomicInteger.incrementAndGet on the same VMWare image.
@@ -458,12 +470,11 @@ A read followed by a read of shared memory on x86
 		<p>
 			Notice the cmpxchg instruction on line 14.  
 			Previously we saw the compiler give this instruction to the processor with a lock prefix.
-			In the absence of SMP the JVM has chosen to avoid this cost.
+			In the absence of SMP the JVM has chosen to avoid this cost - something it could not have done with static compilation.
 		</p>
 		<h3>Closing</h3>
 		<p>
-			Modern hardware is not sequentially consistent.
-			Memory barriers are consequently a necessity for a multi-threaded programs.
+			Memory barriers are a necessity for multi-threaded programming.
 			They come in many flavors.
 			Some are explicit, others are implicit.
 			Some are bidirectional, others are unidirectional.

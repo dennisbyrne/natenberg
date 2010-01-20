@@ -9,7 +9,7 @@
 		</style>
 	</head>
 	<body>
-		<h1>Memory Barriers and the JVM</h1>
+		<h1>Memory Barriers and JVM Concurrency</h1>
 		<p>
 			Memory barriers, or fences, are a set of processor instructions used to apply ordering limitations on memory operations.  		
 			This article explains the impact memory barriers have on the determinism of multi-threaded programs.
@@ -17,6 +17,8 @@
 			It is assumed the reader has a solid understanding of these concepts and the Java memory model.
 			This is not an article about mutual exclusion, parallelism or atomicity per se.
 			Memory barriers are used to achieve an equally important element of concurrent programming called visibility.
+			Thanks to Brian Goetz and Eric Yew for reviewing this article.
+			I'd also like to thank Christian Thalinger for access to SPARC hardware.	
 		</p>
 		<h3>Why Are Memory Barriers Important?</h3>
 		<p>
@@ -478,8 +480,6 @@ A read followed by a read of shared memory on x86
 			Some are bidirectional, others are unidirectional.
 			The JVM uses this array of choices to efficiently honor the Java memory model across all platforms.
 			I hope this article helps experienced JVM developers become a little more knowledgeable about how their code behaves under the hood.
-			I'd like to thank Brian Goetz of Sun Microsystems for reviewing the technical content of this article and for pedagogical advice.
-			I'd also like to thank Christian Thalinger of Sun Microsystems for access to a SPARC workstation.
 		</p>
 		<h3>Reference</h3>
 		<ul>

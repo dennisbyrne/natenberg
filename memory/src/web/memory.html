@@ -20,17 +20,12 @@
 		</p>
 		<h3>Why Are Memory Barriers Important?</h3>
 		<p>
-			The cost of memory latency has pushed processors to reorder and cache memory operations.
 			A trip to main memory costs hundreds of clock cycles on commodity hardware.
-			Processors use caching to decrease latency costs of memory operations by orders of magnitude.
-			These caches introduce a substantial visibility delay because the value of each write operation does not immediately "write through" to main memory.
-			The processor instead places this operation in a buffer and is obligated to "write back" the value later.
-			Buffers are often misunderstood as queues; they are not.
-			Pending memory operations are not necessarily performed in the order in which they are fed to the processor.
-			This opens the door for many optimizations when data is immutable and/or confined to the scope of one thread.  
-		</p>
-		<p>
-			Combining these optimizations with symmetric multi-processing and shared mutable state is a nightmare.
+			Processors use caching to decrease the costs of memory latency by orders of magnitude.
+			These caches re-order pending memory operations for the sake of performance.
+			In other words, the reads and writes of a program are not necessarily performed in the order in which they are given to the processor.
+			When data is immutable and/or confined to the scope of one thread these optimizations are harmless.
+			Combining these optimizations with symmetric multi-processing and shared mutable state on the hand can be a nightmare.
 			A program can behave non-deterministically when memory operations on shared mutable state are re-ordered.  
 			It is possible for a thread to write values that become visible to another thread in ways that are inconsistent with the order in which they were written.
 			A properly placed memory barrier prevents this problem by forcing the processor to serialize pending memory operations.
